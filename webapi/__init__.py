@@ -6,9 +6,22 @@ from . import tasker
 def configure_api_v1(config):
     api_v = '/api/v1'
     config.add_route('api_v1', api_v)
-    config.add_route('api_v1_getdatasets', api_v + '/getdatasets')
-    config.add_route('api_v1_getmodels', api_v + '/getmodels')
-    config.add_route('api_v1_getarchs', api_v + '/getarchs')
+
+    config.add_route('api_v1_user', api_v + '/user')
+    config.add_route('api_v1_login', api_v + '/login')
+    config.add_route('api_v1_token_refresh', api_v + '/token/refresh')
+    
+    config.add_route('api_v1_datasets', api_v + '/datasets')
+    config.add_route('api_v1_dataset_empty', api_v + '/dataset')
+    config.add_route('api_v1_dataset', api_v + '/dataset/{id}')
+
+    config.add_route('api_v1_architectures', api_v + '/architectures')
+    config.add_route('api_v1_architecture_empty', api_v + '/architecture')
+    config.add_route('api_v1_architecture', api_v + '/architecture/{id}')
+
+    config.add_route('api_v1_models', api_v + '/models')
+    config.add_route('api_v1_model_empty', api_v + '/model')
+    config.add_route('api_v1_model', api_v + '/model/{id}')
 
 
 def main(global_config, **settings):
