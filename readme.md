@@ -5,7 +5,16 @@ Release Version 0.1.0
 ## Dependencies
 
 * pyramid==1.9.1
-* celry==4.1.0
+* celery==4.1.0
+* PyJWT==1.5.3
+
+## Install Dependencies
+
+```bahs
+virtualenv venv
+. venv/bin/activate
+python3 setup.py develop
+```
 
 ## Development
 
@@ -46,5 +55,5 @@ pytest -q
 ## Production
 
 ```bash
-pserve production.ini --reload
+pserve production.ini
 ```
