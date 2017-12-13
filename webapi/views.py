@@ -13,12 +13,22 @@ def api_v1(request):
 
 @view_config(route_name='api_v1_getdatasets', renderer='json')
 def api_v1_getdatasets(request):
-    return {'datasets': []}
+    print(request.headers)
+    print(request.params)  # query
+
+    tasker = request.registry.tasker
+    task = tasker.get_datasets.delay()
+    data = task.get(timeout=5)
+
+    return data
 
 
 @view_config(route_name='api_v1_getmodels', renderer='json')
 def api_v1_getmodels(request):
-    return {'models': []}
+    tasker = request.registry.tasker
+    data = tasker.get_models()
+
+    return data
 
 
 @view_config(route_name='api_v1_getarchs', renderer='json')
