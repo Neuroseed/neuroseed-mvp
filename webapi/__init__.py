@@ -1,4 +1,5 @@
 from pyramid.config import Configurator
+from . import tasker
 
 
 def configure_api_v1(config):
@@ -18,6 +19,8 @@ def main(global_config, **settings):
     config.add_route('home', '/')
 
     configure_api_v1(config)
+
+    config.registry.tasker = tasker
 
     config.scan()
     return config.make_wsgi_app()
