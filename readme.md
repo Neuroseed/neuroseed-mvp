@@ -21,7 +21,7 @@ Start celery worker:
 python3 celery_worker.py
 ```
 
-Celery worker configuration file: repo/celeryconfig.py
+Celery worker configuration file: repo/celery_config.json
 
 Start rabbitmq server (version 3.7.0):
 
