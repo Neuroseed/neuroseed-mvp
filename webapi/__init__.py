@@ -1,6 +1,6 @@
 import json
 from pyramid.config import Configurator
-from . import tasker
+import worker
 
 
 def configure_api_v1(config):
@@ -37,9 +37,9 @@ def main(global_config, **settings):
     with open('celery_config.json') as f:
         celery_config = json.load(f)
         print(celery_config)
-        tasker.app.config_from_object(celery_config)
+        worker.app.config_from_object(celery_config)
 
-    config.registry.tasker = tasker
+    config.registry.tasker = worker
 
     config.scan()
     return config.make_wsgi_app()
