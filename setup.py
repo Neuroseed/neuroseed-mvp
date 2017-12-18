@@ -8,8 +8,11 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
+    'celery==4.1.0',
+    'pymongo==3.6.0',
+    'PyJWT==1.5.3',
     'plaster_pastedeploy',
-    'pyramid',
+    'pyramid==1.9.1',
     'pyramid_jinja2',
     'pyramid_debugtoolbar',
     'waitress',

@@ -1,5 +1,5 @@
 {
-    "broker_url": "pyamqp://guest@35.205.222.148//",
+    "broker_url": "pyamqp://guest@rabbitmqserver//",
     "result_backend": "rpc://",
     "result_expires": 3600,
     "task_serializer": "json",

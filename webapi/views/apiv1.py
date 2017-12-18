@@ -66,14 +66,17 @@ def token_refresh(request):
 
 @view_config(route_name='api_v1_datasets', renderer='json')
 def datasets(request):
-    print(request.headers)
-    print(request.params)  # get + post
-    print(request.GET)  # query
-    print(request.POST)  # body args
+    # print(request.headers)
+    # print(request.params)  # get + post
+    # print(request.GET)  # query
+    # print(request.POST)  # body args
 
-    tasker = request.registry.tasker
-    task = tasker.get_datasets.delay()
-    data = task.get(timeout=5)
+    # tasker = request.registry.tasker
+    # task = tasker.get_datasets.delay()
+    # data = task.get(timeout=5)
+
+    metadata = request.registry.metadata
+    data = metadata.get_datasets()
 
     return data
 
@@ -114,8 +117,8 @@ def architecture(request):
 
 @view_config(route_name='api_v1_models', renderer='json')
 def models(request):
-    tasker = request.registry.tasker
-    data = tasker.get_models()
+    metadata = request.registry.metadata
+    data = metadata.get_models()
 
     return data
 
