@@ -1,5 +1,6 @@
 import json
 from pyramid.config import Configurator
+import metadata
 import worker
 
 
@@ -34,9 +35,14 @@ def main(global_config, **settings):
 
     configure_api_v1(config)
 
+    with open('metadata_config.json') as f:
+        meta_config = json.load(f)
+    metadata_ = metadata.Metadata(meta_config)
+    metadata_.check_connection()
+    config.registry.metadata = metadata_
+
     with open('celery_config.json') as f:
         celery_config = json.load(f)
-        print(celery_config)
         worker.app.config_from_object(celery_config)
 
     config.registry.tasker = worker

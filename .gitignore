@@ -1,4 +1,5 @@
 __pycache__
 webapi.egg-info
+venv
 .idea
 *.py[cod]
