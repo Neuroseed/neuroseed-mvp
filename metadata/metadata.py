@@ -47,4 +47,4 @@ class Metadata:
         except ServerSelectionTimeoutError:
             print('ServerSelectionTimeoutError: Connection refused')
 
-        return models
+        return data
