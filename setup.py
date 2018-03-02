@@ -11,11 +11,7 @@ requires = [
     'celery==4.1.0',
     'pymongo==3.6.0',
     'PyJWT==1.5.3',
-    'plaster_pastedeploy',
-    'pyramid==1.9.1',
-    'pyramid_jinja2',
-    'pyramid_debugtoolbar',
-    'waitress',
+    'falcon==1.4.1'
 ]
 
 tests_require = [
@@ -31,24 +27,19 @@ setup(
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
         'Programming Language :: Python',
-        'Framework :: Pyramid',
+        'Framework :: Falcon',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
     author='',
     author_email='',
     url='',
-    keywords='web pyramid pylons',
+    keywords='web falcon',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     extras_require={
         'testing': tests_require,
     },
-    install_requires=requires,
-    entry_points={
-        'paste.app_factory': [
-            'main = webapi:main',
-        ],
-    },
+    install_requires=requires
 )
