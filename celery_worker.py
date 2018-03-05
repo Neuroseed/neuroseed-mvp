@@ -1,7 +1,7 @@
 import sys
 import json
 import celery
-from worker.tasks import *
+from webapi.tasker import *
 
 with open('celery_config.json') as f:
         celery_config = json.load(f)
