@@ -10,6 +10,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
 requires = [
     'celery==4.1.0',
     'pymongo==3.6.0',
+    'pymodm==0.4.0',
     'PyJWT==1.5.3',
     'falcon==1.4.1'
 ]
