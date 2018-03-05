@@ -1,3 +1,3 @@
-from .tasker import *
+from .tasks import *
 from .app import app
 
