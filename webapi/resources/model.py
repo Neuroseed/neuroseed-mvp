@@ -9,7 +9,7 @@ class ModelResource:
         if id:
             self.get_model_meta(req, resp, id)
         else:
-            self.on_description(req, resp)
+            self.get_description(req, resp)
 
     def get_model_meta(self, req, resp, id):
         resp.media = {
@@ -17,7 +17,7 @@ class ModelResource:
             'id': id
         }
 
-    def description(self, req, resp):
+    def get_description(self, req, resp):
         resp.media = {
             'success': True,
             'description': 'text'
