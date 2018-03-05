@@ -7,11 +7,11 @@ __all__ = [
 class ArchitectureResource:
     def on_get(self, req, resp, id=None):
         if id:
-            self.get_architectutre_meta(req, resp, id)
+            self.architectutre_meta(req, resp, id)
         else:
             self.description(req, resp)
 
-    def on_get_architecture_meta(self, req, resp, id):
+    def architecture_meta(self, req, resp, id):
         resp.media = {
             'success': True,
             'id': id
