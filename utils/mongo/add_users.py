@@ -30,7 +30,7 @@ USERS = {
 
 
 def get_config():
-    with open('metadata_config.json') as f:
+    with open('config/metadata_config.json') as f:
         config = json.load(f)
 
     return config

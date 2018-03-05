@@ -7,7 +7,7 @@ api = webapi.main()
 if __name__ == '__main__':
     from wsgiref import simple_server
 
-    with open('falcon_config.json') as f:
+    with open('config/falcon_config.json') as f:
         config = json.load(f)
 
     host = config['host']

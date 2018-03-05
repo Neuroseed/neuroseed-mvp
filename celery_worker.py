@@ -3,7 +3,7 @@ import json
 import celery
 from worker.app import *
 
-with open('celery_config.json') as f:
+with open('config/celery_config.json') as f:
         celery_config = json.load(f)
         app.config_from_object(celery_config)
 
