@@ -1,3 +1,3 @@
 {
-  "mongo_url": "mongodb://rabbitmqserver:27017/"
+  "mongo_url": "mongodb://mongoserver:27017/metadata"
 }
