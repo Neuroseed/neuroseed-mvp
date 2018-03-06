@@ -39,7 +39,7 @@ def configure_api_v1(api):
     api.add_route(BASE + 'architectures', architectures_resource)
 
     #list of models
-    models_resource = ModelsResource
+    models_resource = ModelsResource()
     api.add_route(BASE + 'models', models_resource)
     
     #model operation
