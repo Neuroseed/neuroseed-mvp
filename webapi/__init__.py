@@ -45,10 +45,7 @@ def configure_api_v1(api):
     #model operation
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
-    api.add_route(BASE + 'model/train_model/{id}', model_resource)
-    api.add_route(BASE + 'model/test_model/{id}', model_resource)
-    api.add_route(BASE + 'model/predict_model/{id}', model_resource)
-    api.add_route(BASE + 'model/create_model', model_resource)
+    api.add_route(BASE + 'model/{id}', model_resource)
 
 
 def main():
