@@ -1,6 +1,6 @@
 import requests
 
-url = 'http://localhost:8080/api/v1/model/adfa'
+url = 'http://localhost:8080/api/v1/model'
 
 model={
     "is_public": False,
