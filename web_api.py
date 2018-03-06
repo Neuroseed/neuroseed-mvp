@@ -1,11 +1,14 @@
 import json
 import webapi
+import metadata
 
 api = webapi.main()
 
 
 if __name__ == '__main__':
     from wsgiref import simple_server
+
+    metadata.from_config('config/metadata_config.json')
 
     with open('config/falcon_config.json') as f:
         config = json.load(f)

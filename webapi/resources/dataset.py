@@ -1,3 +1,7 @@
+import base64
+import metadata
+import storage
+import falcon
 
 __all__ = [
     'DatasetResource'
@@ -30,7 +34,25 @@ class DatasetResource:
             self.init_dataset(req, resp)
 
     def upload_dataset(self, req, resp, id):
-        pass
+        try:
+            dataset = metadata.Dataset.objects.get({'_id': str(id)})
+        except metadata.Dataset.DoesNotExist:
+            dataset = None
+
+        if dataset:
+            url = dataset.url
+            file_path = storage.get_dataset_path(url)
+            with open(file_path, 'wb') as f:
+                data = base64.b64decode(req.media)
+                f.write(data)
+
+            resp.media = {'success': True}
+        else:
+            resp.status = falcon.HTTP_404
+            resp.media = {
+                'success': False,
+                'error': 'Dataset metadata does not exist'
+            }
 
     def init_dataset(self, req, resp):
         pass
