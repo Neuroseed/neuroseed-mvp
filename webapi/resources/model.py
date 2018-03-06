@@ -1,4 +1,4 @@
-
+import falcon
 __all__ = [
     'ModelResource'
 ]

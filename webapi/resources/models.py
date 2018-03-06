@@ -1,3 +1,4 @@
+import falcon
 
 __all__ = [
     'ModelsResource'
@@ -9,6 +10,6 @@ class ModelsResource:
         resp.status = falcon.HTTP_200
         resp.media = {
             'success': True,
-            'datasets': []
+            'models': []
         }
 

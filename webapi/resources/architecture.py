@@ -1,3 +1,4 @@
+import falcon
 
 __all__ = [
     'ArchitectureResource'

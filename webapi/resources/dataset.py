@@ -1,8 +1,20 @@
+import falcon
+from falcon.media.validators import jsonschema
 
 __all__ = [
     'DatasetResource'
 ]
 
+schema = {
+    "is_public": {"type": "boolean"},
+    "meta":{
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "category": {"type": "string"},
+        "labels": {"type": "string"},
+},
+"required":["title"]
+}
 
 class DatasetResource:
     def on_get(self, req, resp, id=None):
@@ -26,6 +38,8 @@ class DatasetResource:
     def on_post(self, req, resp, id=None):
         if id:
             self.upload_dataset(req, resp, id)
+        elif id:
+            self.create_dataset_meta(req, resp, id)
         else:
             self.init_dataset(req, resp)
 
@@ -34,4 +48,10 @@ class DatasetResource:
 
     def init_dataset(self, req, resp):
         pass
+
+    @jsonschema.validate(schema)
+    def create_dataset_meta(self, req, resp):
+        resp.media = {
+            'success': True,
+        }
 
