@@ -1,20 +1,10 @@
 import falcon
 from falcon.media.validators import jsonschema
+from .schema import schema
 
 __all__ = [
     'DatasetResource'
 ]
-
-schema = {
-    "is_public": {"type": "boolean"},
-    "meta":{
-        "title": {"type": "string"},
-        "description": {"type": "string"},
-        "category": {"type": "string"},
-        "labels": {"type": "string"},
-},
-"required":["title"]
-}
 
 class DatasetResource:
     def on_get(self, req, resp, id=None):

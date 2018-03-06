@@ -34,14 +34,26 @@ class ModelResource:
             self.create_model(req, resp)
 
     def train_model(self, req, resp, id):
-        pass
+        resp.media = {
+            'success': True,
+            'description': 'text'
+}
 
     def test_model(self, req, resp, id):
-        pass
+        resp.media = {
+            'success': True,
+            'description': 'text'
+}
 
     def predict_model(self, req, resp, id):
-        pass
+        resp.media = {
+            'success': True,
+            'description': 'text'
+}
 
     def create_model(self, req, resp):
-        pass
+        resp.media = {
+            'success': True,
+            'description': 'text'
+}
 
