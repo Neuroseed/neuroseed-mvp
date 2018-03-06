@@ -1,5 +1,10 @@
+import base64
+
 import falcon
 from falcon.media.validators import jsonschema
+
+import metadata
+import storage
 from .schema import schema
 
 __all__ = [
@@ -33,8 +38,43 @@ class DatasetResource:
         else:
             self.init_dataset(req, resp)
 
+    def save_dataset(self, req, resp, dataset_meta):
+        url = dataset_meta.url
+        file_path = storage.get_dataset_path(url)
+
+        with open(file_path, 'wb') as f:
+            data = base64.b64decode(req.media)
+            f.write(data)
+
+        dataset_meta.status = metadata.dataset.RECEIVED
+        dataset_meta.save()
+
+        resp.media = {'success': True}
+
+    def dataset_already_uploaded(self, req, resp):
+        resp.status = falcon.HTTP_405
+        resp.media = {
+            'success': False,
+            'error': 'Dataset already uploaded'
+        }
+
     def upload_dataset(self, req, resp, id):
-        pass
+        try:
+            dataset_meta = metadata.Dataset.objects.get({'_id': str(id)})
+        except metadata.Dataset.DoesNotExist:
+            dataset_meta = None
+
+        if dataset_meta:
+            if dataset_meta.status == metadata.dataset.PENDING:
+                self.save_dataset(req, resp, dataset_meta)
+            elif dataset_meta.status == metadata.dataset.RECEIVED:
+                self.dataset_already_uploaded(req, resp)
+        else:
+            resp.status = falcon.HTTP_404
+            resp.media = {
+                'success': False,
+                'error': 'Dataset metadata does not exist'
+            }
 
     def init_dataset(self, req, resp):
         pass

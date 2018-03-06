@@ -2,6 +2,11 @@ import json
 
 from pymodm import connect
 
+from . import dataset
+from . import architecture
+from . import model
+from . import task
+
 from .dataset import *
 from .architecture import *
 from .model import *

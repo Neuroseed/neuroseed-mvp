@@ -1,35 +1,48 @@
 import falcon
+from falcon import media
 from .resources import *
 
-BASE = '/api/v1/'
+
+class TextPlainHandler(media.BaseHandler):
+    """
+    Обработчик текстовых данных типа
+    MIME text/plain
+    """
+
+    def serialize(self, obj):
+        return obj
+
+    def deserialize(self, raw):
+        return raw
 
 
 def configure_api_v1(api):
+    BASE = '/api/v1/'
 
-#list of datasets
+    #list of datasets
     datasets_resource = DatasetsResource()
     api.add_route(BASE + 'datasets', datasets_resource)
 
-#dataset operations
+    #dataset operations
     dataset_resource = DatasetResource()
     api.add_route(BASE + 'dataset', dataset_resource)
     api.add_route(BASE + 'dataset/{id}', dataset_resource)
     api.add_route(BASE + 'dataset/create_dataset_meta/{id}', dataset_resource)
 
-#architecture operations
+    #architecture operations
     architecture_resource = ArchitectureResource()
     api.add_route(BASE + 'architecture', architecture_resource)
     api.add_route(BASE + 'architecture/{id}', architecture_resource)
 
-#list of architectures
+    #list of architectures
     architectures_resource = ArchitecturesResource()
     api.add_route(BASE + 'architectures', architectures_resource)
 
-#list of models
+    #list of models
     models_resource = ModelsResource
     api.add_route(BASE + 'models', models_resource)
     
-#model operation
+    #model operation
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
     api.add_route(BASE + 'model/train_model/{id}', model_resource)
@@ -40,6 +53,10 @@ def configure_api_v1(api):
 
 def main():
     api = falcon.API()
+    extra_handlers = {
+        'text/plain': TextPlainHandler()
+    }
+    api.req_options.media_handlers.update(extra_handlers)
 
     configure_api_v1(api)
 
