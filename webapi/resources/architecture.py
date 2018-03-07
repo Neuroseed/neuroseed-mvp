@@ -54,7 +54,7 @@ class ArchitectureResource:
             architecture = None
 
         if architecture:
-            architecture._set_attributes(req.media)
+            architecture._set_attributes(req.media)  # TODO: test
             architecture.save()
 
             resp.media = {
@@ -62,12 +62,13 @@ class ArchitectureResource:
             }
         else:
             resp.media = {
-                'success': False
+                'success': False,
                 'error': 'Architecture does not exist'
             }
 
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def create_architecture(self, req, resp):
+        # в функции from_document не происходит маппинг id <-> _id
         req.media['_id'] = req.media['id']  # костыль
         del req.media['id']  # костыль
 
