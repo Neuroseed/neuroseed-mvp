@@ -1,11 +1,10 @@
 import base64
-
 import falcon
+import uuid
 from falcon.media.validators import jsonschema
-
 import metadata
 import storage
-from .schema import schema
+from .schema import DATASET_SCHEMA
 
 __all__ = [
     'DatasetResource'
@@ -21,22 +20,21 @@ class DatasetResource:
     def get_dataset_meta(self, req, resp, id):
         resp.media = {
             'success': True,
-            'id': id
-        }
+            'description': 'text'
+            }
 
     def get_description(self, req, resp):
         resp.media = {
             'success': True,
-            'description': 'text'
+            'id':id
         }
 
     def on_post(self, req, resp, id=None):
         if id:
             self.upload_dataset(req, resp, id)
-        elif id:
-            self.create_dataset_meta(req, resp, id)
         else:
-            self.init_dataset(req, resp)
+            self.create_dataset_meta(req, resp)
+
 
     def save_dataset(self, req, resp, dataset_meta):
         url = dataset_meta.url
@@ -58,7 +56,7 @@ class DatasetResource:
             'error': 'Dataset already uploaded'
         }
 
-    def upload_dataset(self, req, resp, id):
+    def upload_dataset(self, req, resp):
         try:
             dataset_meta = metadata.Dataset.objects.get({'_id': str(id)})
         except metadata.Dataset.DoesNotExist:
@@ -76,12 +74,14 @@ class DatasetResource:
                 'error': 'Dataset metadata does not exist'
             }
 
-    def init_dataset(self, req, resp):
-        pass
-
-    @jsonschema.validate(schema)
+    @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
+        dataset_meta = metadata.Dataset.from_document(req.media)
+        dataset_meta.id = uuid.uuid4().hex
+        dataset_meta.url = dataset_meta.id
+        dataset_meta.save()
+        print(dataset_meta.id)
         resp.media = {
             'success': True,
+            'dataset': dataset_meta.to_son()
         }
-
