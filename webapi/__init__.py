@@ -19,33 +19,42 @@ class TextPlainHandler(media.BaseHandler):
 def configure_api_v1(api):
     BASE = '/api/v1/'
 
-    #list of datasets
-    datasets_resource = DatasetsResource()
-    api.add_route(BASE + 'datasets', datasets_resource)
-
-    #dataset operations
+    # dataset operations
     dataset_resource = DatasetResource()
     api.add_route(BASE + 'dataset', dataset_resource)
     api.add_route(BASE + 'dataset/{id}', dataset_resource)
     api.add_route(BASE + 'dataset/create_dataset_meta/{id}', dataset_resource)
 
-    #architecture operations
+    # list of datasets
+    datasets_resource = DatasetsResource()
+    api.add_route(BASE + 'datasets', datasets_resource)
+
+    # architecture operations
     architecture_resource = ArchitectureResource()
     api.add_route(BASE + 'architecture', architecture_resource)
     api.add_route(BASE + 'architecture/{id}', architecture_resource)
 
-    #list of architectures
+    # list of architectures
     architectures_resource = ArchitecturesResource()
     api.add_route(BASE + 'architectures', architectures_resource)
-
-    #list of models
-    models_resource = ModelsResource()
-    api.add_route(BASE + 'models', models_resource)
-    
-    #model operation
+ 
+    # model operation
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
     api.add_route(BASE + 'model/{id}', model_resource)
+
+    # list of models
+    models_resource = ModelsResource()
+    api.add_route(BASE + 'models', models_resource)
+
+    # task operation
+    task_resource = TaskResource()
+    api.add_route(BASE + 'task/{id}', task_resource)
+    api.add_route(BASE + 'task', task_resource)
+
+    # tasks list
+    tasks_resource = TasksResource()
+    api.add_route(BASE + 'tasks', tasks_resource)
 
 
 def main():

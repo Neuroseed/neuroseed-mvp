@@ -25,6 +25,33 @@ DATASET_SCHEMA = {
     },
 }
 
+ARCHITECTURE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "id": {"type": "string"},
+        "is_public": {"type": "boolean"},
+        "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+        },
+        "description": {
+            "type": "string",
+            "maxLength": 128
+        },
+        "category": {
+            "type": "string",
+            "maxLength": 128
+        },
+        "architecture": {
+            "type": "object",
+            "properties": {
+                "layers": {"type": "array"}
+            }
+        }
+    }
+}
+
 MODEL_SCHEMA = {
     "is_public": {"type": "boolean"},
     "meta":{
@@ -57,6 +84,14 @@ MODEL_SCHEMA = {
             "type": "string",
             "maxLength": 128
         }
+    }
+}
+
+TASK_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "command": {"type": "string"},
+        "config": {"type": "object"}
     }
 }
 
