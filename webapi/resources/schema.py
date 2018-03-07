@@ -71,3 +71,11 @@ MODEL_SCHEMA = {
     }
 }
 
+TASK_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "command": {"type": "string"},
+        "config": {"type": "object"}
+    }
+}
+

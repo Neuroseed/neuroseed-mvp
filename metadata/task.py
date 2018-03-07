@@ -17,9 +17,10 @@ class Task(MongoModel):
     id = fields.CharField(primary_key=True)
     status = fields.IntegerField(default=1)
     owner = fields.CharField()
-    type = fields.CharField()
+    command = fields.CharField()
     date = fields.TimestampField()
-    state = fields.IntegerField(default=PENDING)
+    config_init = lambda: dict()
+    config = fields.DictField(default=config_init)
 
     class Meta:
         connection_alias = 'metadata'
