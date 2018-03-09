@@ -24,20 +24,26 @@ class ArchitectureResource:
             architecture = None
 
         if architecture:
+            resp.status = falcon.HTTP_200
             resp.media = {
-                'success': True,
-                'architecture': architecture.to_son()
+                'id': architecture.id,
+                'is_public': architecture.is_public,
+                'owner': architecture.owner,
+                'title': architecture.title,
+                'description': architecture.description,
+                'category': architecture.category,
+                'architecture': architecture.architecture
             }
         else:
+            resp.status = falcon.HTTP_404
             resp.media = {
-                'success': False,
                 'error': 'Architecture does not exist'
             }
 
     def get_description(self, req, resp):
+        resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
-            'description': 'Create architecture'
+            'description': 'Create/get info about architecture'
         }
 
     def on_post(self, req, resp, id=None):
@@ -57,27 +63,29 @@ class ArchitectureResource:
             architecture._set_attributes(req.media)  # TODO: test
             architecture.save()
 
-            resp.media = {
-                'success': True
-            }
+            resp.status = falcon.HTTP_200
+            resp.media = {}
         else:
+            resp.status = falcon.HTTP_404
             resp.media = {
-                'success': False,
                 'error': 'Architecture does not exist'
             }
 
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def create_architecture(self, req, resp):
+        id = req.media.get('id', None) or uuid.uuid4().hex
+
         # в функции from_document не происходит маппинг id <-> _id
         req.media['_id'] = req.media['id']  # костыль
         del req.media['id']  # костыль
 
         architecture = metadata.Architecture.from_document(req.media)
-        architecture.id = req.media.get('_id', None) or uuid.uuid4()
+        architecture.id = id
+        architecture.owner = '0'
         architecture.save()
 
+        resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
-            'id': architecture.id
+            'id': id
         }
 

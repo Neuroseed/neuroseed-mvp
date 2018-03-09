@@ -14,7 +14,6 @@ class ArchitecturesResource:
 
         resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
             'architectures': architectures_ids
         }
 
