@@ -33,6 +33,7 @@ def train_model(self):
         dataset_id = task.config['dataset']
         dataset = metadata.Dataset.objects.get({'_id': dataset_id})
     except metadata.errors.DoesNotExist:
+        print('dataset does not exist')
         self.update_state(state=states.FAILURE)
         return
     except KeyError as err:
