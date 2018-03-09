@@ -15,16 +15,16 @@ READY = 5
 
 
 class ModelMetadata(EmbeddedMongoModel):
-    owner = fields.CharField()
+    owner = fields.CharField(required=True)
     hash = fields.CharField()
     size = fields.IntegerField()
     date = fields.TimestampField()
-    title = fields.CharField()
+    title = fields.CharField(required=True)
     description = fields.CharField()
     category = fields.CharField()
     labels = fields.ListField(field=fields.CharField())
     accuracy = fields.FloatField()
-    architecture = fields.ReferenceField(Architecture)
+    architecture = fields.ReferenceField(Architecture, required=True)
     dataset = fields.ReferenceField(Dataset)
     # TODO: parent = fields.ReferenceField(Model)
     shape = fields.ListField(field=fields.IntegerField())

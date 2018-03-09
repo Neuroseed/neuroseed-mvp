@@ -14,7 +14,6 @@ class ModelsResource:
 
         resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
             'models': models_ids
         }
 
