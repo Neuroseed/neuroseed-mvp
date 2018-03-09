@@ -23,7 +23,6 @@ def configure_api_v1(api):
     dataset_resource = DatasetResource()
     api.add_route(BASE + 'dataset', dataset_resource)
     api.add_route(BASE + 'dataset/{id}', dataset_resource)
-    api.add_route(BASE + 'dataset/create_dataset_meta/{id}', dataset_resource)
 
     # list of datasets
     datasets_resource = DatasetsResource()

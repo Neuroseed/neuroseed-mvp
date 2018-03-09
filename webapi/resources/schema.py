@@ -23,6 +23,7 @@ DATASET_SCHEMA = {
             "uniqueItems": True
         }
     },
+    "required":["title"]
 }
 
 ARCHITECTURE_SCHEMA = {
@@ -49,7 +50,8 @@ ARCHITECTURE_SCHEMA = {
                 "layers": {"type": "array"}
             }
         }
-    }
+    },
+    "required":["title"]
 }
 
 MODEL_SCHEMA = {
@@ -84,7 +86,8 @@ MODEL_SCHEMA = {
             "type": "string",
             "maxLength": 128
         }
-    }
+    },
+    "required":["title"]
 }
 
 TASK_SCHEMA = {

@@ -18,11 +18,23 @@ class DatasetResource:
             self.get_description(req, resp)
 
     def get_dataset_meta(self, req, resp, id):
-        resp.media = {
-            'success': True,
-            'description': 'text'
-            }
+        try:
+            dataset_meta = metadata.Dataset.objects.get({'_id': str(id)})
+        except metadata.Dataset.DoesNotExist:
+            dataset_meta = None
 
+        if dataset_meta:
+            resp.media = {
+                'success': True,
+                'dataset': dataset_meta.to_son()
+            }
+        else:
+            resp.status = falcon.HTTP_404
+            resp.media = {
+                'success': False,
+                'error': 'Dataset metadata doesnt exist'
+            }
+    
     def get_description(self, req, resp):
         resp.media = {
             'success': True,
@@ -85,3 +97,4 @@ class DatasetResource:
             'success': True,
             'dataset': dataset_meta.to_son()
         }
+        return dataset_meta.id

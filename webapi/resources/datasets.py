@@ -1,4 +1,5 @@
 import falcon
+import metadata
 
 __all__ = [
     'DatasetsResource'
@@ -10,6 +11,6 @@ class DatasetsResource:
         resp.status = falcon.HTTP_200
         resp.media = {
             'success': True,
-            'datasets': []
+            'datasets': datasets.metadata
         }
 
