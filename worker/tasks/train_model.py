@@ -1,9 +1,8 @@
 import time
-import celery
 from celery import states
 
 import metadata
-from .app import app
+from ..app import app
 
 
 @app.task(bind=True, name='model.train')
@@ -62,16 +61,3 @@ def train_model(self):
     print('End train task: {}'.format(task_id))
 
     return {'id': task_id}
-
-
-@app.task(bind=True, name='model.test')
-def test_model(self):
-    task_id = self.request.id
-    return {'id': task_id}
-
-
-@app.task(bind=True, name='model.predict')
-def predict_model(self):
-    task_id = self.request.id
-    return {'id': task_id}
-
