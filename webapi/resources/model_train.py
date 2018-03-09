@@ -20,10 +20,14 @@ class ModelTrainResource:
             task_id = tasker.train_model(id, config)
         except ValueError:
             resp.status = falcon.HTTP_404
+            resp.media = {
+                'error': 'Model does not exists'
+            }
             return
 
+        resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
+            'id': id,
             'task': task_id,
         }
 

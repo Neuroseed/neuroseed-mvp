@@ -55,8 +55,9 @@ ARCHITECTURE_SCHEMA = {
 }
 
 MODEL_SCHEMA = {
-    "is_public": {"type": "boolean"},
-    "meta":{
+    "type": "object",
+    "properties": {
+        "is_public": {"type": "boolean"},
         "title": {
             "type": "string",
             "minLength": 1,
@@ -87,7 +88,7 @@ MODEL_SCHEMA = {
             "maxLength": 128
         }
     },
-    "required":["title"]
+    "required": ["title", "architecture"]
 }
 
 TASK_SCHEMA = {
@@ -102,7 +103,16 @@ MODEL_TRAIN_SCHEMA = {
     "type": "object",
     "properties": {
         "dataset": {"type": "string"},
-        "epochs": {"type": "number"}
-    }
+        "epochs": {"type": "number"},
+        "optimizer": {"type": "string"},
+        "loss": {"type": "string"},
+        "metrics": {
+            "type": "array",
+            "items": "string",
+            "uniqueItems": True
+        }
+    },
+    "additionalProperties": False,
+    "required": ["dataset", "optimizer", "loss"]
 }
 
