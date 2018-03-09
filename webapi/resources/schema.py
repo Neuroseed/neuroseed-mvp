@@ -96,7 +96,8 @@ TASK_SCHEMA = {
     "properties": {
         "command": {"type": "string"},
         "config": {"type": "object"}
-    }
+    },
+    "additionalProperties": False
 }
 
 MODEL_TRAIN_SCHEMA = {
