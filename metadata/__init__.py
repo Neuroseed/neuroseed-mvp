@@ -1,6 +1,7 @@
 import json
 
 from pymodm import connect
+from pymodm import errors
 
 from . import dataset
 from . import architecture
