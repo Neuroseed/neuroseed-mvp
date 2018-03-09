@@ -11,32 +11,33 @@ __all__ = [
 
 
 class TaskResource:
-    def on_get(self, req, resp, id=None):
+    def on_get(self, req, resp, id):
         try:
             task = metadata.Task.objects.get({'_id': id})
         except metadata.Task.DoesNotExist:
             task = None
 
         if task:
+            resp.status = falcon.HTTP_200
             resp.media = {
-                'success': True,
-                'model': task.to_son()
+                'id': id,
+                'command': task.command,
+                'config': task.configs
             }
         else:
             resp.status = falcon.HTTP_404
             resp.media = {
-                'success': False,
-                'error': 'Task does not exist'
+                'error': 'Task does not exists'
             }
 
     @jsonschema.validate(TASK_SCHEMA)
     def on_post(self, req, resp):
         task = metadata.Task.from_document(req.media)
-        task.id = uuid.uuid4()
+        task.id = uuid.uuid4().hex
         task.save()
 
+        resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
-            'model': task.id
+            'id': task.id
         }
 
