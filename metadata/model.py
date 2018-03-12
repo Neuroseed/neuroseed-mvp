@@ -1,10 +1,11 @@
-from pymodm import EmbeddedMongoModel, MongoModel, fields
+from mongoengine import Document, EmbeddedDocument
+from mongoengine import fields
 
-from .dataset import Dataset
-from .architecture import Architecture
+from .dataset import DatasetMetadata
+from .architecture import ArchitectureMetadata
 
 __all__ = [
-    'Model'
+    'ModelMetadata'
 ]
 
 PENDING = 1
@@ -14,32 +15,32 @@ TESTING = 4
 READY = 5
 
 
-class ModelMetadata(EmbeddedMongoModel):
-    owner = fields.CharField(required=True)
-    hash = fields.CharField()
-    size = fields.IntegerField()
-    date = fields.TimestampField()
-    title = fields.CharField(required=True)
-    description = fields.CharField()
-    category = fields.CharField()
-    labels = fields.ListField(field=fields.CharField())
+class ModelBase(EmbeddedDocument):
+    owner = fields.StringField(required=True)
+    hash = fields.StringField()
+    size = fields.LongField()
+    date = fields.LongField()
+    title = fields.StringField(required=True)
+    description = fields.StringField()
+    category = fields.StringField()
+    labels = fields.ListField(field=fields.StringField())
     accuracy = fields.FloatField()
-    architecture = fields.ReferenceField(Architecture, required=True)
-    dataset = fields.ReferenceField(Dataset)
+    architecture = fields.ReferenceField(ArchitectureMetadata, required=True)
+    dataset = fields.ReferenceField(DatasetMetadata)
     # TODO: parent = fields.ReferenceField(Model)
-    shape = fields.ListField(field=fields.IntegerField())
+    shape = fields.ListField(field=fields.IntField())
 
 
-class Model(MongoModel):
-    id = fields.CharField(primary_key=True)
-    url = fields.CharField()
-    status = fields.IntegerField(default=PENDING)
+class ModelMetadata(Document):
+    id = fields.StringField(primary_key=True)
+    url = fields.StringField()
+    status = fields.IntField(default=PENDING)
     is_public = fields.BooleanField(default=False)
-    hash = fields.CharField()
-    meta_init = lambda: ModelMetadata()
-    meta = fields.EmbeddedDocumentField(ModelMetadata, default=meta_init)
+    hash = fields.StringField()
+    base_init = lambda: ModelBase()
+    base = fields.EmbeddedDocumentField(ModelBase, default=base_init)
 
-    class Meta:
-        connection_alias = 'metadata'
-        collection_name = 'models'
-
+    meta = {
+        'db_alias': 'metadata',
+        'collection': 'models'
+    }

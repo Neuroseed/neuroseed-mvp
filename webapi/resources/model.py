@@ -19,8 +19,8 @@ class ModelResource:
 
     def get_model_meta(self, req, resp, id):
         try:
-            model_meta = metadata.Model.objects.get({'_id': str(id)})
-        except metadata.Model.DoesNotExist:
+            model_meta = metadata.ModelMetadata(id=id)
+        except metadata.DoesNotExist:
             model_meta = None
 
         if model_meta:
@@ -29,15 +29,15 @@ class ModelResource:
                 'id': model_meta.id,
                 'is_public': model_meta.is_public,
                 'hash': model_meta.hash,
-                'owner': model_meta.meta.owner,
-                'size': model_meta.meta.size,
-                'date': model_meta.meta.date,
-                'title': model_meta.meta.title,
-                'description': model_meta.meta.description,
-                'category': model_meta.meta.category,
-                'labels': model_meta.meta.labels,
-                'accuracy': model_meta.meta.accuracy,
-                'dataset': model_meta.meta.dataset
+                'owner': model_meta.base.owner,
+                'size': model_meta.base.size,
+                'date': model_meta.base.date,
+                'title': model_meta.base.title,
+                'description': model_meta.base.description,
+                'category': model_meta.base.category,
+                'labels': model_meta.base.labels,
+                'accuracy': model_meta.base.accuracy,
+                'dataset': model_meta.base.dataset
             }
         else:
             resp.status = falcon.HTTP_404
@@ -59,8 +59,8 @@ class ModelResource:
 
     def update_model_meta(self, req, resp, id):
         try:
-            model_meta = metadata.Model.objects.get({'_id': str(id)})
-        except metadata.Model.DoesNotExist:
+            model_meta = metadata.ModelMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             model_meta = None
 
         if model_meta:
@@ -74,22 +74,21 @@ class ModelResource:
                 'error': 'Model metadata does not exist'
             }
 
-
     @jsonschema.validate(MODEL_SCHEMA)
     def create_model_meta(self, req, resp):
         # request to document mapping
-        meta = req.media.copy()
-        del meta['is_public']
+        base = req.media.copy()
+        del base['is_public']
         document = {
             'is_public': req.media['is_public'],
-            'meta': meta
+            'base': base
         }
 
         # save model metadata to database
-        model_meta = metadata.Model.from_document(document)
+        model_meta = metadata.ModelMetadata(**document)
         model_meta.id = uuid.uuid4().hex
         model_meta.url = model_meta.id
-        model_meta.meta.owner = '0'
+        model_meta.base.owner = '0'
         model_meta.save()
 
         resp.status = falcon.HTTP_200

@@ -10,6 +10,7 @@ __all__ = [
     'DatasetResource'
 ]
 
+
 class DatasetResource:
     def on_get(self, req, resp, id=None):
         if id:
@@ -19,8 +20,8 @@ class DatasetResource:
 
     def get_dataset_meta(self, req, resp, id):
         try:
-            dataset_meta = metadata.Dataset.objects.get({'_id': str(id)})
-        except metadata.Dataset.DoesNotExist:
+            dataset_meta = metadata.DatasetMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             dataset_meta = None
 
         if dataset_meta:
@@ -47,7 +48,6 @@ class DatasetResource:
         else:
             self.create_dataset_meta(req, resp)
 
-
     def save_dataset(self, req, resp, dataset_meta):
         url = dataset_meta.url
         file_path = storage.get_dataset_path(url)
@@ -70,8 +70,8 @@ class DatasetResource:
 
     def upload_dataset(self, req, resp):
         try:
-            dataset_meta = metadata.Dataset.objects.get({'_id': str(id)})
-        except metadata.Dataset.DoesNotExist:
+            dataset_meta = metadata.DatasetMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             dataset_meta = None
 
         if dataset_meta:
@@ -88,7 +88,7 @@ class DatasetResource:
 
     @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
-        dataset_meta = metadata.Dataset.from_document(req.media)
+        dataset_meta = metadata.DatasetMetadata(**req.media)
         dataset_meta.id = uuid.uuid4().hex
         dataset_meta.url = dataset_meta.id
         dataset_meta.save()

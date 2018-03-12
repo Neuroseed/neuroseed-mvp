@@ -1,7 +1,8 @@
-from pymodm import EmbeddedMongoModel, MongoModel, fields
+from mongoengine import Document, EmbeddedDocument
+from mongoengine import fields
 
 __all__ = [
-    'Dataset'
+    'DatasetMetadata'
 ]
 
 
@@ -10,29 +11,29 @@ RECEIVED = 2
 FAILURE = 3
 
 
-class DatasetMetadata(EmbeddedMongoModel):
-    owner = fields.CharField()
-    hash = fields.CharField()
-    size = fields.IntegerField()
-    date = fields.TimestampField()
-    title = fields.CharField()
-    description = fields.CharField()
-    category = fields.CharField()
-    labels = fields.ListField(field=fields.CharField())
-    shape = fields.ListField(field=fields.IntegerField())
+class DatasetBase(EmbeddedDocument):
+    owner = fields.StringField()
+    hash = fields.StringField()
+    size = fields.LongField()
+    date = fields.LongField()
+    title = fields.StringField()
+    description = fields.StringField()
+    category = fields.StringField()
+    labels = fields.ListField(fields.StringField())
+    shape = fields.ListField(fields.IntField())
 
 
-class Dataset(MongoModel):
+class DatasetMetadata(Document):
     '''in db mydb.dataset'''
-    id = fields.CharField(primary_key=True)
-    url = fields.CharField()
-    status = fields.IntegerField(default=PENDING)
+    id = fields.StringField(primary_key=True)
+    url = fields.StringField()
+    status = fields.IntField(default=PENDING)
     is_public = fields.BooleanField(default=False)
-    hash = fields.CharField()
-    meta_init = lambda: DatasetMetadata()
-    meta = fields.EmbeddedDocumentField(DatasetMetadata, default=meta_init)
+    hash = fields.StringField()
+    base_init = lambda: DatasetBase()
+    base = fields.EmbeddedDocumentField(DatasetBase, default=base_init)
 
-    class Meta:
-        connection_alias = 'metadata'
-        collection_name = 'datasets'
-
+    meta = {
+        'db_alias': 'metadata',
+        'collection': 'datasets'
+    }

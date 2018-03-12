@@ -34,7 +34,7 @@ def create_task(command, config, id=None, start=True):
     # TODO: replace by one function
     id = id or uuid.uuid4().hex
 
-    task = metadata.Task()
+    task = metadata.TaskMetadata()
     task.id = id
     task.command = command
     task.config = config
@@ -48,8 +48,8 @@ def create_task(command, config, id=None, start=True):
 
 def create_model_task(command, config, model_id):
     try:
-        model = metadata.Model.objects.get({'_id': model_id})
-    except metadata.errors.DoesNotExist as err:
+        model = metadata.ModelMetadata.objects(id=model_id)
+    except metadata.DoesNotExist as err:
         raise errors.ModelDoesNotExist from err
 
     config["model"] = model_id

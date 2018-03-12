@@ -13,8 +13,8 @@ __all__ = [
 class TaskResource:
     def on_get(self, req, resp, id):
         try:
-            task = metadata.Task.objects.get({'_id': id})
-        except metadata.Task.DoesNotExist:
+            task = metadata.TaskMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             task = None
 
         if task:
@@ -32,7 +32,7 @@ class TaskResource:
 
     @jsonschema.validate(TASK_SCHEMA)
     def on_post(self, req, resp):
-        task = metadata.Task.from_document(req.media)
+        task = metadata.TaskMetadata(**req.media)
         task.id = uuid.uuid4().hex
         task.save()
 

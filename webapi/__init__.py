@@ -2,6 +2,8 @@ import falcon
 from falcon import media
 from .resources import *
 
+__version__ = '0.1.0'
+
 
 class TextPlainHandler(media.BaseHandler):
     """

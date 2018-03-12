@@ -1,20 +1,21 @@
-from pymodm import MongoModel, fields
+from mongoengine import Document
+from mongoengine import fields
 
 __all__ = [
-    'Architecture'
+    'ArchitectureMetadata'
 ]
 
 
-class Architecture(MongoModel):
-    id = fields.CharField(primary_key=True)
+class ArchitectureMetadata(Document):
+    id = fields.StringField(primary_key=True)
     is_public = fields.BooleanField(default=False)
-    owner = fields.CharField(required=True)
-    title = fields.CharField(required=True)
-    description = fields.CharField()
-    category = fields.CharField()
+    owner = fields.StringField(required=True)
+    title = fields.StringField(required=True)
+    description = fields.StringField()
+    category = fields.StringField()
     architecture = fields.DictField(required=True)
 
-    class Meta:
-        connection_alias = 'metadata'
-        collection_name = 'architectures'
-
+    meta = {
+        'db_alias': 'metadata',
+        'collection': 'architectures'
+    }
