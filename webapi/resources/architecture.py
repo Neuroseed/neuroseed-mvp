@@ -3,7 +3,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
-from .schema import ARCHITECTURE_SCHEMA
+from ..schema.architecture import ARCHITECTURE_SCHEMA
 
 __all__ = [
     'ArchitectureResource'

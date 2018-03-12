@@ -3,7 +3,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
-from .schema import MODEL_SCHEMA
+from ..schema.model import MODEL_SCHEMA
 
 __all__ = [
     'ModelResource'

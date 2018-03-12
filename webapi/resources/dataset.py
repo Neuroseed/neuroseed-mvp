@@ -4,7 +4,7 @@ import uuid
 from falcon.media.validators import jsonschema
 import metadata
 import storage
-from .schema import DATASET_SCHEMA
+from ..schema.dataset import DATASET_SCHEMA
 
 __all__ = [
     'DatasetResource'
@@ -24,20 +24,23 @@ class DatasetResource:
             dataset_meta = None
 
         if dataset_meta:
+            resp.status = falcon.HTTP_200
             resp.media = {
-                'success': True,
-                'dataset': dataset_meta.to_son()
+                'id': dataset_meta.id,
+                'is_public':dataset_meta.is_public,
+                'title': dataset_meta.meta.title,
+                'description': dataset_meta.meta.description,
+                'category':dataset_meta.meta.category,
+                'labels':dataset_meta.meta.labels
             }
         else:
             resp.status = falcon.HTTP_404
             resp.media = {
-                'success': False,
                 'error': 'Dataset metadata doesnt exist'
             }
     
     def get_description(self, req, resp):
         resp.media = {
-            'success': True,
             'id':id
         }
 
@@ -59,12 +62,11 @@ class DatasetResource:
         dataset_meta.status = metadata.dataset.RECEIVED
         dataset_meta.save()
 
-        resp.media = {'success': True}
+        resp.media = {'id': dataset_meta.id}
 
     def dataset_already_uploaded(self, req, resp):
         resp.status = falcon.HTTP_405
         resp.media = {
-            'success': False,
             'error': 'Dataset already uploaded'
         }
 
@@ -82,19 +84,23 @@ class DatasetResource:
         else:
             resp.status = falcon.HTTP_404
             resp.media = {
-                'success': False,
                 'error': 'Dataset metadata does not exist'
             }
 
     @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
-        dataset_meta = metadata.Dataset.from_document(req.media)
+        meta = req.media.copy()
+        del meta['is_public']
+        document = {
+            'is_public': req.media['is_public'],
+            'meta': meta
+        }
+        dataset_meta = metadata.Dataset.from_document(document)
         dataset_meta.id = uuid.uuid4().hex
         dataset_meta.url = dataset_meta.id
+        dataset_meta.meta.owner = '0'
         dataset_meta.save()
-        print(dataset_meta.id)
+        resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
             'dataset': dataset_meta.to_son()
         }
-        return dataset_meta.id

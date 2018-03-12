@@ -8,9 +8,9 @@ __all__ = [
 
 class DatasetsResource:
     def on_get(self, req, resp):
+        datasets = metadata.Dataset.objects.all()
+        datasets_ids = [meta.id for meta in datasets]
         resp.status = falcon.HTTP_200
         resp.media = {
-            'success': True,
-            'datasets': datasets.metadata
-        }
-
+            'datasets': datasets_ids
+}

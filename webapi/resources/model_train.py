@@ -3,7 +3,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
-from .schema import MODEL_TRAIN_SCHEMA
+from ..schema.model_train import MODEL_TRAIN_SCHEMA
 import tasker
 from .. import errors
 

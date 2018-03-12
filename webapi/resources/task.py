@@ -3,7 +3,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
-from .schema import TASK_SCHEMA
+from ..schema.task import TASK_SCHEMA
 
 __all__ = [
     'TaskResource'
