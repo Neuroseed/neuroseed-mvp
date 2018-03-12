@@ -4,6 +4,7 @@ from celery.result import AsyncResult
 
 import metadata
 from .app import app
+from webapi import errors
 
 
 def start_task(name, *args, task_id=None, **kwargs):
@@ -23,33 +24,48 @@ def wait_task(task_id):
     return task.get(timeout=10)
 
 
-def train_model(model_id, config):
+def create_task(command, config, id=None, start=True):
+    if not type(command) is str:
+        raise TypeError('command type must be str')
+
+    if not type(config) is dict:
+        raise TypeError('config type must be dict')
+
+    # TODO: replace by one function
+    id = id or uuid.uuid4().hex
+
+    task = metadata.Task()
+    task.id = id
+    task.command = command
+    task.config = config
+    task.save()
+
+    if start:
+        start_task(command, task_id=id)
+
+    return id
+
+
+def create_model_task(command, config, model_id):
     try:
         model = metadata.Model.objects.get({'_id': model_id})
     except metadata.errors.DoesNotExist as err:
-        raise ValueError() from err
+        raise errors.ModelDoesNotExist from err
 
     config["model"] = model_id
-    task = {
-        "command": "train",
-        "config": config
-    }
 
-    # TODO: replace by one function
-    task_id = uuid.uuid4().hex
+    id = create_task(command, config)
 
-    task = metadata.Task.from_document(task)
-    task.id = task_id
-    task.save()
-
-    start_task('model.train', task_id=task_id)
-
-    return task_id
+    return id
 
 
-def test_model():
-    return start_task('model.test')
+def train_model(config, model_id):
+    return create_model_task('model.train', config, model_id)
 
 
-def predict_model():
-    return start_task('model.predict')
+def test_model(config, model_id):
+    return create_model_task('model.test', config, model_id)
+
+
+def predict_model(config, model_id):
+    return create_model_task('model.predict', config, model_id)

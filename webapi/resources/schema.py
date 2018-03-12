@@ -109,7 +109,7 @@ MODEL_TRAIN_SCHEMA = {
         "loss": {"type": "string"},
         "metrics": {
             "type": "array",
-            "items": "string",
+            "items": {"type": "string"},
             "uniqueItems": True
         }
     },

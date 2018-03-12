@@ -1,6 +1,6 @@
 import requests
 
-ID = '02c92d6f2c924a8395d9b9034e264bd6'
+ID = '9271a346e0e048f8adf17fdd09752951'
 url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=ID)
 
 config = {
