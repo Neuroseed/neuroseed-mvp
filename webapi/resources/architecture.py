@@ -19,8 +19,8 @@ class ArchitectureResource:
 
     def get_architecture_meta(self, req, resp, id):
         try:
-            architecture = metadata.Architecture.objects.get({'_id': id})
-        except metadata.Model.DoesNotExist:
+            architecture = metadata.ArchitectureMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             architecture = None
 
         if architecture:
@@ -55,8 +55,8 @@ class ArchitectureResource:
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def set_architecture(self, req, resp, id):
         try:
-            architecture = metadata.Architecture.objects.get({'id': id})
-        except metadata.Model.DoesNotExist:
+            architecture = metadata.ArchitectureMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             architecture = None
 
         if architecture:
@@ -75,11 +75,7 @@ class ArchitectureResource:
     def create_architecture(self, req, resp):
         id = req.media.get('id', None) or uuid.uuid4().hex
 
-        # в функции from_document не происходит маппинг id <-> _id
-        req.media['_id'] = req.media['id']  # костыль
-        del req.media['id']  # костыль
-
-        architecture = metadata.Architecture.from_document(req.media)
+        architecture = metadata.ArchitectureMetadata(**req.media)
         architecture.id = id
         architecture.owner = '0'
         architecture.save()

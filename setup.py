@@ -1,6 +1,7 @@
 import os
 
 from setuptools import setup, find_packages
+import webapi
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = ''
@@ -10,7 +11,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
 requires = [
     'celery==4.1.0',
     'pymongo==3.6.0',
-    'pymodm==0.4.0',
+    'mongoengine==0.15.0',
     'PyJWT==1.5.3',
     'falcon==1.4.1'
 ]
@@ -23,7 +24,7 @@ tests_require = [
 
 setup(
     name='webapi',
-    version='0.0',
+    version=webapi.__version__,
     description='webapi',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[

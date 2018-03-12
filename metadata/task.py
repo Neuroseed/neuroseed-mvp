@@ -1,7 +1,8 @@
-from pymodm import MongoModel, fields
+from mongoengine import Document
+from mongoengine import fields
 
 __all__ = [
-    'Task'
+    'TaskMetadata'
 ]
 
 PENDING = 1
@@ -13,16 +14,15 @@ REVOKED = 6
 RETRY = 7
 
 
-class Task(MongoModel):
-    id = fields.CharField(primary_key=True)
-    status = fields.IntegerField(default=1)
-    owner = fields.CharField()
-    command = fields.CharField()
-    date = fields.TimestampField()
-    config_init = lambda: dict()
-    config = fields.DictField(default=config_init)
+class TaskMetadata(Document):
+    id = fields.StringField(primary_key=True)
+    status = fields.IntField(default=1)
+    owner = fields.StringField()
+    command = fields.StringField()
+    date = fields.LongField()
+    config = fields.DictField(default=lambda: dict())
 
-    class Meta:
-        connection_alias = 'metadata'
-        collection_name = 'tasks'
-
+    meta = {
+        'db_alias': 'metadata',
+        'collection': 'tasks'
+    }

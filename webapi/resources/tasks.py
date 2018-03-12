@@ -8,7 +8,7 @@ __all__ = [
 
 class TasksResource:
     def on_get(self, req, resp):
-        tasks = metadata.Task.objects.all()
+        tasks = metadata.TaskMetadata.objects.all()
 
         tasks_ids = [task.id for task in tasks]
 

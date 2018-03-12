@@ -10,6 +10,7 @@ __all__ = [
     'DatasetResource'
 ]
 
+
 class DatasetResource:
     def on_get(self, req, resp, id=None):
         if id:
@@ -19,8 +20,8 @@ class DatasetResource:
 
     def get_dataset_meta(self, req, resp, id):
         try:
-            dataset_meta = metadata.Dataset.objects.get({'_id': str(id)})
-        except metadata.Dataset.DoesNotExist:
+            dataset_meta = metadata.DatasetMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             dataset_meta = None
 
         if dataset_meta:
@@ -50,7 +51,6 @@ class DatasetResource:
         else:
             self.create_dataset_meta(req, resp)
 
-
     def save_dataset(self, req, resp, dataset_meta):
         url = dataset_meta.url
         file_path = storage.get_dataset_path(url)
@@ -72,8 +72,8 @@ class DatasetResource:
 
     def upload_dataset(self, req, resp):
         try:
-            dataset_meta = metadata.Dataset.objects.get({'_id': str(id)})
-        except metadata.Dataset.DoesNotExist:
+            dataset_meta = metadata.DatasetMetadata.objects(id=id)
+        except metadata.DoesNotExist:
             dataset_meta = None
 
         if dataset_meta:
@@ -89,18 +89,19 @@ class DatasetResource:
 
     @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
-        meta = req.media.copy()
-        del meta['is_public']
+        base = req.media.copy()
+        del base['is_public']
         document = {
             'is_public': req.media['is_public'],
-            'meta': meta
+            'base': base
         }
-        dataset_meta = metadata.Dataset.from_document(document)
+        dataset_meta = metadata.DatasetMetadata(**document)
         dataset_meta.id = uuid.uuid4().hex
         dataset_meta.url = dataset_meta.id
-        dataset_meta.meta.owner = '0'
+        dataset_meta.base.owner = '0'
         dataset_meta.save()
+
         resp.status = falcon.HTTP_200
         resp.media = {
-            'dataset': dataset_meta.to_son()
+            'id': dataset_meta.id
         }

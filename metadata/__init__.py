@@ -1,7 +1,7 @@
 import json
 
-from pymodm import connect
-from pymodm import errors
+from mongoengine import connect
+from mongoengine.errors import *
 
 from . import dataset
 from . import architecture
@@ -20,5 +20,6 @@ def from_config(config_path):
 
     mongo_url = config['mongo_url']
 
-    connect(mongo_url, alias='metadata')
+    database = 'metadata'
+    connect(database, host=mongo_url, alias='metadata')
 
