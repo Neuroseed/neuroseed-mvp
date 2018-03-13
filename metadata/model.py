@@ -1,3 +1,5 @@
+import uuid
+
 from mongoengine import Document, EmbeddedDocument
 from mongoengine import fields
 
@@ -32,7 +34,7 @@ class ModelBase(EmbeddedDocument):
 
 
 class ModelMetadata(Document):
-    id = fields.StringField(primary_key=True)
+    id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     url = fields.StringField()
     status = fields.IntField(default=PENDING)
     is_public = fields.BooleanField(default=False)

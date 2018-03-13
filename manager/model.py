@@ -5,50 +5,53 @@ from . import utils
 from webapi import errors
 
 
-def get_model_meta(id):
-    try:
-        model = metadata.ModelMetadata(id=id)
-    except metadata.DoesNotExist:
-        model = None
+class Model(metadata.ModelMetadata):
+    def __init__(self, *args, **kwargs):
+        flatten = None
+        if 'flatten' in kwargs:
+            flatten = kwargs['flatten']
+            del kwargs['flatten']
 
-    if model:
-        meta = {
-            'id': model.id,
-            'is_public': model.is_public,
-            'hash': model.hash,
-            'owner': model.base.owner,
-            'size': model.base.size,
-            'date': model.base.date,
-            'title': model.base.title,
-            'description': model.base.description,
-            'category': model.base.category,
-            'labels': model.base.labels,
-            'accuracy': model.base.accuracy,
-            'dataset': model.base.dataset
-        }
+        super().__init__(*args, **kwargs)
+
+        if flatten:
+            self.from_flatten(flatten)
+
+        self.url = self.id
+
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)
+
+    def flatten(self):
+        """Return model in flatten representation"""
+
+        meta = self.to_mongo().to_dict()
+
+        if '_id' in meta:
+            meta['id'] = meta['_id']
+            del meta['_id']
+
+        meta.update(meta['base'])
+        del meta['base']
+        del meta['_cls']
+
         return meta
-    else:
-        raise metadata.DoesNotExist('Model metadata does not exist')
 
+    to_dict = flatten
 
-def create_model_meta(meta):
-    # request to document mapping
-    base = meta.copy()
-    del base['is_public']
-    document = {
-        'is_public': meta['is_public'],
-        'base': base
-    }
+    def from_flatten(self, meta):
+        """Restore model metadata from flatten representation"""
 
-    # save model metadata to database
-    model = metadata.ModelMetadata(**document)
-    id = str(uuid.uuid4())
-    model.id = id
-    model.url = id
-    model.base.owner = '0'
-    model.save()
+        for name in self._fields:
+            if not name is 'base' and name in meta:
+                setattr(self, name, meta[name])
 
-    return id
+        for name in self.base._fields:
+            if name in meta:
+                setattr(self.base, name, meta[name])
+
+    from_dict = from_flatten
 
 
 def get_models():
@@ -60,9 +63,9 @@ def get_models():
 
 def create_model_task(command, config, model_id):
     try:
-        model = metadata.ModelMetadata.objects(id=model_id)
+        model = Model.from_id(model_id)
     except metadata.DoesNotExist as err:
-        raise errors.ModelDoesNotExist from err
+        raise
 
     config["model"] = model_id
 
