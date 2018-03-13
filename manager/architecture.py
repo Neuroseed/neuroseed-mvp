@@ -1,41 +1,29 @@
-import uuid
 import metadata
 
 
-def get_architecture_meta(id):
-    try:
-        architecture = metadata.ArchitectureMetadata.objects(id=id)
-    except metadata.DoesNotExist:
-        architecture = None
+class Architecture(metadata.ArchitectureMetadata):
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)
 
-    if architecture:
-        meta = {
-            'id': architecture.id,
-            'is_public': architecture.is_public,
-            'owner': architecture.owner,
-            'title': architecture.title,
-            'description': architecture.description,
-            'category': architecture.category,
-            'architecture': architecture.architecture
-        }
+    def to_dict(self):
+        meta = self.to_mongo().to_dict()
+
+        if '_id' in meta:
+            meta['id'] = meta['_id']
+            del meta['_id']
+
+        del meta['_cls']
+
         return meta
-    else:
-        metadata.DoesNotExist('Architecture does not exist')
+
+    def from_dict(self, meta):
+        for name in self._fields:
+            setattr(self, name, meta[name])
 
 
-def create_architecture(meta):
-    id = meta.get('id', None) or str(uuid.uuid4())
-
-    architecture = metadata.ArchitectureMetadata(**meta)
-    architecture.id = id
-    architecture.owner = '0'
-    architecture.save()
-
-    return id
-
-
-def get_architectures():
-    architectures = metadata.ArchitectureMetadata.objects.all()
+def get_architectures_ids():
+    architectures = Architecture.objects.all()
     ids = [arch.id for arch in architectures]
 
     return ids
