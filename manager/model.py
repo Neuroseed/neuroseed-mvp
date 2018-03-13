@@ -1,47 +1,61 @@
 import uuid
-from celery.result import AsyncResult
 
 import metadata
-from .app import app
+from . import utils
 from webapi import errors
 
 
-def start_task(name, *args, task_id=None, **kwargs):
-    return app.send_task(
-        name, 
-        args=args, 
-        kwargs=kwargs, 
-        task_id=task_id)
+def get_model_meta(id):
+    try:
+        model = metadata.ModelMetadata(id=id)
+    except metadata.DoesNotExist:
+        model = None
+
+    if model:
+        meta = {
+            'id': model.id,
+            'is_public': model.is_public,
+            'hash': model.hash,
+            'owner': model.base.owner,
+            'size': model.base.size,
+            'date': model.base.date,
+            'title': model.base.title,
+            'description': model.base.description,
+            'category': model.base.category,
+            'labels': model.base.labels,
+            'accuracy': model.base.accuracy,
+            'dataset': model.base.dataset
+        }
+        return meta
+    else:
+        raise metadata.DoesNotExist('Model metadata does not exist')
 
 
-def get_task(task_id):
-    return AsyncResult(task_id)
+def create_model_meta(meta):
+    # request to document mapping
+    base = meta.copy()
+    del base['is_public']
+    document = {
+        'is_public': meta['is_public'],
+        'base': base
+    }
 
-
-def wait_task(task_id):
-    task = AsyncResult(task_id)
-    return task.get(timeout=10)
-
-
-def create_task(command, config, id=None, start=True):
-    if not type(command) is str:
-        raise TypeError('command type must be str')
-
-    if not type(config) is dict:
-        raise TypeError('config type must be dict')
-
-    id = id or str(uuid.uuid4())
-
-    task = metadata.TaskMetadata()
-    task.id = id
-    task.command = command
-    task.config = config
-    task.save()
-
-    if start:
-        start_task(command, task_id=id)
+    # save model metadata to database
+    model = metadata.ModelMetadata(**document)
+    id = str(uuid.uuid4())
+    model.id = id
+    model.url = id
+    model.base.owner = '0'
+    model.save()
 
     return id
+
+
+def get_models():
+    models_meta = metadata.ModelMetadata.objects.all()
+    ids = [meta.id for meta in models_meta]
+
+    return ids
 
 
 def create_model_task(command, config, model_id):
@@ -52,7 +66,7 @@ def create_model_task(command, config, model_id):
 
     config["model"] = model_id
 
-    id = create_task(command, config)
+    id = utils.create_task(command, config)
 
     return id
 
