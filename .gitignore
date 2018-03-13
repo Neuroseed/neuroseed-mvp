@@ -4,3 +4,4 @@ venv
 .idea
 *.py[cod]
 *.hdf5
+*.h5
