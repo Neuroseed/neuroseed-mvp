@@ -86,7 +86,7 @@ class ModelResource:
 
         # save model metadata to database
         model_meta = metadata.ModelMetadata(**document)
-        model_meta.id = uuid.uuid4().hex
+        model_meta.id = str(uuid.uuid4())
         model_meta.url = model_meta.id
         model_meta.base.owner = '0'
         model_meta.save()

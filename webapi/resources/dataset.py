@@ -96,7 +96,7 @@ class DatasetResource:
             'base': base
         }
         dataset_meta = metadata.DatasetMetadata(**document)
-        dataset_meta.id = uuid.uuid4().hex
+        dataset_meta.id = str(uuid.uuid4())
         dataset_meta.url = dataset_meta.id
         dataset_meta.base.owner = '0'
         dataset_meta.save()

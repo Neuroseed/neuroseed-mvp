@@ -31,8 +31,7 @@ def create_task(command, config, id=None, start=True):
     if not type(config) is dict:
         raise TypeError('config type must be dict')
 
-    # TODO: replace by one function
-    id = id or uuid.uuid4().hex
+    id = id or str(uuid.uuid4())
 
     task = metadata.TaskMetadata()
     task.id = id

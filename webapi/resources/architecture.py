@@ -73,7 +73,7 @@ class ArchitectureResource:
 
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def create_architecture(self, req, resp):
-        id = req.media.get('id', None) or uuid.uuid4().hex
+        id = req.media.get('id', None) or str(uuid.uuid4())
 
         architecture = metadata.ArchitectureMetadata(**req.media)
         architecture.id = id
