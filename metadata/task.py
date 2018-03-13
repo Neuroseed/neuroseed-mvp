@@ -1,3 +1,5 @@
+import uuid
+
 from mongoengine import Document
 from mongoengine import fields
 
@@ -15,7 +17,7 @@ RETRY = 7
 
 
 class TaskMetadata(Document):
-    id = fields.StringField(primary_key=True)
+    id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     status = fields.IntField(default=1)
     owner = fields.StringField()
     command = fields.StringField()

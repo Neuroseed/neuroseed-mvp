@@ -3,30 +3,29 @@ import uuid
 import metadata
 
 
-def get_task(self, req, resp, id):
-    try:
-        task = metadata.TaskMetadata.objects(id=id)
-    except metadata.DoesNotExist as err:
-        raise metadata.DoesNotExist('Task does not exists') from err
+class Task(metadata.TaskMetadata):
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)
 
-    meta = {
-        'id': id,
-        'command': task.command,
-        'config': task.configs
-    }
-    return meta
+    def to_dict(self):
+        meta = self.to_mongo().to_dict()
+
+        if '_id' in meta:
+            meta['id'] = meta['_id']
+            del meta['_id']
+
+        del meta['_cls']
+
+        return meta
+
+    def from_dict(self, meta):
+        for name in self._fields:
+            setattr(self, name, meta[name])
 
 
-def create_task(meta):
-    task = metadata.TaskMetadata(**meta)
-    task.id = str(uuid.uuid4())
-    task.save()
-
-    return task.id
-
-
-def get_tasks():
-    tasks = metadata.TaskMetadata.objects.all()
+def get_tasks_ids():
+    tasks = Task.objects.all()
     ids = [task.id for task in tasks]
 
     return ids

@@ -1,5 +1,3 @@
-import uuid
-
 import metadata
 from . import utils
 from webapi import errors
@@ -55,7 +53,7 @@ class Model(metadata.ModelMetadata):
 
 
 def get_models():
-    models_meta = metadata.ModelMetadata.objects.all()
+    models_meta = Model.objects.all()
     ids = [meta.id for meta in models_meta]
 
     return ids
