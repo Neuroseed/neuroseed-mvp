@@ -1,17 +1,25 @@
+import json
 import uuid
+
 import celery
 from celery.result import AsyncResult
 
 import metadata
-from .app import app
-from webapi import errors
+
+app = celery.Celery('tasks')
+
+
+def configure(filepath):
+    with open('config/celery_config.json') as f:
+        celery_config = json.load(f)
+        app.config_from_object(celery_config)
 
 
 def start_task(name, *args, task_id=None, **kwargs):
     return app.send_task(
-        name, 
-        args=args, 
-        kwargs=kwargs, 
+        name,
+        args=args,
+        kwargs=kwargs,
         task_id=task_id)
 
 
@@ -43,28 +51,3 @@ def create_task(command, config, id=None, start=True):
         start_task(command, task_id=id)
 
     return id
-
-
-def create_model_task(command, config, model_id):
-    try:
-        model = metadata.ModelMetadata.objects(id=model_id)
-    except metadata.DoesNotExist as err:
-        raise errors.ModelDoesNotExist from err
-
-    config["model"] = model_id
-
-    id = create_task(command, config)
-
-    return id
-
-
-def train_model(config, model_id):
-    return create_model_task('model.train', config, model_id)
-
-
-def test_model(config, model_id):
-    return create_model_task('model.test', config, model_id)
-
-
-def predict_model(config, model_id):
-    return create_model_task('model.predict', config, model_id)
