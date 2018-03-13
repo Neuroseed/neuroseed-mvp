@@ -1,5 +1,4 @@
 import uuid
-import celery
 from celery.result import AsyncResult
 
 import metadata

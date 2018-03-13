@@ -4,7 +4,7 @@ from falcon.media.validators import jsonschema
 
 import metadata
 from ..schema.model_train import MODEL_TRAIN_SCHEMA
-import tasker
+import manager
 from .. import errors
 
 __all__ = [
@@ -18,7 +18,7 @@ class ModelTrainResource:
         config = req.media
 
         try:
-            task_id = tasker.train_model(config, id)
+            task_id = manager.train_model(config, id)
         except errors.ModelDoesNotExist:
             resp.status = falcon.HTTP_404
             resp.media = {
@@ -31,4 +31,3 @@ class ModelTrainResource:
             'id': id,
             'task': task_id,
         }
-
