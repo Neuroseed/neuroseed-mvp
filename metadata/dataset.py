@@ -1,3 +1,5 @@
+import uuid
+
 from mongoengine import Document, EmbeddedDocument
 from mongoengine import fields
 
@@ -24,16 +26,15 @@ class DatasetBase(EmbeddedDocument):
 
 
 class DatasetMetadata(Document):
-    '''in db mydb.dataset'''
-    id = fields.StringField(primary_key=True)
+    id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     url = fields.StringField()
     status = fields.IntField(default=PENDING)
     is_public = fields.BooleanField(default=False)
     hash = fields.StringField()
-    base_init = lambda: DatasetBase()
-    base = fields.EmbeddedDocumentField(DatasetBase, default=base_init)
+    base = fields.EmbeddedDocumentField(DatasetBase, default=lambda: DatasetBase())
 
     meta = {
+        'allow_inheritance': True,
         'db_alias': 'metadata',
         'collection': 'datasets'
     }

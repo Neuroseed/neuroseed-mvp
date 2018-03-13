@@ -2,44 +2,57 @@ import uuid
 import metadata
 
 
-def get_dataset_meta(id):
-    try:
-        dataset = metadata.DatasetMetadata.objects(id=id)
-    except metadata.DoesNotExist:
-        dataset = None
+class Dataset(metadata.DatasetMetadata):
+    def __init__(self, *args, **kwargs):
+        flatten = None
+        if 'flatten' in kwargs:
+            flatten = kwargs['flatten']
+            del kwargs['flatten']
 
-    if dataset:
-        meta = {
-            'id': dataset.id,
-            'is_public': dataset.is_public,
-            'title': dataset.base.title,
-            'description': dataset.base.description,
-            'category': dataset.base.category,
-            'labels': dataset.base.labels
-        }
+        super().__init__(*args, **kwargs)
+
+        if flatten:
+            self.from_flatten(flatten)
+
+        self.url = self.id
+
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)
+
+    def flatten(self):
+        """Return dataset in flatten representation"""
+
+        meta = self.to_mongo().to_dict()
+
+        if '_id' in meta:
+            meta['id'] = meta['_id']
+            del meta['_id']
+
+        meta.update(meta['base'])
+        del meta['base']
+        del meta['_cls']
+
         return meta
-    else:
-        raise metadata.DoesNotExist('Dataset does not exist')
+
+    to_dict = flatten
+
+    def from_flatten(self, meta):
+        """Restore dataset metadata from flatten representation"""
+
+        for name in self._fields:
+            if not name is 'base' and name in meta:
+                setattr(self, name, meta[name])
+
+        for name in self.base._fields:
+            if name in meta:
+                setattr(self.base, name, meta[name])
+
+    from_dict = from_flatten
 
 
-def create_dataset(meta):
-    base = meta.copy()
-    del base['is_public']
-    document = {
-        'is_public': meta['is_public'],
-        'base': base
-    }
-    dataset = metadata.DatasetMetadata(**document)
-    dataset.id = str(uuid.uuid4())
-    dataset.url = dataset.id
-    dataset.base.owner = '0'
-    dataset.save()
-
-    return dataset.id
-
-
-def get_datasets():
-    datasets = metadata.Dataset.objects.all()
+def get_datasets_ids():
+    datasets = Dataset.objects.all()
     ids = [meta.id for meta in datasets]
 
     return ids

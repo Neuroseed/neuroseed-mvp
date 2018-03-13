@@ -16,6 +16,7 @@ class ArchitectureMetadata(Document):
     architecture = fields.DictField(required=True)
 
     meta = {
+        'allow_inheritance': True,
         'db_alias': 'metadata',
         'collection': 'architectures'
     }

@@ -41,6 +41,7 @@ class ModelMetadata(Document):
     base = fields.EmbeddedDocumentField(ModelBase, default=base_init)
 
     meta = {
+        'allow_inheritance': True,
         'db_alias': 'metadata',
         'collection': 'models'
     }

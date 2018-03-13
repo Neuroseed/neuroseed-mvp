@@ -23,6 +23,7 @@ class TaskMetadata(Document):
     config = fields.DictField(default=lambda: dict())
 
     meta = {
+        'allow_inheritance': True,
         'db_alias': 'metadata',
         'collection': 'tasks'
     }
