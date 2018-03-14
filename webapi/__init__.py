@@ -1,11 +1,14 @@
+import logging
+
 import falcon
 from falcon import media
-import falcon_auth
 from falcon_auth import JWTAuthBackend, FalconAuthMiddleware
 
 from .resources import *
 
 __version__ = '0.1.0'
+
+logger = logging.getLogger(__name__)
 
 
 class NeuroseedAuthMiddleware(FalconAuthMiddleware):
@@ -101,6 +104,8 @@ def configure_api_v1(api, auth):
     # tasks list
     tasks_resource = TasksResource()
     api.add_route(BASE + 'tasks', tasks_resource)
+
+    logger.debug('api v1 initialized')
 
 
 def main():
