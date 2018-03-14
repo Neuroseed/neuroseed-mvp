@@ -1,4 +1,6 @@
 import uuid
+import logging
+
 import falcon
 from falcon.media.validators import jsonschema
 
@@ -9,12 +11,15 @@ __all__ = [
     'TaskResource'
 ]
 
+logger = logging.getLogger(__name__)
+
 
 class TaskResource:
     def on_get(self, req, resp, id):
         try:
             task = metadata.TaskMetadata.objects(id=id)
         except metadata.DoesNotExist:
+            logger.debug('Task {id} does not exist'.format(id=id))
             task = None
 
         if task:
@@ -33,12 +38,14 @@ class TaskResource:
     @jsonschema.validate(TASK_SCHEMA)
     def on_post(self, req, resp):
         user_id = req.context['user']
-        print('User ID:', user_id)
+        logger.debug('Authorize user {id}'.format(id=user_id))
 
         task = metadata.TaskMetadata(**req.media)
         task.id = str(uuid.uuid4())
         task.owner = user_id
         task.save()
+
+        logger.debug('User {uid} create model {did}'.format(uid=user_id, did=task.id))
 
         resp.status = falcon.HTTP_200
         resp.media = {

@@ -1,4 +1,6 @@
 import base64
+import logging
+
 import falcon
 import uuid
 from falcon.media.validators import jsonschema
@@ -9,6 +11,8 @@ from ..schema.dataset import DATASET_SCHEMA
 __all__ = [
     'DatasetResource'
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class DatasetResource:
@@ -22,6 +26,7 @@ class DatasetResource:
         try:
             dataset_meta = metadata.DatasetMetadata.objects(id=id)
         except metadata.DoesNotExist:
+            logger.debug('Dataset {id} does not exist'.format(id=id))
             dataset_meta = None
 
         if dataset_meta:
@@ -62,9 +67,11 @@ class DatasetResource:
         dataset_meta.status = metadata.dataset.RECEIVED
         dataset_meta.save()
 
+        logger.debug('Dataset {id} received'.format(id=dataset_meta.id))
         resp.media = {'id': dataset_meta.id}
 
-    def dataset_already_uploaded(self, req, resp):
+    def dataset_already_uploaded(self, req, resp, id):
+        logger.debug('Dataset {id} alerady uploaded'.format(id=id))
         resp.status = falcon.HTTP_405
         resp.media = {
             'error': 'Dataset already uploaded'
@@ -80,7 +87,7 @@ class DatasetResource:
             if dataset_meta.status == metadata.dataset.PENDING:
                 self.save_dataset(req, resp, dataset_meta)
             elif dataset_meta.status == metadata.dataset.RECEIVED:
-                self.dataset_already_uploaded(req, resp)
+                self.dataset_already_uploaded(req, resp, id)
         else:
             resp.status = falcon.HTTP_404
             resp.media = {
@@ -90,7 +97,7 @@ class DatasetResource:
     @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
         user_id = req.context['user']
-        print('User ID:', user_id)
+        logger.debug('Authorize user {id}'.format(id=user_id))
 
         base = req.media.copy()
         del base['is_public']
@@ -103,6 +110,8 @@ class DatasetResource:
         dataset_meta.url = dataset_meta.id
         dataset_meta.base.owner = user_id
         dataset_meta.save()
+
+        logger.debug('User {uid} create dataset {did}'.format(uid=user_id, did=dataset_meta.id))
 
         resp.status = falcon.HTTP_200
         resp.media = {

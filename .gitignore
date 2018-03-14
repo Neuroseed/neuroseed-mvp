@@ -1,6 +1,7 @@
 __pycache__
 webapi.egg-info
 venv
+logs
 .idea
 *.py[cod]
 *.hdf5

@@ -1,10 +1,13 @@
 import json
 import uuid
+import logging
 
 import celery
 from celery.result import AsyncResult
 
 import metadata
+
+logger = logging.getLogger(__name__)
 
 app = celery.Celery('tasks')
 
@@ -16,11 +19,15 @@ def configure(filepath):
 
 
 def start_task(name, *args, task_id=None, **kwargs):
-    return app.send_task(
+    task = app.send_task(
         name,
         args=args,
         kwargs=kwargs,
         task_id=task_id)
+
+    logger.debug('Send task {id} to worker'.format(id=task_id))
+
+    return task
 
 
 def get_task(task_id):
