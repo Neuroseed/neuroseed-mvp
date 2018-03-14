@@ -73,11 +73,14 @@ class ArchitectureResource:
 
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def create_architecture(self, req, resp):
+        user_id = req.context['user']
+        print('User ID:', user_id)
+
         id = req.media.get('id', None) or str(uuid.uuid4())
 
         architecture = metadata.ArchitectureMetadata(**req.media)
         architecture.id = id
-        architecture.owner = '0'
+        architecture.owner = user_id
         architecture.save()
 
         resp.status = falcon.HTTP_200

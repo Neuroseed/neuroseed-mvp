@@ -76,6 +76,9 @@ class ModelResource:
 
     @jsonschema.validate(MODEL_SCHEMA)
     def create_model_meta(self, req, resp):
+        user_id = req.context['user']
+        print('User ID:', user_id)
+
         # request to document mapping
         base = req.media.copy()
         del base['is_public']
@@ -88,7 +91,7 @@ class ModelResource:
         model_meta = metadata.ModelMetadata(**document)
         model_meta.id = str(uuid.uuid4())
         model_meta.url = model_meta.id
-        model_meta.base.owner = '0'
+        model_meta.base.owner = user_id
         model_meta.save()
 
         resp.status = falcon.HTTP_200

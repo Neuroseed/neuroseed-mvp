@@ -59,7 +59,7 @@ def get_models():
     return ids
 
 
-def create_model_task(command, config, model_id):
+def create_model_task(command, config, model_id, owner):
     try:
         model = Model.from_id(model_id)
     except metadata.DoesNotExist as err:
@@ -67,13 +67,13 @@ def create_model_task(command, config, model_id):
 
     config["model"] = model_id
 
-    id = utils.create_task(command, config)
+    id = utils.create_task(command, config, owner)
 
     return id
 
 
-def train_model(config, model_id):
-    return create_model_task('model.train', config, model_id)
+def train_model(config, model_id, owner):
+    return create_model_task('model.train', config, model_id, owner)
 
 
 def test_model(config, model_id):

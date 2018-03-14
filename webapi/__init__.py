@@ -67,7 +67,11 @@ def configure_api_v1(api):
 def main():
     SECRET_KEY = 'secret'
     user_loader = lambda payload: payload['user_id']
-    jwt_auth_backend = JWTAuthBackend(user_loader, SECRET_KEY, required_claims=['user_id'])
+    jwt_auth_backend = JWTAuthBackend(
+        user_loader,
+        SECRET_KEY,
+        required_claims=['user_id'],
+        auth_header_prefix='Bearer')
     auth_middleware = FalconAuthMiddleware(jwt_auth_backend)
     middleware = [auth_middleware]
 

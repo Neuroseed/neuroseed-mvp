@@ -32,7 +32,7 @@ def wait_task(task_id):
     return task.get(timeout=10)
 
 
-def create_task(command, config, id=None, start=True):
+def create_task(command, config, owner, id=None, start=True):
     if not type(command) is str:
         raise TypeError('command type must be str')
 
@@ -43,6 +43,7 @@ def create_task(command, config, id=None, start=True):
 
     task = metadata.TaskMetadata()
     task.id = id
+    task.owner = owner
     task.command = command
     task.config = config
     task.save()

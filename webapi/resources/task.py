@@ -32,8 +32,12 @@ class TaskResource:
 
     @jsonschema.validate(TASK_SCHEMA)
     def on_post(self, req, resp):
+        user_id = req.context['user']
+        print('User ID:', user_id)
+
         task = metadata.TaskMetadata(**req.media)
         task.id = str(uuid.uuid4())
+        task.owner = user_id
         task.save()
 
         resp.status = falcon.HTTP_200
