@@ -89,6 +89,9 @@ class DatasetResource:
 
     @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
+        user_id = req.context['user']
+        print('User ID:', user_id)
+
         base = req.media.copy()
         del base['is_public']
         document = {
@@ -98,7 +101,7 @@ class DatasetResource:
         dataset_meta = metadata.DatasetMetadata(**document)
         dataset_meta.id = str(uuid.uuid4())
         dataset_meta.url = dataset_meta.id
-        dataset_meta.base.owner = '0'
+        dataset_meta.base.owner = user_id
         dataset_meta.save()
 
         resp.status = falcon.HTTP_200

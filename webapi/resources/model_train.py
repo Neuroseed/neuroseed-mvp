@@ -15,10 +15,13 @@ __all__ = [
 class ModelTrainResource:
     @jsonschema.validate(MODEL_TRAIN_SCHEMA)
     def on_post(self, req, resp, id):
+        user_id = req.context['user']
+        print('User ID:', user_id)
+
         config = req.media
 
         try:
-            task_id = manager.train_model(config, id)
+            task_id = manager.train_model(config, id, user_id)
         except errors.ModelDoesNotExist:
             resp.status = falcon.HTTP_404
             resp.media = {
