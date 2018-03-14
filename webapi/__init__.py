@@ -8,6 +8,38 @@ from .resources import *
 __version__ = '0.1.0'
 
 
+class NeuroseedAuthMiddleware(FalconAuthMiddleware):
+    """
+    Resource auth schema:
+    auth = {
+        inherit FalconAuthMiddleware auth schema,
+        'optional_routes': []
+        'optional_methods': []
+    }
+    """
+
+    def __init__(self, backend, exempt_routes=None, exempt_methods=None
+, optional_routes=None, optional_methods=None):
+        super().__init__(backend, exempt_routes, exempt_methods)
+
+        self.optional_routes = list(optional_routes or [])
+        self.optional_methods = list(optional_methods or [])
+
+    def process_resource(self, req, resp, resource, *args, **kwargs):
+        auth_setting = self._get_auth_settings(req, resource)
+        try:
+            super().process_resource(req, resp, resource, *args, **kwargs)
+        except falcon.HTTPUnauthorized:
+            optional_routes = tuple(self.optional_routes) + tuple(auth_setting.get('optional_routes', ()))
+            optional_methods = tuple(self.optional_methods) + tuple(auth_setting.get('optional_methods', ()))
+
+            if req.path in optional_routes or \
+               req.method in optional_methods:
+                req.context['user'] = None
+            else:
+                raise
+
+
 class TextPlainHandler(media.BaseHandler):
     """
     Обработчик текстовых данных типа
@@ -21,31 +53,37 @@ class TextPlainHandler(media.BaseHandler):
         return raw
 
 
-def configure_api_v1(api):
+def configure_api_v1(api, auth):
     BASE = '/api/v1/'
 
     # dataset operations
     dataset_resource = DatasetResource()
     api.add_route(BASE + 'dataset', dataset_resource)
+    auth.optional_routes.append(BASE + 'dataset')
     api.add_route(BASE + 'dataset/{id}', dataset_resource)
 
     # list of datasets
     datasets_resource = DatasetsResource()
     api.add_route(BASE + 'datasets', datasets_resource)
+    auth.optional_routes.append(BASE + 'datasets')
 
     # architecture operations
     architecture_resource = ArchitectureResource()
     api.add_route(BASE + 'architecture', architecture_resource)
+    auth.optional_routes.append(BASE + 'architecture')
     api.add_route(BASE + 'architecture/{id}', architecture_resource)
+    auth.optional_routes.append(BASE + 'architecture/{id}')
 
     # list of architectures
     architectures_resource = ArchitecturesResource()
     api.add_route(BASE + 'architectures', architectures_resource)
+    auth.optional_routes.append(BASE + 'architectures')
  
     # model operation
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
     api.add_route(BASE + 'model/{id}', model_resource)
+    auth.optional_routes.append(BASE + 'model/{id}')
 
     model_train_resource = ModelTrainResource()
     api.add_route(BASE + 'model/{id}/train', model_train_resource)
@@ -53,6 +91,7 @@ def configure_api_v1(api):
     # list of models
     models_resource = ModelsResource()
     api.add_route(BASE + 'models', models_resource)
+    auth.optional_routes.append(BASE + 'models')
 
     # task operation
     task_resource = TaskResource()
@@ -72,7 +111,7 @@ def main():
         SECRET_KEY,
         required_claims=['user_id'],
         auth_header_prefix='Bearer')
-    auth_middleware = FalconAuthMiddleware(jwt_auth_backend)
+    auth_middleware = NeuroseedAuthMiddleware(jwt_auth_backend)
     middleware = [auth_middleware]
 
     api = falcon.API(middleware=middleware)
@@ -81,7 +120,7 @@ def main():
     }
     api.req_options.media_handlers.update(extra_handlers)
 
-    configure_api_v1(api)
+    configure_api_v1(api, auth_middleware)
 
     return api
 
