@@ -1,5 +1,8 @@
 import falcon
 from falcon import media
+import falcon_auth
+from falcon_auth import JWTAuthBackend, FalconAuthMiddleware
+
 from .resources import *
 
 __version__ = '0.1.0'
@@ -62,7 +65,13 @@ def configure_api_v1(api):
 
 
 def main():
-    api = falcon.API()
+    SECRET_KEY = 'secret'
+    user_loader = lambda payload: payload['user_id']
+    jwt_auth_backend = JWTAuthBackend(user_loader, SECRET_KEY, required_claims=['user_id'])
+    auth_middleware = FalconAuthMiddleware(jwt_auth_backend)
+    middleware = [auth_middleware]
+
+    api = falcon.API(middleware=middleware)
     extra_handlers = {
         'text/plain': TextPlainHandler()
     }

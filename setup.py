@@ -13,7 +13,8 @@ requires = [
     'pymongo==3.6.0',
     'mongoengine==0.15.0',
     'PyJWT==1.5.3',
-    'falcon==1.4.1'
+    'falcon==1.4.1',
+    'falcon-auth==1.1.0'
 ]
 
 tests_require = [
