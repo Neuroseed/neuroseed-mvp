@@ -1,4 +1,5 @@
-import uuid
+import logging
+
 import falcon
 from falcon.media.validators import jsonschema
 
@@ -11,12 +12,14 @@ __all__ = [
     'ModelTrainResource'
 ]
 
+logger = logging.getLogger(__name__)
+
 
 class ModelTrainResource:
     @jsonschema.validate(MODEL_TRAIN_SCHEMA)
     def on_post(self, req, resp, id):
         user_id = req.context['user']
-        print('User ID:', user_id)
+        logger.debug('Authorize user {id}'.format(id=user_id))
 
         config = req.media
 
@@ -28,6 +31,8 @@ class ModelTrainResource:
                 'error': 'Model does not exists'
             }
             return
+
+        logger.debug('User {uid} create task {did}'.format(uid=user_id, did=id))
 
         resp.status = falcon.HTTP_200
         resp.media = {

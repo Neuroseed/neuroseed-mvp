@@ -1,4 +1,6 @@
 import uuid
+import logging
+
 import falcon
 from falcon.media.validators import jsonschema
 
@@ -8,6 +10,8 @@ from ..schema.model import MODEL_SCHEMA
 __all__ = [
     'ModelResource'
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class ModelResource:
@@ -21,6 +25,7 @@ class ModelResource:
         try:
             model_meta = metadata.ModelMetadata(id=id)
         except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
             model_meta = None
 
         if model_meta:
@@ -77,7 +82,7 @@ class ModelResource:
     @jsonschema.validate(MODEL_SCHEMA)
     def create_model_meta(self, req, resp):
         user_id = req.context['user']
-        print('User ID:', user_id)
+        logger.debug('Authorize user {id}'.format(id=user_id))
 
         # request to document mapping
         base = req.media.copy()
@@ -93,6 +98,8 @@ class ModelResource:
         model_meta.url = model_meta.id
         model_meta.base.owner = user_id
         model_meta.save()
+
+        logger.debug('User {uid} create model {did}'.format(uid=user_id, did=model_meta.id))
 
         resp.status = falcon.HTTP_200
         resp.media = {

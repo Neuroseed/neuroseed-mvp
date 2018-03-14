@@ -1,4 +1,6 @@
 import uuid
+import logging
+
 import falcon
 from falcon.media.validators import jsonschema
 
@@ -8,6 +10,8 @@ from ..schema.architecture import ARCHITECTURE_SCHEMA
 __all__ = [
     'ArchitectureResource'
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class ArchitectureResource:
@@ -21,6 +25,7 @@ class ArchitectureResource:
         try:
             architecture = metadata.ArchitectureMetadata.objects(id=id)
         except metadata.DoesNotExist:
+            logger.debug('Architecture {id} does not exist'.format(id=id))
             architecture = None
 
         if architecture:
@@ -74,7 +79,7 @@ class ArchitectureResource:
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def create_architecture(self, req, resp):
         user_id = req.context['user']
-        print('User ID:', user_id)
+        logger.debug('Authorize user {id}'.format(id=user_id))
 
         id = req.media.get('id', None) or str(uuid.uuid4())
 
@@ -82,6 +87,8 @@ class ArchitectureResource:
         architecture.id = id
         architecture.owner = user_id
         architecture.save()
+
+        logger.debug('User {uid} create architecture {did}'.format(uid=user_id, did=id))
 
         resp.status = falcon.HTTP_200
         resp.media = {
