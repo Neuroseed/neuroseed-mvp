@@ -47,3 +47,7 @@ class ModelMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'models'
     }
+
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)

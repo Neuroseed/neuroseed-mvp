@@ -17,3 +17,6 @@ def from_config(config_path):
 def get_dataset_path(name):
     return path.join(HOME_DIR, 'datasets', name + '.hdf5')
 
+
+def get_model_path(name):
+    return path.join(HOME_DIR, 'models', name + '.hdf5')

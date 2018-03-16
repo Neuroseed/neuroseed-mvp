@@ -22,3 +22,7 @@ class ArchitectureMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'architectures'
     }
+
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)
