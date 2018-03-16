@@ -29,3 +29,7 @@ class TaskMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'tasks'
     }
+
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)

@@ -38,3 +38,7 @@ class DatasetMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'datasets'
     }
+
+    @classmethod
+    def from_id(cls, id):
+        return cls.objects(id=id)

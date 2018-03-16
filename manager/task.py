@@ -4,10 +4,6 @@ import metadata
 
 
 class Task(metadata.TaskMetadata):
-    @classmethod
-    def from_id(cls, id):
-        return cls.objects(id=id)
-
     def to_dict(self):
         meta = self.to_mongo().to_dict()
 

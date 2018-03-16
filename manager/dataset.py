@@ -15,10 +15,6 @@ class Dataset(metadata.DatasetMetadata):
 
         self.url = self.id
 
-    @classmethod
-    def from_id(cls, id):
-        return cls.objects(id=id)
-
     def flatten(self):
         """Return dataset in flatten representation"""
 

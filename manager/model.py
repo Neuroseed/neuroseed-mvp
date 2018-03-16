@@ -17,10 +17,6 @@ class Model(metadata.ModelMetadata):
 
         self.url = self.id
 
-    @classmethod
-    def from_id(cls, id):
-        return cls.objects(id=id)
-
     def flatten(self):
         """Return model in flatten representation"""
 
