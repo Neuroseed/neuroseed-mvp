@@ -70,7 +70,7 @@ class TrainModelCommand(celery.Task):
 
         print('End train task: {}'.format(task_meta.id))
 
-    def train_model(dataset_meta, architecture_meta, model_meta, task_meta):
+    def train_model(self, dataset_meta, architecture_meta, model_meta, task_meta):
         config = task_meta.config
 
         # load dataset
@@ -78,8 +78,12 @@ class TrainModelCommand(celery.Task):
         dataset_path = storage.get_dataset_path(dataset_name)
         print('Open dataset:', dataset_path)
         dataset = h5py.File(dataset_path)
+
+        # get dataset shape
         shape = dataset['x_train'].shape[1:]
         print('Input shape:', shape)
+
+        # get train/test subsets
         x_train = dataset['x_train']
         y_train = dataset['y_train']
         x_test = dataset['x_test']
@@ -105,6 +109,7 @@ class TrainModelCommand(celery.Task):
             validation_data=(x_test, y_test),
             shuffle="batch")
 
+        # save model
         model_name = model_meta['url']
         model_path = storage.get_model_path(model_name)
         save_model(model, model_path)
