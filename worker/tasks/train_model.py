@@ -3,6 +3,7 @@ from celery import states
 
 import metadata
 from ..app import app
+from .. import constructor
 
 
 @app.task(bind=True, name='model.train')
@@ -51,7 +52,7 @@ def train_model(self):
     model.save()
     print('Start train task: {}'.format(task_id))
 
-    time.sleep(10)  # TODO: train here
+    constructor.train_model_task(task_id)
 
     # TODO: compress code to one line
     self.update_state(state=states.SUCCESS)
