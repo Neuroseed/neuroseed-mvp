@@ -41,4 +41,4 @@ class DatasetMetadata(Document):
 
     @classmethod
     def from_id(cls, id):
-        return cls.objects.get(id=id)
+        return cls.objects.get(id=id, class_check=False)
