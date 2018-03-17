@@ -8,7 +8,7 @@ def create_model(architecture, shape):
 
     for layer in architecture['layers']:
         name = layer['name']
-        config = layer['config']
+        config = layer.get('config', {})
         output = getattr(layers, name)(**config)(output)
 
     return models.Model(inputs=input, outputs=output)

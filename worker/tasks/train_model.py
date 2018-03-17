@@ -77,7 +77,7 @@ class TrainModelCommand(celery.Task):
         dataset_name = dataset_meta.url
         dataset_path = storage.get_dataset_path(dataset_name)
         print('Open dataset:', dataset_path)
-        dataset = h5py.File(dataset_path)
+        dataset = h5py.File(dataset_path, 'r')
 
         # get dataset shape
         shape = dataset['x_train'].shape[1:]

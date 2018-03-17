@@ -12,6 +12,7 @@ def from_config(config_path):
     HOME_DIR = config['home']
 
     os.makedirs(path.join(HOME_DIR, 'datasets'), exist_ok=True)
+    os.makedirs(path.join(HOME_DIR, 'models'), exist_ok=True)
 
 
 def get_dataset_path(name):
