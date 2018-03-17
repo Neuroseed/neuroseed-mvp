@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class ArchitectureResource:
+    auth = {
+        'optional_methods': ['GET']
+    }
+
     def on_get(self, req, resp, id=None):
         if id:
             self.get_architecture_meta(req, resp, id)

@@ -16,6 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class DatasetResource:
+    auth = {
+        'optional_methods': ['GET']
+    }
+
     def on_get(self, req, resp, id=None):
         if id:
             self.get_dataset_meta(req, resp, id)

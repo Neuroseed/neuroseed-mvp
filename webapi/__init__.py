@@ -62,7 +62,6 @@ def configure_api_v1(api, auth):
     # dataset operations
     dataset_resource = DatasetResource()
     api.add_route(BASE + 'dataset', dataset_resource)
-    auth.optional_routes.append(BASE + 'dataset')
     api.add_route(BASE + 'dataset/{id}', dataset_resource)
 
     # list of datasets
@@ -73,7 +72,6 @@ def configure_api_v1(api, auth):
     # architecture operations
     architecture_resource = ArchitectureResource()
     api.add_route(BASE + 'architecture', architecture_resource)
-    auth.optional_routes.append(BASE + 'architecture')
     api.add_route(BASE + 'architecture/{id}', architecture_resource)
     auth.optional_routes.append(BASE + 'architecture/{id}')
 
@@ -86,7 +84,6 @@ def configure_api_v1(api, auth):
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
     api.add_route(BASE + 'model/{id}', model_resource)
-    auth.optional_routes.append(BASE + 'model/{id}')
 
     model_train_resource = ModelTrainResource()
     api.add_route(BASE + 'model/{id}/train', model_train_resource)
