@@ -127,8 +127,7 @@ def init_train_model(self):
     model_id = task_meta.config['model']
     model_meta = self.get_model(model_id)
 
-    architecture_id = model_meta.base.architecture
-    architecture_meta = self.get_architecture(architecture_id)
+    architecture_meta = model_meta.base.architecture
 
     # state started
     self.update_state_started(task_meta, model_meta)
