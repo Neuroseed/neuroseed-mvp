@@ -1,3 +1,4 @@
+import time
 import uuid
 
 from mongoengine import Document
@@ -20,10 +21,10 @@ RETRY = 7
 
 class TaskMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
-    status = fields.IntField(default=1)
-    owner = fields.StringField()
-    command = fields.StringField()
-    date = fields.LongField()
+    status = fields.IntField(default=PENDING)
+    owner = fields.StringField(required=True)
+    command = fields.StringField(required=True)
+    date = fields.LongField(default=lambda: int(time.time()))
     config = fields.DictField(default=lambda: dict())
 
     meta = {
