@@ -3,29 +3,27 @@ import logging
 import falcon
 from falcon.media.validators import jsonschema
 
-from ..schema.model_predict import MODEL_PREDICT_SCHEMA
+from ...schema.model_train import MODEL_TRAIN_SCHEMA
 import manager
-from .. import errors
+from ... import errors
 
 __all__ = [
-    'ModelPredictResource'
+    'ModelTrainResource'
 ]
 
 logger = logging.getLogger(__name__)
 
 
-class ModelPredictResource:
-    @jsonschema.validate(MODEL_PREDICT_SCHEMA)
-    def on_post(self, req, resp, mid, did):
+class ModelTrainResource:
+    @jsonschema.validate(MODEL_TRAIN_SCHEMA)
+    def on_post(self, req, resp, id):
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        config = {
-            'dataset': did
-        }
+        config = req.media
 
         try:
-            task_id = manager.predict_model(config, mid, user_id)
+            task_id = manager.train_model(config, id, user_id)
         except errors.ModelDoesNotExist:
             resp.status = falcon.HTTP_404
             resp.media = {
@@ -33,9 +31,10 @@ class ModelPredictResource:
             }
             return
 
-        logger.debug('User {uid} create task {did}'.format(uid=user_id, did=did))
+        logger.debug('User {uid} create task {did}'.format(uid=user_id, did=id))
 
         resp.status = falcon.HTTP_200
         resp.media = {
+            'id': id,
             'task': task_id,
         }
