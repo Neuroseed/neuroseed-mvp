@@ -88,6 +88,9 @@ def configure_api_v1(api, auth):
     model_train_resource = ModelTrainResource()
     api.add_route(BASE + 'model/{id}/train', model_train_resource)
 
+    model_predict_resource = ModelPredictResource()
+    api.add_route(BASE + 'model/{mid}/train/{did}', model_predict_resource)
+
     # list of models
     models_resource = ModelsResource()
     api.add_route(BASE + 'models', models_resource)

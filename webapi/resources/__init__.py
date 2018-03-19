@@ -11,4 +11,4 @@ from .task import *
 from .tasks import *
 
 from .model_train import *
-
+from .model_predict import *
