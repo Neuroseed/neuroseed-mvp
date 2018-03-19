@@ -1,3 +1,5 @@
+import uuid
+
 import celery
 from celery import states
 from keras.models import load_model
@@ -92,6 +94,18 @@ class PreditctModelCommand(celery.Task):
         model = load_model(model_path)
 
         result = model.predict(x)
+
+        # save result
+        tmp_id = str(uuid.uuid4())
+        tmp_name = tmp_id + '.hdf5'
+        tmp_path = storage.get_tmp_path(tmp_name)
+
+        h5 = h5py.File(tmp_path, 'w')
+        h5.create_dataset('y', data=result)
+        h5.close()
+
+        task_meta.config['result'] = tmp_id
+        task_meta.save()
 
 
 @app.task(bind=True, base=PreditctModelCommand, name='model.predict')
