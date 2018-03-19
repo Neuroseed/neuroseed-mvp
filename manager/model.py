@@ -76,5 +76,5 @@ def test_model(config, model_id):
     return create_model_task('model.test', config, model_id)
 
 
-def predict_model(config, model_id):
-    return create_model_task('model.predict', config, model_id)
+def predict_model(config, model_id, owner):
+    return create_model_task('model.predict', config, model_id, owner)
