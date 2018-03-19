@@ -5,6 +5,7 @@ from mongoengine import fields
 
 from .dataset import DatasetMetadata
 from .architecture import ArchitectureMetadata
+from .mixin import MetadataMixin
 
 __all__ = [
     'ModelMetadata'
@@ -33,7 +34,7 @@ class ModelBase(EmbeddedDocument):
     shape = fields.ListField(field=fields.IntField())
 
 
-class ModelMetadata(Document):
+class ModelMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     url = fields.StringField()
     status = fields.IntField(default=PENDING)
@@ -47,7 +48,3 @@ class ModelMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'models'
     }
-
-    @classmethod
-    def from_id(cls, id):
-        return cls.objects.get(id=id, class_check=False)

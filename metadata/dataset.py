@@ -3,6 +3,8 @@ import uuid
 from mongoengine import Document, EmbeddedDocument
 from mongoengine import fields
 
+from .mixin import MetadataMixin
+
 __all__ = [
     'DatasetMetadata'
 ]
@@ -25,7 +27,7 @@ class DatasetBase(EmbeddedDocument):
     shape = fields.ListField(fields.IntField())
 
 
-class DatasetMetadata(Document):
+class DatasetMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     url = fields.StringField()
     status = fields.IntField(default=PENDING)
@@ -38,7 +40,3 @@ class DatasetMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'datasets'
     }
-
-    @classmethod
-    def from_id(cls, id):
-        return cls.objects.get(id=id, class_check=False)

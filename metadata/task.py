@@ -3,6 +3,8 @@ import uuid
 from mongoengine import Document
 from mongoengine import fields
 
+from .mixin import MetadataMixin
+
 __all__ = [
     'TaskMetadata'
 ]
@@ -16,7 +18,7 @@ REVOKED = 6
 RETRY = 7
 
 
-class TaskMetadata(Document):
+class TaskMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     status = fields.IntField(default=1)
     owner = fields.StringField()
@@ -29,7 +31,3 @@ class TaskMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'tasks'
     }
-
-    @classmethod
-    def from_id(cls, id):
-        return cls.objects.get(id=id, class_check=False)
