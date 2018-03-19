@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 class TaskResource:
     def on_get(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
         try:
             task = metadata.TaskMetadata.objects(id=id)
         except metadata.DoesNotExist:
