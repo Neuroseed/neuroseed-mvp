@@ -29,7 +29,9 @@ class TaskResource:
             resp.status = falcon.HTTP_200
             resp.media = {
                 'id': id,
+                'status': task.status,
                 'command': task.command,
+                'date': task.date,
                 'config': task.configs
             }
         else:
