@@ -89,11 +89,13 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'model/{id}/train', model_train_resource)
 
     model_predict_resource = ModelPredictResource()
-    api.add_route(BASE + 'model/{mid}/predict', model_predict_resource)
-    api.add_route(BASE + 'model/{mid}/predict/{tid}', model_predict_resource)
+    api.add_route(BASE + 'model/{id}/predict', model_predict_resource)
+
+    model_predict_status_resource = ModelPredictStatusResource()
+    api.add_route(BASE + 'model/predict/{tid}', model_predict_status_resource)
 
     model_predict_result_resource = ModelPredictResult()
-    api.add_route(BASE + 'model/{mid}/predict/{tid}/resource', model_predict_result_resource)
+    api.add_route(BASE + 'model/predict/{tid}/resource', model_predict_result_resource)
 
     # list of models
     models_resource = ModelsResource()

@@ -1,4 +1,6 @@
 MODEL_PREDICT_SCHEMA = {
     "type": "object",
-    "properties": {}
+    "properties": {
+        'dataset': {'type': 'string'}
+    }
 }
