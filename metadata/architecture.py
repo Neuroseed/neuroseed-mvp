@@ -3,12 +3,14 @@ import uuid
 from mongoengine import Document
 from mongoengine import fields
 
+from .mixin import MetadataMixin
+
 __all__ = [
     'ArchitectureMetadata'
 ]
 
 
-class ArchitectureMetadata(Document):
+class ArchitectureMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     is_public = fields.BooleanField(default=False)
     owner = fields.StringField(required=True)
@@ -22,7 +24,3 @@ class ArchitectureMetadata(Document):
         'db_alias': 'metadata',
         'collection': 'architectures'
     }
-
-    @classmethod
-    def from_id(cls, id):
-        return cls.objects.get(id=id, class_check=False)
