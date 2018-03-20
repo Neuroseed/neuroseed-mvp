@@ -24,7 +24,7 @@ class ModelTestResource:
         config = req.media
 
         try:
-            task_id = manager.test_model(config, mid, user_id)
+            task_id = manager.test_model(config, id, user_id)
         except errors.ModelDoesNotExist:
             resp.status = falcon.HTTP_404
             resp.media = {

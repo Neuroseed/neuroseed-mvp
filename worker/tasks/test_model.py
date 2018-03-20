@@ -97,7 +97,7 @@ class TestModelCommand(celery.Task):
         result = model.evaluate(x, y, verbose=0)
 
         # save result
-        task_meta.config['result'] = result
+        task_meta.config['metrics'] = result
         task_meta.save()
 
 
