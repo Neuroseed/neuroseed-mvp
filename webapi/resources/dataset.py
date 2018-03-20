@@ -1,5 +1,6 @@
-import base64
 import logging
+import base64
+import cgi
 
 import falcon
 import uuid
@@ -37,11 +38,11 @@ class DatasetResource:
             resp.status = falcon.HTTP_200
             resp.media = {
                 'id': dataset_meta.id,
-                'is_public':dataset_meta.is_public,
+                'is_public': dataset_meta.is_public,
                 'title': dataset_meta.meta.title,
                 'description': dataset_meta.meta.description,
-                'category':dataset_meta.meta.category,
-                'labels':dataset_meta.meta.labels
+                'category': dataset_meta.meta.category,
+                'labels': dataset_meta.meta.labels
             }
         else:
             resp.status = falcon.HTTP_404
@@ -51,7 +52,7 @@ class DatasetResource:
     
     def get_description(self, req, resp):
         resp.media = {
-            'id':id
+            'id': id
         }
 
     def on_post(self, req, resp, id=None):
@@ -60,7 +61,11 @@ class DatasetResource:
         else:
             self.create_dataset_meta(req, resp)
 
-    def save_dataset(self, req, resp, dataset_meta):
+    def save_dataset_v1(self, req, resp, dataset_meta):
+        """
+        Plain text base64 encoding dataset upload
+        """
+
         url = dataset_meta.url
         file_path = storage.get_dataset_path(url)
 
@@ -74,6 +79,38 @@ class DatasetResource:
         logger.debug('Dataset {id} received'.format(id=dataset_meta.id))
         resp.media = {'id': dataset_meta.id}
 
+    def save_dataset_v2(self, req, resp, dataset_meta):
+        """
+        Multipart dataset upload        
+        """
+        print('Content type:', req.content_type)
+        print('Content length:', req.content_length)
+
+        CHUNK_SIZE_BYTES = 4096
+        env = req.env
+        env.setdefault('QUERY_STRING', '')
+
+        #form = cgi.FieldStorage(fp=req.stream, environ=env, strict_parsing=True)
+        form = cgi.FieldStorage(fp=req.bounded_stream, environ=env, strict_parsing=True)
+
+        file_item = form['file']
+        if file_item.file:
+            url = dataset_meta.url
+            file_path = storage.get_dataset_path(url)
+
+            with open(file_path, 'wb') as f:
+                logger.debug('Save dataset to file {path}'.format(path=file_path))
+
+                while True:
+                    chunk = file_item.file.read(CHUNK_SIZE_BYTES)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+        else:
+            logger.debug('No file item')
+
+        resp.media = {'id': dataset_meta.id}
+
     def dataset_already_uploaded(self, req, resp, id):
         logger.debug('Dataset {id} alerady uploaded'.format(id=id))
         resp.status = falcon.HTTP_405
@@ -81,15 +118,21 @@ class DatasetResource:
             'error': 'Dataset already uploaded'
         }
 
-    def upload_dataset(self, req, resp):
+    def upload_dataset(self, req, resp, id):
         try:
-            dataset_meta = metadata.DatasetMetadata.objects(id=id)
+            dataset_meta = metadata.DatasetMetadata.from_id(id)
         except metadata.DoesNotExist:
             dataset_meta = None
 
         if dataset_meta:
             if dataset_meta.status == metadata.dataset.PENDING:
-                self.save_dataset(req, resp, dataset_meta)
+                upload_version = 2
+
+                if upload_version == 1:
+                    self.save_dataset_v1(req, resp, dataset_meta)
+                elif upload_version == 2:
+                    self.save_dataset_v2(req, resp, dataset_meta)
+
             elif dataset_meta.status == metadata.dataset.RECEIVED:
                 self.dataset_already_uploaded(req, resp, id)
         else:

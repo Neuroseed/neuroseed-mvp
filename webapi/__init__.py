@@ -43,10 +43,9 @@ class NeuroseedAuthMiddleware(FalconAuthMiddleware):
                 raise
 
 
-class TextPlainHandler(media.BaseHandler):
+class NothingHandler(media.BaseHandler):
     """
-    Обработчик текстовых данных типа
-    MIME text/plain
+    Обработчик данных без преобразования
     """
 
     def serialize(self, obj):
@@ -130,7 +129,7 @@ def main():
 
     api = falcon.API(middleware=middleware)
     extra_handlers = {
-        'text/plain': TextPlainHandler()
+        #'multipart/form-data': NothingHandler()
     }
     api.req_options.media_handlers.update(extra_handlers)
 
