@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ModelTestResource:
     @jsonschema.validate(MODEL_TEST_SCHEMA)
-    def on_post(self, req, resp, mid):
+    def on_post(self, req, resp, id):
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 

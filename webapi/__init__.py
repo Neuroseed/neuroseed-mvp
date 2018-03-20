@@ -79,7 +79,7 @@ def configure_api_v1(api, auth):
     architectures_resource = ArchitecturesResource()
     api.add_route(BASE + 'architectures', architectures_resource)
     auth.optional_routes.append(BASE + 'architectures')
- 
+
     # model operation
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
@@ -87,6 +87,9 @@ def configure_api_v1(api, auth):
 
     model_train_resource = ModelTrainResource()
     api.add_route(BASE + 'model/{id}/train', model_train_resource)
+
+    model_test_resource = ModelTestResource()
+    api.add_route(BASE + 'model/{id}/test', model_test_resource)
 
     model_predict_resource = ModelPredictResource()
     api.add_route(BASE + 'model/{id}/predict', model_predict_resource)
@@ -134,4 +137,3 @@ def main():
     configure_api_v1(api, auth_middleware)
 
     return api
-
