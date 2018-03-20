@@ -117,12 +117,16 @@ def configure_api_v1(api, auth):
     logger.debug('api v1 initialized')
 
 
-def main():
-    SECRET_KEY = 'secret'
+def main(config=None):
+    key_file = config['auth_key_file']
+
+    with open(key_file) as f:
+        secret_key = f.read()
+
     user_loader = lambda payload: payload['user_id']
     jwt_auth_backend = JWTAuthBackend(
         user_loader,
-        SECRET_KEY,
+        secret_key,
         required_claims=['user_id'],
         auth_header_prefix='Bearer')
     auth_middleware = NeuroseedAuthMiddleware(jwt_auth_backend)

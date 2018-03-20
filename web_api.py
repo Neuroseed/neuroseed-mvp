@@ -41,10 +41,6 @@ def init_logging():
 
     logging.warning('Start logging')
 
-init_logging()
-
-api = webapi.main()
-
 
 def serve_forever():
     with open('config/falcon_config.json') as f:
@@ -53,10 +49,14 @@ def serve_forever():
     host = config['host']
     port = config['port']
 
+    api = webapi.main(config)
+
     httpd = simple_server.make_server(host, port, api)
     logging.debug('Start server on {}:{}'.format(host, port))
     httpd.serve_forever()
 
+
+init_logging()
 
 if __name__ == '__main__':
     from wsgiref import simple_server
@@ -65,4 +65,5 @@ if __name__ == '__main__':
     storage.from_config('config/storage_config.json')
 
     serve_forever()
-
+else:
+    api = webapi.main()
