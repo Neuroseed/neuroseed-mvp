@@ -73,7 +73,7 @@ def train_model(config, model_id, owner):
 
 
 def test_model(config, model_id):
-    return create_model_task('model.test', config, model_id)
+    return create_model_task('model.test', config, model_id, owner)
 
 
 def predict_model(config, model_id, owner):
