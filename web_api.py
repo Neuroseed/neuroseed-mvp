@@ -43,7 +43,7 @@ def init_logging():
 
 
 def serve_forever():
-    with open('config/falcon_config.json') as f:
+    with open('config/web_api_config.json') as f:
         config = json.load(f)
 
     host = config['host']

@@ -1,18 +1,19 @@
 import sys
 import json
-import celery
 
 import metadata
 import storage
+import worker
 from worker.app import *
-
-with open('config/celery_config.json') as f:
-        celery_config = json.load(f)
-        app.config_from_object(celery_config)
 
 metadata.from_config('config/metadata_config.json')
 storage.from_config('config/storage_config.json')
+worker.from_config('config/celery_config.json')
 
-sys.argv.extend(['-l', 'info'])
+with open('config/worker_config.json') as f:
+        config = json.load(f)
+
+log_level = config['log_level']
+sys.argv.extend(['-l', log_level])
+sys.argv.append('--autoscale=10,1')
 app.worker_main()
-
