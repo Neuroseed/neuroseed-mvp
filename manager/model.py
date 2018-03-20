@@ -72,7 +72,7 @@ def train_model(config, model_id, owner):
     return create_model_task('model.train', config, model_id, owner)
 
 
-def test_model(config, model_id):
+def test_model(config, model_id, owner):
     return create_model_task('model.test', config, model_id, owner)
 
 
