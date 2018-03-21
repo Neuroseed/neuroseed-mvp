@@ -1,9 +1,14 @@
+import sys
+import os
 import logging
+import json
 
 import falcon
 from falcon import media
 from falcon_auth import JWTAuthBackend, FalconAuthMiddleware
 
+import metadata
+import storage
 from .resources import *
 
 __version__ = '0.1.0'
@@ -54,6 +59,54 @@ class TextPlainHandler(media.BaseHandler):
 
     def deserialize(self, raw):
         return raw
+
+
+def init_logging():
+    def excepthook(type, value, traceback):
+        logging.critical('Uncaught exception',
+                         exc_info=(type, value, traceback))
+
+        sys.__excepthook__(type, value, traceback)
+
+        sys.exit(1)
+
+    sys.excepthook = excepthook
+
+    if not os.path.isdir('logs'):
+        os.mkdir('logs')
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+
+    file_handler = logging.FileHandler('logs/log-web-api.txt', mode='w')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+
+    logging.warning('Start logging')
+
+
+def from_config(config_file):
+    if type(config_file) is str:
+        with open(config_file) as f:
+            config = json.load(f)
+    elif type(config_file) is dict:
+        config = config_file
+
+    metadata_config = config['metadata_config']
+    metadata.from_config(metadata_config)
+
+    storage_config = config['storage_config']
+    storage.from_config(storage_config)
+
+    return config
 
 
 def configure_api_v1(api, auth):
@@ -141,3 +194,14 @@ def main(config=None):
     configure_api_v1(api, auth_middleware)
 
     return api
+
+
+def serve_forever(api, config):
+    from wsgiref import simple_server
+
+    host = config['host']
+    port = config['port']
+
+    httpd = simple_server.make_server(host, port, api)
+    logging.debug('Start server on {}:{}'.format(host, port))
+    httpd.serve_forever()
