@@ -4,6 +4,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
+import storage
 from ...schema.model_predict import MODEL_PREDICT_SCHEMA
 import manager
 from .... import errors
@@ -19,14 +20,14 @@ logger = logging.getLogger(__name__)
 
 class ModelPredictResource:
     @jsonschema.validate(MODEL_PREDICT_SCHEMA)
-    def on_post(self, req, resp, mid):
+    def on_post(self, req, resp, id):
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         config = req.media
 
         try:
-            task_id = manager.predict_model(config, mid, user_id)
+            task_id = manager.predict_model(config, id, user_id)
         except errors.ModelDoesNotExist:
             resp.status = falcon.HTTP_404
             resp.media = {
@@ -51,19 +52,18 @@ class ModelPredictStatusResource:
             task = metadata.TaskMetadata.from_id(tid)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
-            task = None
 
-        if task:
-            resp.status = falcon.HTTP_200
-            resp.media = {
-                'id': id,
-                'config': task.configs
-            }
-        else:
             resp.status = falcon.HTTP_404
             resp.media = {
                 'error': 'Task does not exists'
             }
+            return
+
+        resp.status = falcon.HTTP_200
+        resp.media = {
+            'id': tid,
+            'config': task.config
+        }
 
 
 class ModelPredictResult:
@@ -75,15 +75,24 @@ class ModelPredictResult:
             task = metadata.TaskMetadata.from_id(tid)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
-            task = None
 
-        if task:
-            resp.status = falcon.HTTP_200
-            resp.media = {
-                'result': task.config['result']
-            }
-        else:
             resp.status = falcon.HTTP_404
             resp.media = {
                 'error': 'Task does not exists'
             }
+            return
+
+        if 'result' not in task.config:
+            resp.status = falcon.HTTP_404
+            resp.media = {
+                'error': 'Task is not completed'
+            }
+            return
+
+        temp_id = task.config['result']
+        temp_path = storage.get_tmp_path(temp_id)
+
+        # TODO: send by multipart stream
+        with open(temp_path) as f:
+            raw = f.read()
+            resp.stream.write(raw)
