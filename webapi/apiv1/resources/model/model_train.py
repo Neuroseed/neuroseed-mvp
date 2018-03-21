@@ -5,7 +5,7 @@ from falcon.media.validators import jsonschema
 
 from ...schema.model_train import MODEL_TRAIN_SCHEMA
 import manager
-from ... import errors
+from .... import errors
 
 __all__ = [
     'ModelTrainResource'

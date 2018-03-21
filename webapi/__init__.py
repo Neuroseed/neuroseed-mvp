@@ -1,46 +1,21 @@
+import sys
+import os
 import logging
+import json
 
 import falcon
 from falcon import media
-from falcon_auth import JWTAuthBackend, FalconAuthMiddleware
+from falcon_auth import JWTAuthBackend
 
-from .resources import *
+import metadata
+import storage
+from . import apiv1
+from .authmiddleware import NeuroseedAuthMiddleware
+
 
 __version__ = '0.1.0'
 
 logger = logging.getLogger(__name__)
-
-
-class NeuroseedAuthMiddleware(FalconAuthMiddleware):
-    """
-    Resource auth schema:
-    auth = {
-        inherit FalconAuthMiddleware auth schema,
-        'optional_routes': []
-        'optional_methods': []
-    }
-    """
-
-    def __init__(self, backend, exempt_routes=None, exempt_methods=None
-, optional_routes=None, optional_methods=None):
-        super().__init__(backend, exempt_routes, exempt_methods)
-
-        self.optional_routes = list(optional_routes or [])
-        self.optional_methods = list(optional_methods or [])
-
-    def process_resource(self, req, resp, resource, *args, **kwargs):
-        auth_setting = self._get_auth_settings(req, resource)
-        try:
-            super().process_resource(req, resp, resource, *args, **kwargs)
-        except falcon.HTTPUnauthorized:
-            optional_routes = tuple(self.optional_routes) + tuple(auth_setting.get('optional_routes', ()))
-            optional_methods = tuple(self.optional_methods) + tuple(auth_setting.get('optional_methods', ()))
-
-            if req.path in optional_routes or \
-               req.method in optional_methods:
-                req.context['user'] = None
-            else:
-                raise
 
 
 class TextPlainHandler(media.BaseHandler):
@@ -56,68 +31,55 @@ class TextPlainHandler(media.BaseHandler):
         return raw
 
 
-def configure_api_v1(api, auth):
-    BASE = '/api/v1/'
+def init_logging():
+    def excepthook(type, value, traceback):
+        logging.critical('Uncaught exception',
+                         exc_info=(type, value, traceback))
 
-    # dataset operations
-    dataset_resource = DatasetResource()
-    api.add_route(BASE + 'dataset', dataset_resource)
-    api.add_route(BASE + 'dataset/{id}', dataset_resource)
+        sys.__excepthook__(type, value, traceback)
 
-    # list of datasets
-    datasets_resource = DatasetsResource()
-    api.add_route(BASE + 'datasets', datasets_resource)
-    auth.optional_routes.append(BASE + 'datasets')
+        sys.exit(1)
 
-    # architecture operations
-    architecture_resource = ArchitectureResource()
-    api.add_route(BASE + 'architecture', architecture_resource)
-    api.add_route(BASE + 'architecture/{id}', architecture_resource)
-    auth.optional_routes.append(BASE + 'architecture/{id}')
+    sys.excepthook = excepthook
 
-    # list of architectures
-    architectures_resource = ArchitecturesResource()
-    api.add_route(BASE + 'architectures', architectures_resource)
-    auth.optional_routes.append(BASE + 'architectures')
+    if not os.path.isdir('logs'):
+        os.mkdir('logs')
 
-    # model operation
-    model_resource = ModelResource()
-    api.add_route(BASE + 'model', model_resource)
-    api.add_route(BASE + 'model/{id}', model_resource)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
 
-    model_train_resource = ModelTrainResource()
-    api.add_route(BASE + 'model/{id}/train', model_train_resource)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 
-    model_test_resource = ModelTestResource()
-    api.add_route(BASE + 'model/{id}/test', model_test_resource)
+    file_handler = logging.FileHandler('logs/log-web-api.txt', mode='w')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
 
-    model_predict_resource = ModelPredictResource()
-    api.add_route(BASE + 'model/{id}/predict', model_predict_resource)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
 
-    model_predict_status_resource = ModelPredictStatusResource()
-    api.add_route(BASE + 'model/predict/{tid}', model_predict_status_resource)
-
-    model_predict_result_resource = ModelPredictResult()
-    api.add_route(BASE + 'model/predict/{tid}/resource', model_predict_result_resource)
-
-    # list of models
-    models_resource = ModelsResource()
-    api.add_route(BASE + 'models', models_resource)
-    auth.optional_routes.append(BASE + 'models')
-
-    # task operation
-    task_resource = TaskResource()
-    api.add_route(BASE + 'task/{id}', task_resource)
-    api.add_route(BASE + 'task', task_resource)
-
-    # tasks list
-    tasks_resource = TasksResource()
-    api.add_route(BASE + 'tasks', tasks_resource)
-
-    logger.debug('api v1 initialized')
+    logging.warning('Start logging')
 
 
-def main(config=None):
+def from_config(config_file):
+    if type(config_file) is str:
+        with open(config_file) as f:
+            config = json.load(f)
+    elif type(config_file) is dict:
+        config = config_file
+
+    metadata_config = config['metadata_config']
+    metadata.from_config(metadata_config)
+
+    storage_config = config['storage_config']
+    storage.from_config(storage_config)
+
+    return config
+
+
+def main(config):
     key_file = config['auth_key_file']
 
     with open(key_file) as f:
@@ -138,6 +100,17 @@ def main(config=None):
     }
     api.req_options.media_handlers.update(extra_handlers)
 
-    configure_api_v1(api, auth_middleware)
+    apiv1.configure_api_v1(api, auth_middleware)
 
     return api
+
+
+def serve_forever(api, config):
+    from wsgiref import simple_server
+
+    host = config['host']
+    port = config['port']
+
+    httpd = simple_server.make_server(host, port, api)
+    logging.debug('Start server on {}:{}'.format(host, port))
+    httpd.serve_forever()

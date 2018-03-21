@@ -6,7 +6,7 @@ from falcon.media.validators import jsonschema
 import metadata
 from ...schema.model_test import MODEL_TEST_SCHEMA
 import manager
-from ... import errors
+from .... import errors
 
 __all__ = [
     'ModelTestResource',
