@@ -70,8 +70,7 @@ class TrainModelCommand(celery.Task):
 
         print('End train task: {}'.format(task_meta.id))
 
-    def train_model(self, dataset_meta, architecture_meta, model_meta, task_meta):
-        config = task_meta.config
+    def slice_dataset(self, dataset_meta):
 
         # load dataset
         dataset_name = dataset_meta.url
@@ -80,17 +79,35 @@ class TrainModelCommand(celery.Task):
         dataset = h5py.File(dataset_path, 'r')
 
         # get dataset shape
-        shape = dataset['x_train'].shape[1:]
-        print('Input shape:', shape)
+        x = dataset['x']
+        y = dataset['y']
+        examples = x.shape[0]
 
         # get train/test subsets
-        x_train = dataset['x_train']
-        y_train = dataset['y_train']
-        x_test = dataset['x_test']
-        y_test = dataset['y_test']
+        div_factor = 0.8
+        border = int(examples * div_factor)
+        x_train = x[border:]
+        y_train = y[border:]
+        x_test = x[:border]
+        y_test = y[:border]
+
+        return (x_train, y_train), (x_test, y_test)
+
+    def save_model(self, model, model_meta):
+        # save model
+        model_name = model_meta.url
+        model_path = storage.get_model_path(model_name)
+        save_model(model, model_path)
+
+    def train_model(self, dataset_meta, architecture_meta, model_meta, task_meta):
+        config = task_meta.config
+
+        (x_train, y_train), (x_test, y_test) = self.slice_dataset(dataset_meta)
 
         # create keras model
         architecture = architecture_meta.architecture
+        shape = x_train.shape[1:]
+        print('Input shape:', shape)
         model = constructor.create_model(architecture, shape)
         model.summary()
 
@@ -101,7 +118,7 @@ class TrainModelCommand(celery.Task):
         epochs = config.get('epochs', 1)
 
         # train keras model
-        model.fit(
+        history = model.fit(
             x_train,
             y_train,
             batch_size=batch_size,
@@ -109,10 +126,10 @@ class TrainModelCommand(celery.Task):
             validation_data=(x_test, y_test),
             shuffle="batch")
 
-        # save model
-        model_name = model_meta['url']
-        model_path = storage.get_model_path(model_name)
-        save_model(model, model_path)
+        task_meta.config['history'] = history
+        task_meta.save()
+
+        self.save_model(model, model_meta)
 
 
 @app.task(bind=True, base=TrainModelCommand, name='model.train')
