@@ -90,8 +90,7 @@ class DatasetResource:
         env = req.env
         env.setdefault('QUERY_STRING', '')
 
-        #form = cgi.FieldStorage(fp=req.stream, environ=env, strict_parsing=True)
-        form = cgi.FieldStorage(fp=req.bounded_stream, environ=env, strict_parsing=True)
+        form = cgi.FieldStorage(fp=req.stream, environ=env)
 
         file_item = form['file']
         if file_item.file:
