@@ -34,12 +34,27 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'model', model_resource)
     api.add_route(BASE + 'model/{id}', model_resource)
 
+    # train
     model_train_resource = ModelTrainResource()
     api.add_route(BASE + 'model/{id}/train', model_train_resource)
 
+    model_train_status_resource = ModelTrainStatusResource()
+    api.add_route(BASE + 'model/train/{tid}', model_train_status_resource)
+
+    model_train_result_resource = ModelTrainResult()
+    api.add_route(BASE + 'model/train/{tid}/history', model_train_result_resource)
+
+    # test
     model_test_resource = ModelTestResource()
     api.add_route(BASE + 'model/{id}/test', model_test_resource)
 
+    model_test_status_resource = ModelTestStatusResource()
+    api.add_route(BASE + 'model/test/{tid}', model_test_status_resource)
+
+    model_test_result_resource = ModelTestResult()
+    api.add_route(BASE + 'model/test/{tid}/metrics', model_test_result_resource)
+
+    # predict
     model_predict_resource = ModelPredictResource()
     api.add_route(BASE + 'model/{id}/predict', model_predict_resource)
 
