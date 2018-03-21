@@ -2,14 +2,17 @@ import os
 from os import path
 import json
 
-HOME_DIR = None
+HOME_DIR = 'home'
 
 
-def from_config(config_path):
+def from_config(config_file):
     global HOME_DIR
 
-    with open(config_path) as f:
-        config = json.load(f)
+    if type(config_file) is str:
+        with open(config_file) as f:
+            config = json.load(f)
+    elif type(config_file) is dict:
+        config = config_file
 
     HOME_DIR = config['home']
 

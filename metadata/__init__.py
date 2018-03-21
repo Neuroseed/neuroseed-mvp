@@ -14,12 +14,14 @@ from .model import *
 from .task import *
 
 
-def from_config(config_path):
-    with open(config_path) as f:
-        config = json.load(f)
+def from_config(config_file):
+    if type(config_file) is str:
+        with open(config_file) as f:
+            config = json.load(f)
+    elif type(config_file) is dict:
+        config = config_file
 
     mongo_url = config['mongo_url']
 
     database = 'metadata'
     connect(database, host=mongo_url, alias='metadata')
-

@@ -1,3 +1,6 @@
 {
-  "log_level": "info"
+  "log_level": "info",
+  "celery_config": "config/celery_config.json",
+  "metadata_config": "config/metadata_config.json",
+  "storage_config": "config/storage_config.json"
 }
