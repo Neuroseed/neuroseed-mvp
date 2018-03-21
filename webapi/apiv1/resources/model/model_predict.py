@@ -92,6 +92,8 @@ class ModelPredictResult:
         temp_id = task.config['result']
         temp_path = storage.get_tmp_path(temp_id)
 
+        resp.status = falcon.HTTP_200
+
         # TODO: send by multipart stream
         with open(temp_path) as f:
             raw = f.read()
