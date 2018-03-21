@@ -6,7 +6,7 @@ from falcon.media.validators import jsonschema
 import metadata
 from ...schema.model_predict import MODEL_PREDICT_SCHEMA
 import manager
-from ... import errors
+from .... import errors
 
 __all__ = [
     'ModelPredictResource',
