@@ -1,5 +1,5 @@
-docker run --rm --net=host \
--v ./config/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf \
--v ./config/rabbitmq/cert.cer:/etc/cert.cer \
--v ./config/rabbitmq/key.pem:/etc/key.pem \
-rabbitmq
+docker run -d --rm --net=host \
+-v $PWD/config/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf \
+-v $PWD/config/rabbitmq/cert.cer:/etc/cert.cer \
+-v $PWD/config/rabbitmq/key.pem:/etc/key.pem \
+--name rabbitmq rabbitmq
