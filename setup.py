@@ -12,7 +12,6 @@ requires = [
     'celery==4.1.0',
     'pymongo==3.6.0',
     'mongoengine==0.15.0',
-    'PyJWT==1.5.3',
     'falcon==1.4.1',
     'PyJWT==1.6.0',
     'falcon-auth==1.1.0'
@@ -45,5 +44,6 @@ setup(
     extras_require={
         'testing': tests_require,
     },
-    install_requires=requires
+    install_requires=requires,
+    test_suite='tests'
 )
