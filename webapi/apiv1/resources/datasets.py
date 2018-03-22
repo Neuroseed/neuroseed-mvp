@@ -21,7 +21,7 @@ class DatasetsResource:
         ids = [meta.id for meta in datasets]
 
         if user_id:
-            datasets = metadata.DatasetMetadata.objects(is_public=False, base__user=user_id)
+            datasets = metadata.DatasetMetadata.objects(is_public=False, base__owner=user_id)
             ids = [meta.id for meta in datasets] + ids
 
         resp.status = falcon.HTTP_200
@@ -39,7 +39,7 @@ class DatasetsFullResource:
         datasets_meta = self.get_datasets_meta(datasets)
 
         if user_id:
-            datasets = metadata.DatasetMetadata.objects(is_public=False, base__user=user_id)
+            datasets = metadata.DatasetMetadata.objects(is_public=False, base__owner=user_id)
             datasets_meta = self.get_datasets_meta(datasets) + datasets_meta
 
         from_ = int(req.params.get('from', 0))
@@ -79,7 +79,7 @@ class DatasetsNumberResource:
         number = metadata.DatasetMetadata.objects(is_public=True).count()
 
         if user_id:
-            number += metadata.DatasetMetadata.objects(is_public=False, base__user=user_id).count()
+            number += metadata.DatasetMetadata.objects(is_public=False, base__owner=user_id).count()
 
         resp.status = falcon.HTTP_200
         resp.media = number

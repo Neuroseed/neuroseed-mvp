@@ -15,7 +15,7 @@ class TasksResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        tasks = metadata.TaskMetadata.objects.all()
+        tasks = metadata.TaskMetadata.objects(owner=user_id)
 
         ids = [task.id for task in tasks]
 
