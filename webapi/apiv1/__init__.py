@@ -18,6 +18,14 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'datasets', datasets_resource)
     auth.optional_routes.append(BASE + 'datasets')
 
+    dataset_full_resource = DatasetsFullResource()
+    api.add_route(BASE + 'datasets/full', dataset_full_resource)
+    auth.optional_routes.append(BASE + 'datasets/full')
+
+    dataset_number_resource = DatasetsNumberResource()
+    api.add_route(BASE + 'datasets/number', dataset_number_resource)
+    auth.optional_routes.append(BASE + 'datasets/number')
+
     # architecture operations
     architecture_resource = ArchitectureResource()
     api.add_route(BASE + 'architecture', architecture_resource)

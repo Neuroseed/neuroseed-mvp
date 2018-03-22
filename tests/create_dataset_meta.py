@@ -11,7 +11,7 @@ TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
 url = 'http://localhost:8080/api/v1/dataset'
 
 dataset_meta={
-    "is_public": False,
+    "is_public": True,
     "title": "Test Dataset123",
     "description": "Test test",
     "category": "classification",
