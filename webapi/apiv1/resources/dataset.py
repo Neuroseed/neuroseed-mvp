@@ -39,10 +39,10 @@ class DatasetResource:
             resp.media = {
                 'id': dataset_meta.id,
                 'is_public': dataset_meta.is_public,
-                'title': dataset_meta.meta.title,
-                'description': dataset_meta.meta.description,
-                'category': dataset_meta.meta.category,
-                'labels': dataset_meta.meta.labels
+                'title': dataset_meta.base.title,
+                'description': dataset_meta.base.description,
+                'category': dataset_meta.base.category,
+                'labels': dataset_meta.base.labels
             }
         else:
             resp.status = falcon.HTTP_404
