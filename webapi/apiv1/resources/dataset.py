@@ -59,8 +59,9 @@ class DatasetResource:
             }
     
     def get_description(self, req, resp):
+        resp.status = falcon.HTTP_404
         resp.media = {
-            'id': id
+            'error': 'Dataset metadata does not exist'
         }
 
     def on_post(self, req, resp, id=None):
