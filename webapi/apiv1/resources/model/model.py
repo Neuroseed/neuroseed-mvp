@@ -64,7 +64,7 @@ class ModelResource:
     def get_description(self, req, resp):
         resp.status = falcon.HTTP_404
         resp.media = {
-            'description': 'Model metadata does not exist'
+            'error': 'Model metadata does not exist'
         }
 
     def on_post(self, req, resp, id=None):
@@ -76,7 +76,7 @@ class ModelResource:
     def update_model_meta(self, req, resp, id):
         resp.status = falcon.HTTP_400
         resp.media = {
-            'description': 'Can not update model metadata'
+            'error': 'Can not update model metadata'
         }
         return
 

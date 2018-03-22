@@ -26,33 +26,40 @@ class ArchitectureResource:
             self.get_description(req, resp)
 
     def get_architecture_meta(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
         try:
-            architecture = metadata.ArchitectureMetadata.objects(id=id)
+            if user_id:
+                kwargs = {'id': id, 'base__owner': user_id}
+            else:
+                kwargs = {'id': id, 'is_public': True}
+
+            architecture = metadata.ArchitectureMetadata.from_id(**kwargs)
         except metadata.DoesNotExist:
             logger.debug('Architecture {id} does not exist'.format(id=id))
-            architecture = None
 
-        if architecture:
-            resp.status = falcon.HTTP_200
-            resp.media = {
-                'id': architecture.id,
-                'is_public': architecture.is_public,
-                'owner': architecture.owner,
-                'title': architecture.title,
-                'description': architecture.description,
-                'category': architecture.category,
-                'architecture': architecture.architecture
-            }
-        else:
             resp.status = falcon.HTTP_404
             resp.media = {
                 'error': 'Architecture does not exist'
             }
+            return
 
-    def get_description(self, req, resp):
         resp.status = falcon.HTTP_200
         resp.media = {
-            'description': 'Create/get info about architecture'
+            'id': architecture.id,
+            'is_public': architecture.is_public,
+            'owner': architecture.owner,
+            'title': architecture.title,
+            'description': architecture.description,
+            'category': architecture.category,
+            'architecture': architecture.architecture
+        }
+
+    def get_description(self, req, resp):
+        resp.status = falcon.HTTP_404
+        resp.media = {
+            'error': 'Architecture does not exist'
         }
 
     def on_post(self, req, resp, id=None):
