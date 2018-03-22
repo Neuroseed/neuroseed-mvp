@@ -26,38 +26,45 @@ class ModelResource:
             self.get_description(req, resp)
 
     def get_model_meta(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
         try:
-            model_meta = metadata.ModelMetadata(id=id)
+            if user_id:
+                kwargs = {'id': id, 'base__owner': user_id}
+            else:
+                kwargs = {'id': id, 'is_public': True}
+
+            model_meta = metadata.ModelMetadata.from_id(**kwargs)
         except metadata.DoesNotExist:
             logger.debug('Model {id} does not exist'.format(id=id))
-            model_meta = None
 
-        if model_meta:
-            resp.status = falcon.HTTP_200
-            resp.media = {
-                'id': model_meta.id,
-                'is_public': model_meta.is_public,
-                'hash': model_meta.hash,
-                'owner': model_meta.base.owner,
-                'size': model_meta.base.size,
-                'date': model_meta.base.date,
-                'title': model_meta.base.title,
-                'description': model_meta.base.description,
-                'category': model_meta.base.category,
-                'labels': model_meta.base.labels,
-                'accuracy': model_meta.base.accuracy,
-                'dataset': model_meta.base.dataset
-            }
-        else:
             resp.status = falcon.HTTP_404
             resp.media = {
                 'error': 'Model metadata does not exist'
             }
+            return
 
-    def get_description(self, req, resp):
         resp.status = falcon.HTTP_200
         resp.media = {
-            'description': 'Create model metadata'
+            'id': model_meta.id,
+            'is_public': model_meta.is_public,
+            'hash': model_meta.hash,
+            'owner': model_meta.base.owner,
+            'size': model_meta.base.size,
+            'date': model_meta.base.date,
+            'title': model_meta.base.title,
+            'description': model_meta.base.description,
+            'category': model_meta.base.category,
+            'labels': model_meta.base.labels,
+            'accuracy': model_meta.base.accuracy,
+            'dataset': model_meta.base.dataset
+        }
+
+    def get_description(self, req, resp):
+        resp.status = falcon.HTTP_404
+        resp.media = {
+            'description': 'Model metadata does not exist'
         }
 
     def on_post(self, req, resp, id=None):
@@ -67,21 +74,11 @@ class ModelResource:
             self.create_model_meta(req, resp)
 
     def update_model_meta(self, req, resp, id):
-        try:
-            model_meta = metadata.ModelMetadata.objects(id=id)
-        except metadata.DoesNotExist:
-            model_meta = None
-
-        if model_meta:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'description': 'Can\'t update model'
-            }
-        else:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Model metadata does not exist'
-            }
+        resp.status = falcon.HTTP_400
+        resp.media = {
+            'description': 'Can not update model metadata'
+        }
+        return
 
     @jsonschema.validate(MODEL_SCHEMA)
     def create_model_meta(self, req, resp):
