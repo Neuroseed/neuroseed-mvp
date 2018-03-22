@@ -45,7 +45,7 @@ def _read(self, size, target):
 
 import hashlib
 if hashlib.sha256(falcon.request_helpers.BoundedStream._read.__code__.co_code).hexdigest() != 'f01e0ef4b334be2ac60c8740a675223da618257bb0ae25a7a29bfbdd812be3a7':
-    raise ValueError('Falcon fix bug')
+    logger.warning('Falcon fix BoundedStream.readline bug')
 
 falcon.request_helpers.BoundedStream._read = _read
 
