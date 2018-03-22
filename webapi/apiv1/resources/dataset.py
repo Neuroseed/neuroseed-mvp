@@ -28,8 +28,16 @@ class DatasetResource:
             self.get_description(req, resp)
 
     def get_dataset_meta(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
         try:
-            dataset_meta = metadata.DatasetMetadata.objects(id=id)
+            if user_id:
+                kwargs = {'id': id, 'base__owner': user_id}
+            else:
+                kwargs = {'id': id, 'is_public': True}
+
+            dataset_meta = metadata.DatasetMetadata.from_id(**kwargs)
         except metadata.DoesNotExist:
             logger.debug('Dataset {id} does not exist'.format(id=id))
             dataset_meta = None
@@ -47,7 +55,7 @@ class DatasetResource:
         else:
             resp.status = falcon.HTTP_404
             resp.media = {
-                'error': 'Dataset metadata doesnt exist'
+                'error': 'Dataset metadata does not exist'
             }
     
     def get_description(self, req, resp):
