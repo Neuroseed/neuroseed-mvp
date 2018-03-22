@@ -5,14 +5,19 @@ import webapi
 import metadata
 from mongoengine import connect
 
-class Testdatasets(testing.TestCase):
+class TestIntAPI(testing.TestCase):
     def setUp(self):
-        super(Testdatasets, self).setUp()
+        super().setUp()
         
         connect('metaddata', host='mongomock://localhost', alias='metadata')
-        self.app = webapi.main()
+        config = {
+            "auth_key_file": "config/auth.key",
+            "celery_config": "config/celery_config.json",
+            "metadata_config": {},
+        }
+        self.app = webapi.main(config)
 
-class TestDatasets(Testdatasets):
+class TestDatasets(TestIntAPI):
     def test_configure_api_v1(self):
         body= {'ids': []}
         result = self.simulate_get('/api/v1/datasets')
@@ -23,7 +28,7 @@ class TestDatasets(Testdatasets):
         result = self.simulate_get('/api/v1/dataset/{id}')
         self.assertEqual(result.json, body)
 
-class TestArchitecture(Testdatasets):
+class TestArchitecture(TestIntAPI):
     def test_configure_api_v3(self):
         body= {'ids': []}
         result = self.simulate_get('/api/v1/architectures')
