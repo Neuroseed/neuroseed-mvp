@@ -12,6 +12,7 @@ requires = [
     'celery==4.1.0',
     'pymongo==3.6.0',
     'mongoengine==0.15.0',
+    'jsonschema==2.6.0',
     'falcon==1.4.1',
     'PyJWT==1.6.0',
     'falcon-auth==1.1.0',
@@ -19,9 +20,11 @@ requires = [
 ]
 
 tests_require = [
-    'WebTest >= 1.3.1',  # py3 compat
-    'pytest',
-    'pytest-cov',
+    'mongoengine==0.15.0',
+    'mongomock==3.9.0',
+    'falcon==1.4.1',
+    'PyJWT==1.6.0',
+    'falcon-auth==1.1.0'
 ]
 
 setup(
