@@ -32,10 +32,8 @@ class TestInitAPI(testing.TestCase):
         self.SECRET_KEY = open(config["auth_key_file"]).read()
         self.app = webapi.main(config)
 
-
-class TestArchitecture(TestInitAPI):
     def tearDown(self):
-        metadata.DatasetMetadata.objects.all().delete()
+        metadata.ArchitectureMetadata.objects.all().delete()
 
     def create_arch_metadata(self, is_public, owner):
         architecture = metadata.ArchitectureMetadata()
@@ -48,6 +46,8 @@ class TestArchitecture(TestInitAPI):
 
         return architecture
 
+
+class TestArchitecture(TestInitAPI):
     def test_schema_no_auth(self):
         self.create_arch_metadata(True, 'u1')
 
@@ -206,3 +206,98 @@ class TestArchitecture(TestInitAPI):
 
         # validate code
         self.assertEqual(result.status, falcon.HTTP_200)
+
+
+class TestArchitectureFull(TestInitAPI):
+    def test_get_empty(self):
+        result = self.simulate_get('/api/v1/architectures/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+    def test_get_one(self):
+        a1 = self.create_arch_metadata(True, 'u1')
+
+        result = self.simulate_get('/api/v1/architectures/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        architectures = result.json['architectures']
+        self.assertEqual(len(architectures), 1)
+
+        self.assertEqual(architectures[0]['id'], a1.id)
+
+    def test_get_many_no_auth(self):
+        number = 5
+        [self.create_arch_metadata(True, 'u1') for _ in range(number)]
+
+        result = self.simulate_get('/api/v1/architectures/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        architectures = result.json['architectures']
+        self.assertEqual(len(architectures), number)
+
+    def test_get_many_auth(self):
+        number = 5
+        [self.create_arch_metadata(False, 'u1') for _ in range(number)]
+        [self.create_arch_metadata(False, 'u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/architectures/full', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        architectures = result.json['architectures']
+        self.assertEqual(len(architectures), number)
+
+
+class TestArchitectureNumber(TestInitAPI):
+    def test_get_number_of_empty(self):
+        result = self.simulate_get('/api/v1/architectures/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 0)
+
+    def test_get_number_one(self):
+        a1 = self.create_arch_metadata(True, 'u1')
+
+        result = self.simulate_get('/api/v1/architectures/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 1)
+
+    def test_get_number_many(self):
+        number = 15
+        arcitectures = [self.create_arch_metadata(True, 'u1') for _ in range(number)]
+
+        result = self.simulate_get('/api/v1/architectures/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, number)
+
+    def test_get_number_many_auth(self):
+        number = 5
+        arcitectures = [self.create_arch_metadata(False, 'u1') for _ in range(number)]
+        arcitectures = [self.create_arch_metadata(True, 'u1') for _ in range(number)]
+        arcitectures = [self.create_arch_metadata(False, 'u2') for _ in range(number)]
+        arcitectures = [self.create_arch_metadata(True, 'u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/architectures/number', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 3 * number)

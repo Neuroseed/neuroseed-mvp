@@ -44,7 +44,6 @@ class ArchitecturesFullResource:
 
         from_ = int(req.params.get('from', 0))
         number = int(req.params.get('number', 99999))
-        print('params:', from_, number)
         if from_ < len(architectures):
             architectures_meta = architectures_meta[from_: from_ + number]
 
