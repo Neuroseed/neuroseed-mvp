@@ -85,6 +85,14 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'models', models_resource)
     auth.optional_routes.append(BASE + 'models')
 
+    models_full_resource = ModelsFullResource()
+    api.add_route(BASE + 'models/full', models_full_resource)
+    auth.optional_routes.append(BASE + 'models/full')
+
+    models_number_resource = ModelsNumberResource()
+    api.add_route(BASE + 'models/number', models_number_resource)
+    auth.optional_routes.append(BASE + 'models/number')
+
     # task operation
     task_resource = TaskResource()
     api.add_route(BASE + 'task/{id}', task_resource)
