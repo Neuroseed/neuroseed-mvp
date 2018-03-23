@@ -1,10 +1,11 @@
 DATASET_SCHEMA = {
-    "is_public": {"type": "boolean"},
-    "meta":{
+    "type": "object",
+    "properties": {
+        "is_public": {"type": "boolean"},
         "title": {
             "type": "string",
-                "minLength":1,
-                "maxLength":128
+            "minLength": 1,
+            "maxLength": 128
         },
         "description": {
             "type": "string",
@@ -18,10 +19,11 @@ DATASET_SCHEMA = {
             "type": "array",
             "items": {
                 "type": "string",
-                "maxLength":64
+                "maxLength": 64
             },
             "uniqueItems": True
         }
     },
-#    "required":["title"]
+    "required": ["title"],
+    "additionalProperties": False
 }

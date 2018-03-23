@@ -20,8 +20,10 @@ ARCHITECTURE_SCHEMA = {
             "type": "object",
             "properties": {
                 "layers": {"type": "array"}
-            }
+            },
+            "additionalProperties": False
         }
     },
-    "required": ["title", "architecture"]
+    "required": ["title", "architecture"],
+    "additionalProperties": False
 }
