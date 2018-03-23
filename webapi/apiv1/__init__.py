@@ -37,6 +37,14 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'architectures', architectures_resource)
     auth.optional_routes.append(BASE + 'architectures')
 
+    architectures_full_resource = ArchitecturesFullResource()
+    api.add_route(BASE + 'architectures/full', architectures_full_resource)
+    auth.optional_routes.append(BASE + 'architectures/full')
+
+    architectures_number_resource = ArchitecturesNumberResource()
+    api.add_route(BASE + 'architectures/number', architectures_number_resource)
+    auth.optional_routes.append(BASE + 'architectures/number')
+
     # model operation
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
@@ -76,6 +84,14 @@ def configure_api_v1(api, auth):
     models_resource = ModelsResource()
     api.add_route(BASE + 'models', models_resource)
     auth.optional_routes.append(BASE + 'models')
+
+    models_full_resource = ModelsFullResource()
+    api.add_route(BASE + 'models/full', models_full_resource)
+    auth.optional_routes.append(BASE + 'models/full')
+
+    models_number_resource = ModelsNumberResource()
+    api.add_route(BASE + 'models/number', models_number_resource)
+    auth.optional_routes.append(BASE + 'models/number')
 
     # task operation
     task_resource = TaskResource()

@@ -32,10 +32,8 @@ class TestInitAPI(testing.TestCase):
         self.SECRET_KEY = open(config["auth_key_file"]).read()
         self.app = webapi.main(config)
 
-
-class TestModels(TestInitAPI):
     def tearDown(self):
-        metadata.DatasetMetadata.objects.all().delete()
+        metadata.ModelMetadata.objects.all().delete()
 
     def create_arch_metadata(self, is_public, owner):
         architecture = metadata.ArchitectureMetadata()
@@ -49,16 +47,19 @@ class TestModels(TestInitAPI):
         return architecture
 
     def create_model_metadata(self, is_public, owner):
-        model = metadata.ModelMetadata(is_public=is_public)
+        model = metadata.ModelMetadata()
         model.id = str(uuid.uuid4())
         model.url = model.id
+        model.is_public = is_public
         model.base.owner = owner
         model.base.title = 'title'
         model.base.architecture = self.create_arch_metadata(True, owner)
         model.save()
 
         return model
-    
+
+
+class TestModels(TestInitAPI):
     def test_schema_no_auth(self):
         self.create_model_metadata(True, 'u1')
 
@@ -226,3 +227,98 @@ class TestModels(TestInitAPI):
 
         # validate id
         self.assertEqual(result.json['id'], m1.id)
+
+
+class TestModelsFull(TestInitAPI):
+    def test_get_empty(self):
+        result = self.simulate_get('/api/v1/models/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+    def test_get_one(self):
+        a1 = self.create_model_metadata(True, 'u1')
+
+        result = self.simulate_get('/api/v1/models/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        models = result.json['models']
+        self.assertEqual(len(models), 1)
+
+        self.assertEqual(models[0]['id'], a1.id)
+
+    def test_get_many_no_auth(self):
+        number = 5
+        [self.create_model_metadata(True, 'u1') for _ in range(number)]
+
+        result = self.simulate_get('/api/v1/models/full')
+
+        # validate codes
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        models = result.json['models']
+        self.assertEqual(len(models), number)
+
+    def test_get_many_auth(self):
+        number = 5
+        [self.create_model_metadata(False, 'u1') for _ in range(number)]
+        [self.create_model_metadata(False, 'u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/models/full', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        models = result.json['models']
+        self.assertEqual(len(models), number)
+
+
+class TestModelsNumber(TestInitAPI):
+    def test_get_number_of_empty(self):
+        result = self.simulate_get('/api/v1/models/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 0)
+
+    def test_get_number_one(self):
+        m1 = self.create_model_metadata(True, 'u1')
+
+        result = self.simulate_get('/api/v1/models/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 1)
+
+    def test_get_number_many(self):
+        number = 15
+        models = [self.create_model_metadata(True, 'u1') for _ in range(number)]
+
+        result = self.simulate_get('/api/v1/models/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, number)
+
+    def test_get_number_many_auth(self):
+        number = 5
+        models = [self.create_model_metadata(False, 'u1') for _ in range(number)]
+        models = [self.create_model_metadata(True, 'u1') for _ in range(number)]
+        models = [self.create_model_metadata(False, 'u2') for _ in range(number)]
+        models = [self.create_model_metadata(True, 'u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/models/number', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 3 * number)
