@@ -31,7 +31,7 @@ class ArchitectureResource:
 
         try:
             if user_id:
-                kwargs = {'id': id, 'base__owner': user_id}
+                kwargs = {'id': id, 'owner': user_id}
             else:
                 kwargs = {'id': id, 'is_public': True}
 
@@ -70,13 +70,17 @@ class ArchitectureResource:
 
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def set_architecture(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
         try:
-            architecture = metadata.ArchitectureMetadata.objects(id=id)
+            architecture = metadata.ArchitectureMetadata.from_id(id, owner=user_id)
         except metadata.DoesNotExist:
             architecture = None
 
         if architecture:
-            architecture._set_attributes(req.media)  # TODO: test
+            for key in req.media:
+                setattr(architecture, key, req.media[key])
             architecture.save()
 
             resp.status = falcon.HTTP_200
