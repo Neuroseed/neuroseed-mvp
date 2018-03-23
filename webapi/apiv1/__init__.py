@@ -37,6 +37,14 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'architectures', architectures_resource)
     auth.optional_routes.append(BASE + 'architectures')
 
+    architectures_full_resource = ArchitecturesFullResource()
+    api.add_route(BASE + 'architectures/full', architectures_full_resource)
+    auth.optional_routes.append(BASE + 'architectures/full')
+
+    architectures_number_resource = ArchitecturesNumberResource()
+    api.add_route(BASE + 'architectures/number', architectures_number_resource)
+    auth.optional_routes.append(BASE + 'architectures/number')
+
     # model operation
     model_resource = ModelResource()
     api.add_route(BASE + 'model', model_resource)
