@@ -39,12 +39,11 @@ class ModelsFullResource:
         models_meta = self.get_models_meta(models)
 
         if user_id:
-            models = metadata.DatasetMetadata.objects(is_public=False, base__owner=user_id)
+            models = metadata.ModelMetadata.objects(is_public=False, base__owner=user_id)
             models_meta = self.get_models_meta(models) + models_meta
 
         from_ = int(req.params.get('from', 0))
         number = int(req.params.get('number', 99999))
-        print('params:', from_, number)
         if from_ < len(models_meta):
             models_meta = models_meta[from_: from_ + number]
 
