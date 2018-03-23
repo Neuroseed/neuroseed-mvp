@@ -1,4 +1,6 @@
 import os
+import codecs
+import re
 
 from setuptools import setup, find_packages
 import webapi
@@ -7,6 +9,20 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = ''
 with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
+
+
+def read(*parts):
+    with codecs.open(os.path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 requires = [
     'celery==4.1.0',
@@ -29,7 +45,7 @@ tests_require = [
 
 setup(
     name='webapi',
-    version=webapi.__version__,
+    version=find_version('webapi/__init__.py'),
     description='webapi',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
