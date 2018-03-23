@@ -85,13 +85,24 @@ class ModelResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
+        architecture_id = req.media['architecture']
+        try:
+            architecture = metadata.ArchitectureMetadata.from_id(architecture_id, owner=user_id)
+        except metadata.DoesNotExist:
+            resp.status = falcon.HTTP_404
+            resp.media = {
+                'error': 'Architectured does not exist'
+            }
+            return
+
         # request to document mapping
         base = req.media.copy()
-        del base['is_public']
         document = {
-            'is_public': req.media['is_public'],
             'base': base
         }
+        if 'is_public' in req.media:
+            del base['is_public']
+            document['is_public'] = req.media['is_public']
 
         # save model metadata to database
         model_meta = metadata.ModelMetadata(**document)

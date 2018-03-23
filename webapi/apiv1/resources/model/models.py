@@ -19,7 +19,7 @@ class ModelsResource:
         ids = [meta.id for meta in models]
 
         if user_id:
-            models = metadata.ModelMetadata.objects(is_public=False, owner=user_id)
+            models = metadata.ModelMetadata.objects(is_public=False, base__owner=user_id)
             ids = [meta.id for meta in models] + ids
 
         resp.status = falcon.HTTP_200

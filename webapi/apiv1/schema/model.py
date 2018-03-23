@@ -31,5 +31,5 @@ MODEL_SCHEMA = {
             "maxLength": 128
         }
     },
-    "required":["title"]
+    "required":["title", "architecture"]
 }
