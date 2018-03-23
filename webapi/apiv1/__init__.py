@@ -102,4 +102,10 @@ def configure_api_v1(api, auth):
     tasks_resource = TasksResource()
     api.add_route(BASE + 'tasks', tasks_resource)
 
+    tasks_full_resource = TasksFullResource()
+    api.add_route(BASE + 'tasks/full', tasks_full_resource)
+
+    tasks_number_resource = TasksNumberResource()
+    api.add_route(BASE + 'tasks/number', tasks_number_resource)
+
     logger.debug('api v1 initialized')
