@@ -40,6 +40,7 @@ class TestModels(TestInitAPI):
     def create_arch_metadata(self, is_public, owner):
         architecture = metadata.ArchitectureMetadata()
         architecture.id = str(uuid.uuid4())
+        architecture.is_public = is_public
         architecture.owner = owner
         architecture.title = 'title'
         architecture.architecture = {'layers': []}
@@ -128,7 +129,7 @@ class TestModels(TestInitAPI):
         for id in not_my_models:
             self.assertFalse(id in result.json['ids'])
 
-    def test_get_dataset(self):
+    def test_get_model(self):
         result = self.simulate_get('/api/v1/model')
 
         # validate code

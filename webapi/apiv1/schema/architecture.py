@@ -23,5 +23,5 @@ ARCHITECTURE_SCHEMA = {
             }
         }
     },
-    "required":["title"]
+    "required": ["title", "architecture"]
 }
