@@ -32,10 +32,8 @@ class TestInitAPI(testing.TestCase):
         self.SECRET_KEY = open(config["auth_key_file"]).read()
         self.app = webapi.main(config)
 
-
-class TestModels(TestInitAPI):
     def tearDown(self):
-        metadata.DatasetMetadata.objects.all().delete()
+        metadata.TaskMetadata.objects.all().delete()
 
     def create_task_metadata(self, owner):
         document = {
@@ -50,6 +48,8 @@ class TestModels(TestInitAPI):
 
         return task
 
+
+class TestModels(TestInitAPI):
     def test_get_datasets_no_auth(self):
         result = self.simulate_get('/api/v1/tasks')
 
@@ -158,3 +158,106 @@ class TestModels(TestInitAPI):
 
         # validate code
         self.assertEqual(result.status, falcon.HTTP_400)  # Bad Request
+
+
+class TestTasksFull(TestInitAPI):
+    def test_get_tasks_no_auth(self):
+        result = self.simulate_get('/api/v1/tasks/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_401)
+
+    def test_get_one(self):
+        t1 = self.create_task_metadata('u1')
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/tasks/full', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        models = result.json['tasks']
+        self.assertEqual(len(models), 1)
+
+        self.assertEqual(models[0]['id'], t1.id)
+
+    def test_get_many_no_auth(self):
+        number = 5
+        [self.create_task_metadata('u1') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/tasks/full', headers=headers)
+
+        # validate codes
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        tasks = result.json['tasks']
+        self.assertEqual(len(tasks), number)
+
+    def test_get_many_auth(self):
+        number = 5
+        [self.create_task_metadata('u1') for _ in range(number)]
+        [self.create_task_metadata('u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/tasks/full', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        tasks = result.json['tasks']
+        self.assertEqual(len(tasks), number)
+
+
+class TestTasksNumber(TestInitAPI):
+    def test_get_number_of_empty(self):
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/tasks/number', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 0)
+
+    def test_get_number_one(self):
+        t1 = self.create_task_metadata('u1')
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/tasks/number', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 1)
+
+    def test_get_number_many(self):
+        number = 15
+        tasks = [self.create_task_metadata('u1') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/tasks/number', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, number)
+
+    def test_get_number_many_auth(self):
+        number = 5
+        tasks = [self.create_task_metadata('u1') for _ in range(number)]
+        tasks = [self.create_task_metadata('u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/tasks/number', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, number)

@@ -32,12 +32,8 @@ class TasksFullResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        tasks = metadata.TaskMetadata.objects(is_public=True)
-        tasks_meta = self.get_models_meta(tasks)
-
-        if user_id:
-            tasks = metadata.ModelMetadata.objects(is_public=False, owner=user_id)
-            tasks_meta = self.get_tasks_meta(tasks) + tasks_meta
+        tasks = metadata.TaskMetadata.objects(owner=user_id)
+        tasks_meta = self.get_tasks_meta(tasks)
 
         from_ = int(req.params.get('from', 0))
         number = int(req.params.get('number', 99999))
@@ -55,11 +51,11 @@ class TasksFullResource:
 
         for task in tasks:
             task_meta = {
-                'id': id,
+                'id': task.id,
                 'status': task.status,
                 'command': task.command,
                 'date': task.date,
-                'config': task.configs
+                'config': task.config
             }
             tasks_meta.append(task_meta)
 
@@ -71,10 +67,7 @@ class TasksNumberResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        number = metadata.TaskMetadata.objects(is_public=True).count()
-
-        if user_id:
-            number += metadata.TaskMetadata.objects(is_public=False, owner=user_id).count()
+        number = metadata.TaskMetadata.objects(owner=user_id).count()
 
         resp.status = falcon.HTTP_200
         resp.media = number
