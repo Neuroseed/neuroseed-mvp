@@ -3,7 +3,8 @@ TASK_SCHEMA = {
     "properties": {
         "command": {"type": "string"},
         "config": {"type": "object"}
-    }
+    },
+    "additionalProperties": False
 }
 
 MODEL_TRAIN_SCHEMA = {
@@ -11,6 +12,6 @@ MODEL_TRAIN_SCHEMA = {
     "properties": {
         "dataset": {"type": "string"},
         "epochs": {"type": "number"}
-    }
+    },
+    "additionalProperties": False
 }
-

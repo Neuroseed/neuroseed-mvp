@@ -1,6 +1,7 @@
 MODEL_SCHEMA = {
-    "is_public": {"type": "boolean"},
-    "meta":{
+    "type": "object",
+    "properties": {
+        "is_public": {"type": "boolean"},
         "title": {
             "type": "string",
             "minLength": 1,
@@ -31,5 +32,6 @@ MODEL_SCHEMA = {
             "maxLength": 128
         }
     },
-    "required":["title", "architecture"]
+    "required": ["title", "architecture"],
+    "additionalProperties": False
 }
