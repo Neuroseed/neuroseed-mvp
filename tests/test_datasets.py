@@ -13,8 +13,9 @@ class TestIntAPI(testing.TestCase):
         payload = {
             'user_id': user_id
         }
-        TOKEN = jwt.encode(payload, self.SECRET_KEY, algorithm='HS256').decode('utf-8')
-    
+        token = jwt.encode(payload, self.SECRET_KEY, algorithm='HS256').decode('utf-8')
+        return token
+        
     def get_auth_headers(self, token):
         headers = {'Authorization': 'Bearer {token}'.format(token=token)}
         return headers
@@ -35,7 +36,7 @@ class TestDatasets(TestIntAPI):
     def setUp(self):
         super().setUp()
         document = {
-            'is_public': True
+            'is_public': False
             }
         dataset_meta = metadata.DatasetMetadata(**document)
         dataset_meta.id = str(uuid.uuid4())
