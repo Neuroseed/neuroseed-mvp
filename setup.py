@@ -14,7 +14,8 @@ requires = [
     'mongoengine==0.15.0',
     'falcon==1.4.1',
     'PyJWT==1.6.0',
-    'falcon-auth==1.1.0'
+    'falcon-auth==1.1.0',
+    'gevent==1.2.2'
 ]
 
 tests_require = [

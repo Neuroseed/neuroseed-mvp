@@ -137,11 +137,11 @@ def main(config):
 
 
 def serve_forever(api, config):
-    from wsgiref import simple_server
+    from gevent import pywsgi
 
     host = config['host']
     port = config['port']
 
-    httpd = simple_server.make_server(host, port, api)
+    httpd = pywsgi.WSGIServer((host, port), api)
     logging.debug('Start server on {}:{}'.format(host, port))
     httpd.serve_forever()
