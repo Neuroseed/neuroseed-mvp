@@ -126,7 +126,7 @@ class TrainModelCommand(celery.Task):
             validation_data=(x_test, y_test),
             shuffle="batch")
 
-        task_meta.config['history'] = history
+        task_meta.config['history'] = history.history
         task_meta.save()
 
         self.save_model(model, model_meta)
