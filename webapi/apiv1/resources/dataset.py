@@ -155,11 +155,13 @@ class DatasetResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         base = req.media.copy()
-        del base['is_public']
         document = {
-            'is_public': req.media['is_public'],
             'base': base
         }
+        if 'is_public' in base:
+            del base['is_public']
+            document['is_public'] = req.media['is_public']
+
         dataset_meta = metadata.DatasetMetadata(**document)
         dataset_meta.id = str(uuid.uuid4())
         dataset_meta.url = dataset_meta.id
