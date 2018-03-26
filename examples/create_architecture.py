@@ -1,40 +1,35 @@
-import requests
-import jwt
+import utils
 
-SECRET_KEY = 'secret'
 
-payload = {
-    'user_id': 'user-user-user',
-}
-TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+def create_architecture():
+    url = 'http://localhost:8080/api/v1/architecture'
 
-url = 'http://localhost:8080/api/v1/architecture'
+    architecture = {
+        "layers": [
+            {"name": "input"},
+            {"name": "conv2d"},
+            {"name": "maxpooling2d"},
+            {"name": "conv2d"},
+            {"name": "flatten"},
+            {"name": "dense"}
+        ]
+    }
 
-architecture = {
-    "layers": [
-        "input",
-        "conv2d",
-        "maxpooling2d",
-        "conv2d",
-        "flatten",
-        "dense"
-    ]
-}
+    data = {
+        "id": "arch1",
+        "is_public": True,
+        "title": "title",
+        "description": "description",
+        "architecture": architecture
+    }
 
-data = {
-    "id": "arch1",
-    "is_public": False,
-    "title": "title",
-    "description": "description",
-    "category": "adfad",
-    "architecture": architecture
-}
+    resp = utils.post(url, json=data)
 
-headers = {
-    'Authorization': 'Bearer {token}'.format(token=TOKEN)
-}
+    print('status:', resp.status_code, 'data:', resp.text)
 
-r = requests.post(url, json=data, headers=headers)
+    if resp.status_code == 200:
+        return resp.json()['id']
 
-print('status:', r.status_code, 'data:', r.text)
 
+if __name__ == '__main__':
+    create_architecture()
