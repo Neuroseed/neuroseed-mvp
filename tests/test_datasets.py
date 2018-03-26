@@ -8,7 +8,7 @@ import jwt
 from mongoengine import connect
 
 
-class TestIntAPI(testing.TestCase):
+class TestInitAPI(testing.TestCase):
     def create_token(self, user_id):
         payload = {
             'user_id': user_id
@@ -31,21 +31,22 @@ class TestIntAPI(testing.TestCase):
         self.SECRET_KEY = open(config["auth_key_file"]).read()
         self.app = webapi.main(config)
 
-
-class TestDatasets(TestIntAPI):
     def tearDown(self):
         metadata.DatasetMetadata.objects.all().delete()
-    
+
     def create_dataset_metadata(self, is_public, owner):
-        dataset_meta = metadata.DatasetMetadata()
-        dataset_meta.is_public = is_public
-        dataset_meta.base.owner = owner
-        dataset_meta.id = str(uuid.uuid4())
-        dataset_meta.url = dataset_meta.id
-        dataset_meta.save()
+        dataset = metadata.DatasetMetadata()
+        dataset.is_public = is_public
+        dataset.base.owner = owner
+        dataset.id = str(uuid.uuid4())
+        dataset.url = dataset.id
+        dataset.base.title = 'title'
+        dataset.save()
 
-        return dataset_meta
+        return dataset
 
+
+class TestDatasets(TestInitAPI):
     def test_get_many_datasets_no_auth(self):
         user_id = 'user1'
         datasets_no_auth = [self.create_dataset_metadata(True, user_id).id for _ in range(3)]

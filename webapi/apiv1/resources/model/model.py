@@ -57,8 +57,8 @@ class ModelResource:
             'description': model_meta.base.description,
             'category': model_meta.base.category,
             'labels': model_meta.base.labels,
-            'accuracy': model_meta.base.accuracy,
-            'dataset': model_meta.base.dataset
+            'metrics': model_meta.base.metrics,
+            'dataset': model_meta.base.dataset.id
         }
 
     def get_description(self, req, resp):

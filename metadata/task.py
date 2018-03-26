@@ -10,22 +10,43 @@ __all__ = [
     'TaskMetadata'
 ]
 
-PENDING = 1
-RECEIVED = 2
-STARTED = 3
-SUCCESS = 4
-FAILURE = 5
-REVOKED = 6
-RETRY = 7
+PENDING = 'PENDING'
+RECEIVED = 'RECEIVED'
+STARTED = 'STARTED'
+SUCCESS = 'SUCCESS'
+FAILURE = 'FAILURE'
+REVOKED = 'REVOKED'
+RETRY = 'RETRY'
+
+TASK_STATUS_CODES = [
+    PENDING,
+    RECEIVED,
+    STARTED,
+    SUCCESS,
+    FAILURE,
+    REVOKED,
+    RETRY
+]
+
+MODEL_TRAIN = 'model.train'
+MODEL_TEST = 'model.test'
+MODEL_PREDICT = 'model.predict'
+
+TASK_COMMANDS = [
+    MODEL_TRAIN,
+    MODEL_TEST,
+    MODEL_PREDICT
+]
 
 
 class TaskMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
-    status = fields.IntField(default=PENDING)
+    status = fields.StringField(default=PENDING, choices=TASK_STATUS_CODES, required=True)
     owner = fields.StringField(required=True)
-    command = fields.StringField(required=True)
+    command = fields.StringField(choices=TASK_COMMANDS, required=True)
     date = fields.LongField(default=lambda: int(time.time()))
     config = fields.DictField(default=lambda: dict())
+    history = fields.DictField(default=lambda: dict())
 
     meta = {
         'allow_inheritance': True,

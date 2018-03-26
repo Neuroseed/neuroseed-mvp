@@ -68,8 +68,8 @@ class ModelsFullResource:
                 'description': model.base.description,
                 'category': model.base.category,
                 'labels': model.base.labels,
-                'accuracy': model.base.accuracy,
-                'dataset': model.base.dataset
+                'metrics': model.base.metrics,
+                'dataset': model.base.dataset.id
             }
             models_meta.append(model_meta)
 
