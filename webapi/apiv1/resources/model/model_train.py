@@ -23,10 +23,29 @@ class ModelTrainResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        config = req.media
+        try:
+            model = metadata.ModelMetadata.from_id(id, base__owner=user_id)
+        except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
+
+            resp.status = falcon.HTTP_404
+            resp.media = {
+                'error': 'Model does not exists'
+            }
+            return
+
+        if model.status != metadata.model.PENDING:
+            resp.status = falcon.HTTP_304
+            resp.media = {
+                'error': 'Model already trained'
+            }
+            return
+
+        model.status = metadata.model.INITIALIZE
+        model.save()
 
         try:
-            task_id = manager.train_model(config, id, user_id)
+            task_id = manager.train_model(req.media, id, user_id)
         except errors.ModelDoesNotExist:
             resp.status = falcon.HTTP_404
             resp.media = {
