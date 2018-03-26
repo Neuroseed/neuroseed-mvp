@@ -1,6 +1,7 @@
 import uuid
 
 import metadata
+from celery.app import control
 
 
 class Task(metadata.TaskMetadata):
@@ -25,3 +26,8 @@ def get_tasks_ids():
     ids = [task.id for task in tasks]
 
     return ids
+
+
+def terminate(task_id):
+    control.terminate(task_id)
+    metadata.TaskMetadata.from_id(task_id).delete()

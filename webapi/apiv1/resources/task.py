@@ -5,6 +5,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
+import manager
 from ..schema.task import TASK_SCHEMA
 
 __all__ = [
@@ -57,3 +58,21 @@ class TaskResource:
             'id': task.id
         }
 
+    def on_delete(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            task = metadata.TaskMetadata.from_id(id, owner=user_id)
+        except metadata.DoesNotExist:
+            logger.debug('Task {id} does not exist'.format(id=id))
+
+            resp.status = falcon.HTTP_204
+            resp.media = {
+                'error': 'Task does not exists'
+            }
+
+        manager.terminate(id)
+
+        resp.status = falcon.HTTP_200
+        resp.media = {}
