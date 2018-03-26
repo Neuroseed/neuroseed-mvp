@@ -1,3 +1,5 @@
+import metadata
+
 DATASET_SCHEMA = {
     "type": "object",
     "properties": {
@@ -13,7 +15,7 @@ DATASET_SCHEMA = {
         },
         "category": {
             "type": "string",
-            "maxLength": 64
+            "enum": metadata.dataset.DATASET_CATEGORIES
         },
         "labels": {
             "type": "array",

@@ -1,17 +1,14 @@
+import metadata
+
 TASK_SCHEMA = {
     "type": "object",
     "properties": {
-        "command": {"type": "string"},
+        "command": {
+            "type": "string",
+            "enum": metadata.task.TASK_COMMANDS
+        },
         "config": {"type": "object"}
     },
-    "additionalProperties": False
-}
-
-MODEL_TRAIN_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "dataset": {"type": "string"},
-        "epochs": {"type": "number"}
-    },
+    "required": ["command"],
     "additionalProperties": False
 }
