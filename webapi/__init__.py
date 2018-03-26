@@ -114,7 +114,7 @@ def main(config):
     key_file = config['auth_key_file']
 
     with open(key_file) as f:
-        secret_key = f.read()
+        secret_key = f.read().strip()
 
     user_loader = lambda payload: payload['user_id']
     jwt_auth_backend = JWTAuthBackend(
