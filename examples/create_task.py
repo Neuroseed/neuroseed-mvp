@@ -1,29 +1,25 @@
-import requests
-import jwt
+import utils
 
-SECRET_KEY = 'secret'
 
-payload = {
-    'user_id': 'user-user-user',
-}
-TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+def create_task():
+    url = 'http://localhost:8080/api/v1/task'
 
-url = 'http://localhost:8080/api/v1/task'
-
-task = {
-    "command": "predict",
-    "config": {
-        "dataset": "d1",
-        "accuracy": 0.7,
-        "epochs": 10
+    task = {
+        "command": "model.train",
+        "config": {
+            "dataset": "d1",
+            "accuracy": 0.7,
+            "epochs": 10
+        }
     }
-}
 
-headers = {
-    'Authorization': 'Bearer {token}'.format(token=TOKEN)
-}
+    resp = utils.post(url, json=task)
 
-r = requests.post(url, json=task, headers=headers)
+    print('status:', resp.status_code, 'data:', resp.text)
 
-print('status:', r.status_code, 'data:', r.text)
+    if resp.status_code == 200:
+        return resp.json()['id']
 
+
+if __name__ == '__main__':
+    create_task()
