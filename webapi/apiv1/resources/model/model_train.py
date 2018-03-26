@@ -38,8 +38,7 @@ class ModelTrainResource:
 
         resp.status = falcon.HTTP_200
         resp.media = {
-            'id': id,
-            'task': task_id,
+            'id': task_id,
         }
 
 

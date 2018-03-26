@@ -39,7 +39,7 @@ class ModelPredictResource:
 
         resp.status = falcon.HTTP_200
         resp.media = {
-            'task': task_id,
+            'id': task_id,
         }
 
 
