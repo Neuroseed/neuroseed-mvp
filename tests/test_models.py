@@ -33,7 +33,20 @@ class TestInitAPI(testing.TestCase):
         self.app = webapi.main(config)
 
     def tearDown(self):
+        metadata.DatasetMetadata.objects.all().delete()
+        metadata.ArchitectureMetadata.objects.all().delete()
         metadata.ModelMetadata.objects.all().delete()
+
+    def create_dataset_metadata(self, is_public, owner):
+        dataset = metadata.DatasetMetadata()
+        dataset.is_public = is_public
+        dataset.base.owner = owner
+        dataset.id = str(uuid.uuid4())
+        dataset.url = dataset.id
+        dataset.base.title = 'title'
+        dataset.save()
+
+        return dataset
 
     def create_arch_metadata(self, is_public, owner):
         architecture = metadata.ArchitectureMetadata()
@@ -53,7 +66,8 @@ class TestInitAPI(testing.TestCase):
         model.is_public = is_public
         model.base.owner = owner
         model.base.title = 'title'
-        model.base.architecture = self.create_arch_metadata(True, owner)
+        model.base.architecture = self.create_arch_metadata(is_public, owner)
+        model.base.dataset = self.create_dataset_metadata(is_public, owner)
         model.save()
 
         return model
@@ -144,9 +158,11 @@ class TestModels(TestInitAPI):
         self.assertEqual(result.status, falcon.HTTP_401)
 
     def test_create_model_auth_arch_does_not_exist(self):
+        d1 = self.create_dataset_metadata(True, 'u1')
         json = {
             'title': 'title',
-            'architecture': 'some-architecture-id'
+            'architecture': 'some-architecture-id',
+            'dataset': d1.id
         }
         token = self.create_token('u1')
         headers = self.get_auth_headers(token)
@@ -157,9 +173,11 @@ class TestModels(TestInitAPI):
 
     def test_create_model_auth_arch_another_user(self):
         a1 = self.create_arch_metadata(False, 'u2')
+        d1 = self.create_dataset_metadata(True, 'u1')
         json = {
             'title': 'title',
-            'architecture': a1.id
+            'architecture': a1.id,
+            'dataset': d1.id
         }
         token = self.create_token('u1')
         headers = self.get_auth_headers(token)
@@ -170,10 +188,12 @@ class TestModels(TestInitAPI):
 
     def test_create_model_auth(self):
         a1 = self.create_arch_metadata(True, 'u1')
+        d1 = self.create_dataset_metadata(True, 'u1')
 
         json = {
             'title': 'title',
-            'architecture': a1.id
+            'architecture': a1.id,
+            'dataset': d1.id
         }
         token = self.create_token('u1')
         headers = self.get_auth_headers(token)

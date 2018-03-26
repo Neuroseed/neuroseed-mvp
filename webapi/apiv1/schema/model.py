@@ -4,16 +4,12 @@ MODEL_SCHEMA = {
         "is_public": {"type": "boolean"},
         "title": {
             "type": "string",
-            "minLength": 1,
+            "minLength": 3,
             "maxLength": 128
         },
         "description": {
             "type": "string",
             "maxLength": 4096
-        },
-        "category": {
-            "type": "string",
-            "maxLength": 64
         },
         "labels": {
             "type": "array",
@@ -32,6 +28,6 @@ MODEL_SCHEMA = {
             "maxLength": 128
         }
     },
-    "required": ["title", "architecture"],
+    "required": ["title", "architecture", "dataset"],
     "additionalProperties": False
 }

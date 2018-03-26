@@ -44,19 +44,20 @@ class TestInitAPI(testing.TestCase):
         task = metadata.TaskMetadata(**document)
         task.id = str(uuid.uuid4())
         task.owner = owner
+        task.command = metadata.task.MODEL_TRAIN
         task.save()
 
         return task
 
 
 class TestModels(TestInitAPI):
-    def test_get_datasets_no_auth(self):
+    def test_get_tasks_no_auth(self):
         result = self.simulate_get('/api/v1/tasks')
 
         # validate code
         self.assertEqual(result.status, falcon.HTTP_401)
 
-    def test_get_datasets_schema_auth(self):
+    def test_get_tasks_schema_auth(self):
         token = self.create_token("u1")
         headers = self.get_auth_headers(token)
         result = self.simulate_get('/api/v1/tasks', headers=headers)
@@ -126,7 +127,7 @@ class TestModels(TestInitAPI):
 
     def test_create_task_no_auth(self):
         json = {
-            'command': 'command',
+            'command': metadata.task.MODEL_TRAIN,
             'config': {}
         }
         result = self.simulate_post('/api/v1/task', json=json)
@@ -136,7 +137,7 @@ class TestModels(TestInitAPI):
 
     def test_create_task(self):
         json = {
-            'command': 'command',
+            'command': metadata.task.MODEL_TRAIN,
             'config': {}
         }
         token = self.create_token('u1')
@@ -148,7 +149,7 @@ class TestModels(TestInitAPI):
 
     def test_create_task_invalid_schema(self):
         json = {
-            'command': 'command',
+            'command': metadata.task.MODEL_TRAIN,
             'config': {},
             'wrong_field': 1
         }

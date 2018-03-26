@@ -19,8 +19,20 @@ ARCHITECTURE_SCHEMA = {
         "architecture": {
             "type": "object",
             "properties": {
-                "layers": {"type": "array"}
+                "layers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "config": {"type": "object"}
+                        },
+                        "required": ["name"],
+                        "additionalProperties": False
+                    },
+                }
             },
+            "required": ["layers"],
             "additionalProperties": False
         }
     },

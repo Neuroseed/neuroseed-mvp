@@ -11,11 +11,23 @@ __all__ = [
     'ModelMetadata'
 ]
 
-PENDING = 1
-INITIALIZE = 2
-TRAINING = 3
-TESTING = 4
-READY = 5
+PENDING = 'PENDING'
+INITIALIZE = 'INITIALIZE'
+TRAINING = 'TRAINING'
+TESTING = 'TESTING'
+READY = 'READY'
+FAILURE = 'FAILURE'
+PUBLISHED = 'PUBLISHED'
+
+MODEL_STATUS_CODES = [
+    PENDING,
+    INITIALIZE,
+    TRAINING,
+    TESTING,
+    READY,
+    FAILURE,
+    PUBLISHED
+]
 
 
 class ModelBase(EmbeddedDocument):
@@ -25,23 +37,29 @@ class ModelBase(EmbeddedDocument):
     date = fields.LongField()
     title = fields.StringField(required=True)
     description = fields.StringField()
-    category = fields.StringField()
     labels = fields.ListField(field=fields.StringField())
-    accuracy = fields.FloatField()
+    metrics = fields.DictField(default=lambda: dict())
     architecture = fields.ReferenceField(ArchitectureMetadata, required=True)
-    dataset = fields.ReferenceField(DatasetMetadata)
+    dataset = fields.ReferenceField(DatasetMetadata, required=True)
     # TODO: parent = fields.ReferenceField(Model)
     shape = fields.ListField(field=fields.IntField())
+
+    # category = fields.StringField()
+
+    @property
+    def category(self):
+        """Return category from dataset"""
+
+        return self.dataset.base.category
 
 
 class ModelMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     url = fields.StringField()
-    status = fields.IntField(default=PENDING)
+    status = fields.StringField(default=PENDING, choices=MODEL_STATUS_CODES, required=True)
     is_public = fields.BooleanField(default=False)
     hash = fields.StringField()
-    base_init = lambda: ModelBase()
-    base = fields.EmbeddedDocumentField(ModelBase, default=base_init)
+    base = fields.EmbeddedDocumentField(ModelBase, default=lambda: ModelBase())
 
     meta = {
         'allow_inheritance': True,
