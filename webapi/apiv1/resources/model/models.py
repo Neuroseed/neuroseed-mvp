@@ -43,9 +43,20 @@ class ModelsFullResource:
             models_meta = self.get_models_meta(models) + models_meta
 
         from_ = int(req.params.get('from', 0))
+
+        if from_ < 0:
+            resp.status = falcon.HTTP_400
+            resp.media = {'error': 'from must be greater than 0'}
+            return
+
         number = int(req.params.get('number', 99999))
-        if from_ < len(models_meta):
-            models_meta = models_meta[from_: from_ + number]
+
+        if number < 0:
+            resp.status = falcon.HTTP_400
+            resp.media = {'error': 'number must be greater than 0'}
+            return
+
+        models_meta = models_meta[from_: from_ + number]
 
         resp.status = falcon.HTTP_200
         resp.media = {

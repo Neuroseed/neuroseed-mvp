@@ -43,10 +43,20 @@ class DatasetsFullResource:
             datasets_meta = self.get_datasets_meta(datasets) + datasets_meta
 
         from_ = int(req.params.get('from', 0))
+
+        if from_ < 0:
+            resp.status = falcon.HTTP_400
+            resp.media = {'error': 'from must be greater than 0'}
+            return
+
         number = int(req.params.get('number', 99999))
-        print('params:', from_, number)
-        if from_ < len(datasets_meta):
-            datasets_meta = datasets_meta[from_: from_ + number]
+
+        if number < 0:
+            resp.status = falcon.HTTP_400
+            resp.media = {'error': 'number must be greater than 0'}
+            return
+
+        datasets_meta = datasets_meta[from_: from_ + number]
 
         resp.status = falcon.HTTP_200
         resp.media = {

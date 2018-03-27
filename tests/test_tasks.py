@@ -212,6 +212,21 @@ class TestTasksFull(TestInitAPI):
         tasks = result.json['tasks']
         self.assertEqual(len(tasks), number)
 
+    def test_query_slice(self):
+        number = 5
+        [self.create_task_metadata('u1') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+
+        query_string = 'from=-2&number=3'
+        result = self.simulate_get('/api/v1/tasks/full', query_string=query_string, headers=headers)
+        self.assertEqual(result.status, falcon.HTTP_400)
+
+        query_string = 'from=1&number=-3'
+        result = self.simulate_get('/api/v1/tasks/full', query_string=query_string, headers=headers)
+        self.assertEqual(result.status, falcon.HTTP_400)
+
 
 class TestTasksNumber(TestInitAPI):
     def test_get_number_of_empty(self):
