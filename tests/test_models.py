@@ -157,6 +157,8 @@ class TestModels(TestInitAPI):
         # validate code
         self.assertEqual(result.status, falcon.HTTP_401)
 
+
+class TestModel(TestInitAPI):
     def test_create_model_auth_arch_does_not_exist(self):
         d1 = self.create_dataset_metadata(True, 'u1')
         json = {
@@ -213,7 +215,7 @@ class TestModels(TestInitAPI):
         # validate code
         self.assertEqual(result.status, falcon.HTTP_400)
 
-    def test_get_one_dataset_no_auth(self):
+    def test_get_one_model_no_auth(self):
         m1 = self.create_model_metadata(True, 'u1')
 
         url = '/api/v1/model/{id}'.format(id=m1.id)
@@ -225,7 +227,7 @@ class TestModels(TestInitAPI):
         # validate id
         self.assertEqual(result.json['id'], m1.id)
 
-    def test_get_one_private_dataset_no_auth(self):
+    def test_get_one_private_model_no_auth(self):
         m1 = self.create_model_metadata(False, 'u1')
 
         url = '/api/v1/model/{id}'.format(id=m1.id)
@@ -234,7 +236,7 @@ class TestModels(TestInitAPI):
         # validate code
         self.assertEqual(result.status, falcon.HTTP_404)
 
-    def test_get_one_dataset_auth(self):
+    def test_get_one_model_auth(self):
         m1 = self.create_model_metadata(False, 'u1')
 
         token = self.create_token('u1')
@@ -247,6 +249,20 @@ class TestModels(TestInitAPI):
 
         # validate id
         self.assertEqual(result.json['id'], m1.id)
+
+    def test_get_other_public_model_with_auth(self):
+        user_1 = 'u1'
+        user_2 = 'u2'
+
+        not_my_public_model = self.create_model_metadata(True, user_2)
+
+        token = self.create_token(user_1)
+        headers = self.get_auth_headers(token)
+        url = '/api/v1/model/{id}'.format(id=not_my_public_model.id)
+        result = self.simulate_get(url, headers=headers)
+
+        self.assertEqual(result.status, falcon.HTTP_200)
+        self.assertTrue(not_my_public_model.id, result.json['id'])
 
 
 class TestModelsFull(TestInitAPI):

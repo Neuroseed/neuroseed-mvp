@@ -21,7 +21,7 @@ class TaskResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id, owner=user_id)
+            task = metadata.TaskMetadata.from_id(id=id, owner=user_id)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
             task = None
@@ -63,7 +63,7 @@ class TaskResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id, owner=user_id)
+            task = metadata.TaskMetadata.from_id(id=id, owner=user_id)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 

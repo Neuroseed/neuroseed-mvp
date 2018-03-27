@@ -1,10 +1,12 @@
 import logging
+import uuid
 import base64
 import cgi
 
+from mongoengine.queryset.visitor import Q
 import falcon
-import uuid
 from falcon.media.validators import jsonschema
+
 import metadata
 import storage
 from ..schema.dataset import DATASET_SCHEMA
@@ -33,11 +35,11 @@ class DatasetResource:
 
         try:
             if user_id:
-                kwargs = {'id': id, 'base__owner': user_id}
+                query = Q(id=id) & (Q(base__owner=user_id) | Q(is_public=True))
+                dataset_meta = metadata.DatasetMetadata.from_id(query)
             else:
                 kwargs = {'id': id, 'is_public': True}
-
-            dataset_meta = metadata.DatasetMetadata.from_id(**kwargs)
+                dataset_meta = metadata.DatasetMetadata.from_id(**kwargs)
         except metadata.DoesNotExist:
             logger.debug('Dataset {id} does not exist'.format(id=id))
             dataset_meta = None
@@ -128,7 +130,7 @@ class DatasetResource:
 
     def upload_dataset(self, req, resp, id):
         try:
-            dataset_meta = metadata.DatasetMetadata.from_id(id)
+            dataset_meta = metadata.DatasetMetadata.from_id(id=id)
         except metadata.DoesNotExist:
             dataset_meta = None
 
