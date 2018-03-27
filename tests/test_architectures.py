@@ -47,7 +47,7 @@ class TestInitAPI(testing.TestCase):
         return architecture
 
 
-class TestArchitecture(TestInitAPI):
+class TestArchitectures(TestInitAPI):
     def test_schema_no_auth(self):
         self.create_arch_metadata(True, 'u1')
 
@@ -271,7 +271,19 @@ class TestArchitectureFull(TestInitAPI):
         architectures = result.json['architectures']
         self.assertEqual(len(architectures), number)
 
-    def test_query_slice(self):
+    def test_query_slice_on_border(self):
+        number = 20
+        [self.create_arch_metadata(True, 'u1') for _ in range(number)]
+
+        from_ = 10
+        n = 20
+        query_string = 'from={f}&number={n}'.format(f=from_, n=n)
+        result = self.simulate_get('/api/v1/architectures/full', query_string=query_string)
+
+        self.assertEqual(result.status, falcon.HTTP_200)
+        self.assertEqual(len(result.json['architectures']), number - from_)
+
+    def test_query_invalid_slice(self):
         number = 5
         [self.create_arch_metadata(True, 'u1') for _ in range(number)]
 
