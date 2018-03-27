@@ -1,5 +1,6 @@
 import logging
 
+from mongoengine.queryset.visitor import Q
 import falcon
 import metadata
 
@@ -32,9 +33,6 @@ class TasksFullResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        tasks = metadata.TaskMetadata.objects(owner=user_id)
-        tasks_meta = self.get_tasks_meta(tasks)
-
         from_ = int(req.params.get('from', 0))
 
         if from_ < 0:
@@ -49,7 +47,9 @@ class TasksFullResource:
             resp.media = {'error': 'number must be greater than 0'}
             return
 
-        tasks_meta = tasks_meta[from_: from_ + number]
+        query = Q(owner=user_id)
+        tasks = metadata.TaskMetadata.objects(query).skip(from_).limit(number)
+        tasks_meta = self.get_tasks_meta(tasks)
 
         resp.status = falcon.HTTP_200
         resp.media = {
