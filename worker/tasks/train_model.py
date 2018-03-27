@@ -126,7 +126,7 @@ class TrainModelCommand(celery.Task):
             validation_data=(x_test, y_test),
             shuffle="batch")
 
-        task_meta.config['history'] = history.history
+        task_meta.history = history.history
         task_meta.save()
 
         self.save_model(model, model_meta)
@@ -138,11 +138,10 @@ def init_train_model(self):
 
     task_meta = self.get_task(task_id)
 
-    dataset_id = task_meta.config['dataset']
-    dataset_meta = self.get_dataset(dataset_id)
-
     model_id = task_meta.config['model']
     model_meta = self.get_model(model_id)
+
+    dataset_meta = model_meta.base.dataset
 
     architecture_meta = model_meta.base.architecture
 
