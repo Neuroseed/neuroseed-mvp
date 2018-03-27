@@ -18,9 +18,9 @@ def compile_model(model, config):
     # compile
     loss = config['loss']
     optimizer_name = config['optimizer']['name']
-    optimizer_config = config['optimizer']['config']
+    optimizer_config = config['optimizer'].get('config', {})
     optimizer = getattr(optimizers, optimizer_name)(**optimizer_config)
-    metrics = config['metrics']
+    metrics = config.get('metrics', [])
 
     # compile keras model
     model.compile(
