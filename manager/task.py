@@ -30,4 +30,4 @@ def get_tasks_ids():
 
 def terminate(task_id):
     control.terminate(task_id)
-    metadata.TaskMetadata.from_id(task_id).delete()
+    metadata.TaskMetadata.from_id(id=task_id).delete()

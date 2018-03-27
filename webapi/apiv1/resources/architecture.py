@@ -1,6 +1,7 @@
 import uuid
 import logging
 
+from mongoengine.queryset.visitor import Q
 import falcon
 from falcon.media.validators import jsonschema
 
@@ -31,11 +32,11 @@ class ArchitectureResource:
 
         try:
             if user_id:
-                kwargs = {'id': id, 'owner': user_id}
+                query = Q(id=id) & (Q(owner=user_id) | Q(is_public=True))
+                architecture = metadata.ArchitectureMetadata.from_id(query)
             else:
                 kwargs = {'id': id, 'is_public': True}
-
-            architecture = metadata.ArchitectureMetadata.from_id(**kwargs)
+                architecture = metadata.ArchitectureMetadata.from_id(**kwargs)
         except metadata.DoesNotExist:
             logger.debug('Architecture {id} does not exist'.format(id=id))
 
@@ -74,7 +75,7 @@ class ArchitectureResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            architecture = metadata.ArchitectureMetadata.from_id(id, owner=user_id)
+            architecture = metadata.ArchitectureMetadata.from_id(id=id, owner=user_id)
         except metadata.DoesNotExist:
             architecture = None
 

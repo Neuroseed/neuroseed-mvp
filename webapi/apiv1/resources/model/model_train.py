@@ -24,7 +24,7 @@ class ModelTrainResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            model = metadata.ModelMetadata.from_id(id, base__owner=user_id)
+            model = metadata.ModelMetadata.from_id(id=id, base__owner=user_id)
         except metadata.DoesNotExist:
             logger.debug('Model {id} does not exist'.format(id=id))
 
@@ -67,7 +67,7 @@ class ModelTrainStatusResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(tid, owner=user_id)
+            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
@@ -90,7 +90,7 @@ class ModelTrainResult:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(tid, owner=user_id)
+            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 

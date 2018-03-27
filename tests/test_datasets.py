@@ -69,6 +69,8 @@ class TestDatasets(TestInitAPI):
         for id in not_my_datasets:
             self.assertFalse(id in result.json['ids'])
 
+
+class TestDataset(TestInitAPI):
     def test_get_dataset_id_no_auth(self):
         user_id = 'user1'
         no_auth_dataset = self.create_dataset_metadata(True, user_id)
@@ -79,13 +81,30 @@ class TestDatasets(TestInitAPI):
     def test_get_dataset_id_auth(self):
         user_id = 'user1'
         another_user_id = 'user2'
+
         my_dataset = self.create_dataset_metadata(True, user_id)
         not_my_dataset = self.create_dataset_metadata(False, another_user_id)
+
         token = self.create_token(user_id)
-        headers= self.get_auth_headers(token)
+        headers = self.get_auth_headers(token)
         result = self.simulate_get('/api/v1/dataset/{id}'.format(id=my_dataset.id), headers=headers)
+
         self.assertEqual(result.status, falcon.HTTP_200)
         self.assertTrue(my_dataset.id, result.json['id'])
+
+    def test_get_other_public_dataset_with_auth(self):
+        user_1 = 'u1'
+        user_2 = 'u2'
+
+        not_my_public_dataset = self.create_dataset_metadata(True, user_2)
+
+        token = self.create_token(user_1)
+        headers = self.get_auth_headers(token)
+        url = '/api/v1/dataset/{id}'.format(id=not_my_public_dataset.id)
+        result = self.simulate_get(url, headers=headers)
+
+        self.assertEqual(result.status, falcon.HTTP_200)
+        self.assertTrue(not_my_public_dataset.id, result.json['id'])
 
     def test_create_dataset_auth(self):
         user_id = 'user1'

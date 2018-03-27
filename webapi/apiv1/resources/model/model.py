@@ -1,6 +1,7 @@
 import uuid
 import logging
 
+from mongoengine.queryset.visitor import Q
 import falcon
 from falcon.media.validators import jsonschema
 
@@ -31,11 +32,11 @@ class ModelResource:
 
         try:
             if user_id:
-                kwargs = {'id': id, 'base__owner': user_id}
+                query = Q(id=id) & (Q(base__owner=user_id) | Q(is_public=True))
+                model_meta = metadata.ModelMetadata.from_id(query)
             else:
                 kwargs = {'id': id, 'is_public': True}
-
-            model_meta = metadata.ModelMetadata.from_id(**kwargs)
+                model_meta = metadata.ModelMetadata.from_id(**kwargs)
         except metadata.DoesNotExist:
             logger.debug('Model {id} does not exist'.format(id=id))
 
@@ -87,7 +88,7 @@ class ModelResource:
 
         architecture_id = req.media['architecture']
         try:
-            architecture = metadata.ArchitectureMetadata.from_id(architecture_id, owner=user_id)
+            architecture = metadata.ArchitectureMetadata.from_id(id=architecture_id, owner=user_id)
         except metadata.DoesNotExist:
             resp.status = falcon.HTTP_404
             resp.media = {

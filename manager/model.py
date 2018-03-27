@@ -57,7 +57,7 @@ def get_models():
 
 def create_model_task(command, config, model_id, owner):
     try:
-        model = Model.from_id(model_id)
+        model = Model.from_id(id=model_id)
     except metadata.DoesNotExist as err:
         raise
 

@@ -118,6 +118,8 @@ class TestArchitecture(TestInitAPI):
         for id in not_my_architectures:
             self.assertFalse(id in result.json['ids'])
 
+
+class TestArchitecture(TestInitAPI):
     def test_get_architecture(self):
         result = self.simulate_get('/api/v1/architecture')
 
@@ -155,6 +157,20 @@ class TestArchitecture(TestInitAPI):
         # validate code
         self.assertEqual(result.status, falcon.HTTP_200)
         self.assertEqual(a1.id, result.json['id'])
+
+    def test_get_other_public_architecture_with_auth(self):
+        user_1 = 'u1'
+        user_2 = 'u2'
+
+        not_my_public_architecture = self.create_arch_metadata(True, user_2)
+
+        token = self.create_token(user_1)
+        headers = self.get_auth_headers(token)
+        url = '/api/v1/architecture/{id}'.format(id=not_my_public_architecture.id)
+        result = self.simulate_get(url, headers=headers)
+
+        self.assertEqual(result.status, falcon.HTTP_200)
+        self.assertTrue(not_my_public_architecture.id, result.json['id'])
 
     def test_create_architecture_no_auth(self):
         json = {}

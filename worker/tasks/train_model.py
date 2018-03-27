@@ -12,7 +12,7 @@ from .. import constructor
 class TrainModelCommand(celery.Task):
     def get_dataset(self, dataset_id):
         try:
-            dataset_meta = metadata.DatasetMetadata.from_id(dataset_id)
+            dataset_meta = metadata.DatasetMetadata.from_id(id=dataset_id)
         except metadata.DoesNotExist:
             print('dataset does not exist')
             self.update_state(state=states.FAILURE)
@@ -22,7 +22,7 @@ class TrainModelCommand(celery.Task):
 
     def get_architecture(self, architecture_id):
         try:
-            architecture_meta = metadata.ArchitectureMetadata.from_id(architecture_id)
+            architecture_meta = metadata.ArchitectureMetadata.from_id(id=architecture_id)
         except metadata.DoesNotExist:
             print('architecture does not exist')
             self.update_state(state=states.FAILURE)
@@ -32,7 +32,7 @@ class TrainModelCommand(celery.Task):
 
     def get_model(self, model_id):
         try:
-            model_meta = metadata.ModelMetadata.from_id(model_id)
+            model_meta = metadata.ModelMetadata.from_id(id=model_id)
         except metadata.DoesNotExist:
             self.update_state(state=states.FAILURE)
             raise
@@ -41,7 +41,7 @@ class TrainModelCommand(celery.Task):
 
     def get_task(self, task_id):
         try:
-            task_meta = metadata.TaskMetadata.from_id(task_id)
+            task_meta = metadata.TaskMetadata.from_id(id=task_id)
         except metadata.DoesNotExist:
             self.update_state(state=states.FAILURE)
             raise
