@@ -1,5 +1,6 @@
 import logging
 
+from mongoengine.queryset.visitor import Q
 import falcon
 import metadata
 
@@ -35,13 +36,6 @@ class ArchitecturesFullResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        architectures = metadata.ArchitectureMetadata.objects(is_public=True)
-        architectures_meta = self.get_datasets_meta(architectures)
-
-        if user_id:
-            architectures = metadata.ArchitectureMetadata.objects(is_public=False, owner=user_id)
-            architectures_meta = self.get_datasets_meta(architectures) + architectures_meta
-
         from_ = int(req.params.get('from', 0))
 
         if from_ < 0:
@@ -56,7 +50,13 @@ class ArchitecturesFullResource:
             resp.media = {'error': 'number must be greater than 0'}
             return
 
-        architectures_meta = architectures_meta[from_: from_ + number]
+        query = Q(is_public=True)
+
+        if user_id:
+            query = query | (Q(is_public=False) & Q(owner=user_id))
+
+        architectures = metadata.ArchitectureMetadata.objects(query).skip(from_).limit(number)
+        architectures_meta = self.get_architecture_meta(architectures)
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -64,7 +64,7 @@ class ArchitecturesFullResource:
         }
 
     @staticmethod
-    def get_datasets_meta(architectures):
+    def get_architecture_meta(architectures):
         architectures_meta = []
 
         for architecture in architectures:
