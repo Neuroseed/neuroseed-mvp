@@ -59,7 +59,7 @@ class PreditctModelCommand(celery.Task):
         model_meta.status = metadata.model.TRAINING
         model_meta.save()
 
-        print('Start train task: {}'.format(task_meta.id))
+        print('Start predict task: {}'.format(task_meta.id))
 
     def update_state_success(self, task_meta, model_meta):
         self.update_state(state=states.SUCCESS)
@@ -70,7 +70,7 @@ class PreditctModelCommand(celery.Task):
         model_meta.status = metadata.model.READY
         model_meta.save()
 
-        print('End train task: {}'.format(task_meta.id))
+        print('End predict task: {}'.format(task_meta.id))
 
     def predict_model(self, dataset_meta, model_meta, task_meta):
         config = task_meta.config
@@ -93,12 +93,17 @@ class PreditctModelCommand(celery.Task):
         model_path = storage.get_model_path(model_name)
         model = load_model(model_path)
 
-        result = model.predict(x)
+        print('Model loaded')
+
+        result = model.predict(x, verbose=1)
+
+        print('Predict done!')
 
         # save result
         tmp_id = str(uuid.uuid4())
         tmp_name = tmp_id + '.hdf5'
         tmp_path = storage.get_tmp_path(tmp_name)
+        print("Save result to:", tmp_path)
 
         h5 = h5py.File(tmp_path, 'w')
         h5.create_dataset('y', data=result)
