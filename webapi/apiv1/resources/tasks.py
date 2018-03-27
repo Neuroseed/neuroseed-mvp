@@ -40,12 +40,14 @@ class TasksFullResource:
         if from_ < 0:
             resp.status = falcon.HTTP_400
             resp.media = {'error': 'from must be greater than 0'}
+            return
 
         number = int(req.params.get('number', 99999))
 
         if number < 0:
             resp.status = falcon.HTTP_400
             resp.media = {'error': 'number must be greater than 0'}
+            return
 
         tasks_meta = tasks_meta[from_: from_ + number]
 

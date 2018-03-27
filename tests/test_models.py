@@ -296,6 +296,18 @@ class TestModelsFull(TestInitAPI):
         models = result.json['models']
         self.assertEqual(len(models), number)
 
+    def test_query_slice(self):
+        number = 5
+        [self.create_model_metadata(True, 'u1') for _ in range(number)]
+
+        query_string = 'from=-2&number=3'
+        result = self.simulate_get('/api/v1/models/full', query_string=query_string)
+        self.assertEqual(result.status, falcon.HTTP_400)
+
+        query_string = 'from=1&number=-3'
+        result = self.simulate_get('/api/v1/models/full', query_string=query_string)
+        self.assertEqual(result.status, falcon.HTTP_400)
+
 
 class TestModelsNumber(TestInitAPI):
     def test_get_number_of_empty(self):

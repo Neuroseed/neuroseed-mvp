@@ -101,3 +101,110 @@ class TestDatasets(TestInitAPI):
     def test_get_dataset_does_not_exist(self):
         result = self.simulate_get('/api/v1/dataset/dataset-id')
         self.assertEqual(result.status, falcon.HTTP_404)
+
+
+class TestDatasetssFull(TestInitAPI):
+    def test_get_empty(self):
+        result = self.simulate_get('/api/v1/datasets/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+    def test_get_one(self):
+        d1 = self.create_dataset_metadata(True, 'u1')
+
+        result = self.simulate_get('/api/v1/datasets/full')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        datasets = result.json['datasets']
+        self.assertEqual(len(datasets), 1)
+
+        self.assertEqual(datasets[0]['id'], d1.id)
+
+    def test_get_many_no_auth(self):
+        number = 5
+        [self.create_dataset_metadata(True, 'u1') for _ in range(number)]
+
+        result = self.simulate_get('/api/v1/datasets/full')
+
+        # validate codes
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        datasets = result.json['datasets']
+        self.assertEqual(len(datasets), number)
+
+    def test_get_many_auth(self):
+        number = 5
+        [self.create_dataset_metadata(False, 'u1') for _ in range(number)]
+        [self.create_dataset_metadata(False, 'u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/datasets/full', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        datasets = result.json['datasets']
+        self.assertEqual(len(datasets), number)
+
+    def test_query_slice(self):
+        number = 5
+        [self.create_dataset_metadata(True, 'u1') for _ in range(number)]
+
+        query_string = 'from=-2&number=3'
+        result = self.simulate_get('/api/v1/datasets/full', query_string=query_string)
+        self.assertEqual(result.status, falcon.HTTP_400)
+
+        query_string = 'from=1&number=-3'
+        result = self.simulate_get('/api/v1/datasets/full', query_string=query_string)
+        self.assertEqual(result.status, falcon.HTTP_400)
+
+
+class TestDatasetsNumber(TestInitAPI):
+    def test_get_number_of_empty(self):
+        result = self.simulate_get('/api/v1/datasets/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 0)
+
+    def test_get_number_one(self):
+        d1 = self.create_dataset_metadata(True, 'u1')
+
+        result = self.simulate_get('/api/v1/datasets/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 1)
+
+    def test_get_number_many(self):
+        number = 15
+        datasets = [self.create_dataset_metadata(True, 'u1') for _ in range(number)]
+
+        result = self.simulate_get('/api/v1/datasets/number')
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, number)
+
+    def test_get_number_many_auth(self):
+        number = 5
+        datasets = [self.create_dataset_metadata(False, 'u1') for _ in range(number)]
+        datasets = [self.create_dataset_metadata(True, 'u1') for _ in range(number)]
+        datasets = [self.create_dataset_metadata(False, 'u2') for _ in range(number)]
+        datasets = [self.create_dataset_metadata(True, 'u2') for _ in range(number)]
+
+        token = self.create_token('u1')
+        headers = self.get_auth_headers(token)
+        result = self.simulate_get('/api/v1/datasets/number', headers=headers)
+
+        # validate code
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+        self.assertEqual(result.json, 3 * number)
