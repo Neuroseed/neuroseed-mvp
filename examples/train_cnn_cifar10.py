@@ -69,6 +69,7 @@ def train_cnn_cifar10(model_id):
     url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=model_id)
 
     config = {
+        "epochs": 3,
         "optimizer": {
             "name": "SGD"
         },
