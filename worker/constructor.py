@@ -21,6 +21,7 @@ def compile_model(model, config):
     optimizer_config = config['optimizer'].get('config', {})
     optimizer = getattr(optimizers, optimizer_name)(**optimizer_config)
     metrics = config.get('metrics', [])
+    metrics.append('accuracy')
 
     # compile keras model
     model.compile(

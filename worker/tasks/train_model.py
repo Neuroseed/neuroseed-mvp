@@ -1,5 +1,8 @@
+import time
+
 import celery
 from celery import states
+from keras import callbacks
 from keras.models import save_model
 import h5py
 
@@ -7,6 +10,76 @@ import metadata
 import storage
 from ..app import app
 from .. import constructor
+
+
+class HistoryCallback(callbacks.Callback):
+    UPDATE_ON_BATCH = 10
+
+    def __init__(self, task, epochs, batch_in_epoch):
+        super().__init__()
+
+        self._task = task
+        task.history['batch'] = {}
+        task.history['epoch'] = {}
+        task.history['train'] = {}
+
+        task.history['epochs'] = epochs
+        task.history['current_epoch'] = 0
+
+        task.history['batch_in_epoch'] = batch_in_epoch
+        task.history['batch_in_train'] = batch_in_epoch * epochs
+        task.history['current_batch'] = 0
+        task.save()
+
+    @property
+    def task(self):
+        return self._task
+
+    def on_batch_end(self, batch, logs=None):
+        del logs['batch']  # delete batch number
+        del logs['size']  # delete batch size
+        logs['time'] = round(time.time(), 3)  # add current time
+
+        batch_history = self.task.history['batch']
+
+        for key in logs:
+            history = batch_history.setdefault(key, [])
+            value = float(logs[key])
+            history.append(value)
+
+        self.task.history['current_batch'] = batch
+
+        if batch % self.UPDATE_ON_BATCH == 0:
+            self.task.save()
+
+    def on_epoch_begin(self, epoch, logs=None):
+        self.task.history['current_epoch'] = epoch + 1
+
+        self.task.save()
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs['time'] = round(time.time(), 3)  # add current time
+
+        epoch_history = self.task.history['epoch']
+
+        for key in logs:
+            history = epoch_history.setdefault(key, [])
+            value = float(logs[key])
+            history.append(value)
+
+        self.task.history['current_epoch'] = epoch + 1
+
+        self.task.save()
+
+    def on_train_end(self, logs=None):
+        train_history = self.task.history['train']
+
+        for key in logs:
+            history = train_history.setdefault(key, [])
+            value = float(logs[key])
+            history.append(value)
+
+        self.task.save()
 
 
 class TrainModelCommand(celery.Task):
@@ -106,6 +179,7 @@ class TrainModelCommand(celery.Task):
 
         # create keras model
         architecture = architecture_meta.architecture
+        train_examples_number = x_train.shape[0]
         shape = x_train.shape[1:]
         print('Input shape:', shape)
         model = constructor.create_model(architecture, shape)
@@ -117,17 +191,20 @@ class TrainModelCommand(celery.Task):
         batch_size = config.get('batch_size', 32)
         epochs = config.get('epochs', 1)
 
+        batch_in_epoch = train_examples_number // batch_size + 1
+
+        h = HistoryCallback(task_meta, epochs, batch_in_epoch)
+        callbacks = [h]
+
         # train keras model
-        history = model.fit(
+        model.fit(
             x_train,
             y_train,
             batch_size=batch_size,
             epochs=epochs,
             validation_data=(x_test, y_test),
-            shuffle="batch")
-
-        task_meta.history = history.history
-        task_meta.save()
+            shuffle="batch",
+            callbacks=callbacks)
 
         self.save_model(model, model_meta)
 

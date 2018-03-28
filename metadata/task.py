@@ -46,7 +46,7 @@ class TaskMetadata(Document, MetadataMixin):
     command = fields.StringField(choices=TASK_COMMANDS, required=True)
     date = fields.LongField(default=lambda: int(time.time()))
     config = fields.DictField(default=lambda: dict())
-    history = fields.DictField(default=lambda: dict())
+    history = fields.DictField()
 
     meta = {
         'allow_inheritance': True,
