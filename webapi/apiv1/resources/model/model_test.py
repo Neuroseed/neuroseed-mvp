@@ -27,7 +27,7 @@ class ModelTestResource:
 
         try:
             task_id = manager.test_model(config, id, user_id)
-        except errors.ModelDoesNotExist:
+        except (errors.ModelDoesNotExist, metadata.DoesNotExist):
             resp.status = falcon.HTTP_404
             resp.media = {
                 'error': 'Model does not exists'

@@ -87,8 +87,8 @@ class TestModelCommand(celery.Task):
         print('Input shape:', shape)
 
         # get x dataset
-        x = dataset['x']
-        y = dataset['y']
+        x = dataset['x'][10:]
+        y = dataset['y'][10:]
 
         # load model
         model_name = model_meta['url']
@@ -103,14 +103,14 @@ class TestModelCommand(celery.Task):
         print('Evaluate done!')
 
         if isinstance(result, collections.Iterable):
-            metrics = {metric: value for metric, value in zip(result, model.metrics_names.keys())}
+            metrics = {metric: value for value, metric in zip(result, model.metrics_names)}
         else:
             metrics = {
                 'loss': result
             }
 
         # save result
-        task_meta.config['metrics'] = metrics
+        task_meta.history['metrics'] = metrics
         task_meta.save()
 
 
