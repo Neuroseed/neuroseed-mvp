@@ -1,4 +1,5 @@
 import time
+import collections
 
 import celery
 from celery import states
@@ -202,6 +203,27 @@ class TrainModelCommand(celery.Task):
             callbacks=callbacks)
 
         self.save_model(model, model_meta)
+
+        print('Evaluate...')
+
+        result = model.evaluate(x_test, y_test, verbose=1)
+
+        print('Evaluate done!')
+
+        if isinstance(result, collections.Iterable):
+            metrics = {metric: value for value, metric in zip(result, model.metrics_names)}
+        else:
+            metrics = {
+                'loss': result
+            }
+
+        print('metrics:', metrics)
+
+        # save model metrics
+        model_meta.base.metrics = metrics
+        model_meta.save()
+
+        print('Train done!')
 
 
 @app.task(bind=True, base=TrainModelCommand, name='model.train')
