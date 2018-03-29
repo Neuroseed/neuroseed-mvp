@@ -80,7 +80,8 @@ class ModelTrainStatusResource:
         resp.status = falcon.HTTP_200
         resp.media = {
             'id': tid,
-            'config': task.config
+            'config': task.config,
+            'history': task.history
         }
 
 
@@ -100,12 +101,5 @@ class ModelTrainResult:
             }
             return
 
-        if 'history' not in task.config:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task is not completed'
-            }
-            return
-
         resp.status = falcon.HTTP_200
-        resp.media = task.config['history']
+        resp.media = task.history
