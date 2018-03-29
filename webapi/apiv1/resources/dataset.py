@@ -17,6 +17,8 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
+MAX_DATASET_SIZE = 1 * 10**9  # in bytes
+
 
 class DatasetResource:
     auth = {
@@ -97,6 +99,13 @@ class DatasetResource:
         print('Content type:', req.content_type)
         print('Content length:', req.content_length)
 
+        if req.content_length > MAX_DATASET_SIZE:
+            resp.status = falcon.HTTP_413
+            resp.media = {
+                'error': 'Dataset is too large'
+            }
+            return
+
         CHUNK_SIZE_BYTES = 4096
         env = req.env
         env.setdefault('QUERY_STRING', '')
@@ -119,6 +128,7 @@ class DatasetResource:
         else:
             logger.debug('No file item')
 
+        resp.status = falcon.HTTP_200
         resp.media = {'id': dataset_meta.id}
 
     def dataset_already_uploaded(self, req, resp, id):
