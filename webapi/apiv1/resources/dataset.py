@@ -1,4 +1,6 @@
+import os
 import logging
+import hashlib
 import uuid
 import base64
 import cgi
@@ -6,6 +8,7 @@ import cgi
 from mongoengine.queryset.visitor import Q
 import falcon
 from falcon.media.validators import jsonschema
+import h5py
 
 import metadata
 import storage
@@ -16,6 +19,24 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+MAX_DATASET_SIZE = 1 * 10**9  # in bytes
+
+
+def file_to_hash(file_path):
+    hash = hashlib.sha256()
+
+    with open(file_path, 'rb') as f:
+        while True:
+            print('read')
+            raw = f.read(1024)
+
+            if not raw:
+                break
+
+            hash.update(raw)
+
+    return hash.hexdigest()
 
 
 class DatasetResource:
@@ -97,6 +118,13 @@ class DatasetResource:
         print('Content type:', req.content_type)
         print('Content length:', req.content_length)
 
+        if req.content_length > MAX_DATASET_SIZE:
+            resp.status = falcon.HTTP_413
+            resp.media = {
+                'error': 'Dataset is too large'
+            }
+            return
+
         CHUNK_SIZE_BYTES = 4096
         env = req.env
         env.setdefault('QUERY_STRING', '')
@@ -108,6 +136,7 @@ class DatasetResource:
             url = dataset_meta.url
             file_path = storage.get_dataset_path(url)
 
+            # save dataset
             with open(file_path, 'wb') as f:
                 logger.debug('Save dataset to file {path}'.format(path=file_path))
 
@@ -116,9 +145,44 @@ class DatasetResource:
                     if not chunk:
                         break
                     f.write(chunk)
+
+            # validate hdf5
+            try:
+                with h5py.File(file_path, 'r') as f:
+                    _ = f['x']
+                    _ = f['y']
+            except OSError as err:
+                os.remove(file_path)
+
+                resp.status = falcon.HTTP_415
+                resp.media = {
+                    'error': str(err)
+                }
+                return
+            except KeyError as err:
+                os.remove(file_path)
+
+                resp.status = falcon.HTTP_415
+                resp.media = {
+                    'error': str(err)
+                }
+                return
+
+            # save dataset size
+            statinfo = os.stat(file_path)
+            file_size = statinfo.st_size
+            dataset_meta.base.size = int(file_size)
+
+            # save dataset hash
+            dataset_meta.base.hash = file_to_hash(file_path)
+
+            # change status
+            dataset_meta.status = metadata.dataset.RECEIVED
+            dataset_meta.save()
         else:
             logger.debug('No file item')
 
+        resp.status = falcon.HTTP_200
         resp.media = {'id': dataset_meta.id}
 
     def dataset_already_uploaded(self, req, resp, id):
