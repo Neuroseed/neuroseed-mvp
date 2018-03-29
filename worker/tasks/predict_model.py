@@ -109,7 +109,7 @@ class PreditctModelCommand(celery.Task):
         h5.create_dataset('y', data=result)
         h5.close()
 
-        task_meta.config['result'] = tmp_id
+        task_meta.history['result'] = tmp_id
         task_meta.save()
 
 
