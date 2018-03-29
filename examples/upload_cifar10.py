@@ -1,3 +1,4 @@
+import os
 import requests
 import jwt
 import numpy
@@ -40,7 +41,7 @@ def create_dataset_metadata():
 
 
 def cifar10_to_hdf5(file_name):
-    if os.path.exist(file_name):
+    if os.path.exists(file_name):
         return
     
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
