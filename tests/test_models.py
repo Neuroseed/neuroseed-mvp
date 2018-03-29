@@ -312,7 +312,19 @@ class TestModelsFull(TestInitAPI):
         models = result.json['models']
         self.assertEqual(len(models), number)
 
-    def test_query_slice(self):
+    def test_query_slice_on_border(self):
+        number = 20
+        [self.create_model_metadata(True, 'u1') for _ in range(number)]
+
+        from_ = 10
+        n = 20
+        query_string = 'from={f}&number={n}'.format(f=from_, n=n)
+        result = self.simulate_get('/api/v1/models/full', query_string=query_string)
+
+        self.assertEqual(result.status, falcon.HTTP_200)
+        self.assertEqual(len(result.json['models']), number - from_)
+
+    def test_query_invalid_slice(self):
         number = 5
         [self.create_model_metadata(True, 'u1') for _ in range(number)]
 

@@ -1,5 +1,6 @@
 import logging
 
+from mongoengine.queryset.visitor import Q
 import falcon
 import metadata
 
@@ -35,13 +36,6 @@ class DatasetsFullResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        datasets = metadata.DatasetMetadata.objects(is_public=True)
-        datasets_meta = self.get_datasets_meta(datasets)
-
-        if user_id:
-            datasets = metadata.DatasetMetadata.objects(is_public=False, base__owner=user_id)
-            datasets_meta = self.get_datasets_meta(datasets) + datasets_meta
-
         from_ = int(req.params.get('from', 0))
 
         if from_ < 0:
@@ -56,7 +50,13 @@ class DatasetsFullResource:
             resp.media = {'error': 'number must be greater than 0'}
             return
 
-        datasets_meta = datasets_meta[from_: from_ + number]
+        query = Q(is_public=True)
+
+        if user_id:
+            query = query | (Q(is_public=False) & Q(base__owner=user_id))
+
+        datasets = metadata.DatasetMetadata.objects(query).skip(from_).limit(number)
+        datasets_meta = self.get_datasets_meta(datasets)
 
         resp.status = falcon.HTTP_200
         resp.media = {

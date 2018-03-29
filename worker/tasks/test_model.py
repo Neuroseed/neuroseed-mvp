@@ -1,4 +1,5 @@
 import uuid
+import collections
 
 import celery
 from celery import states
@@ -59,7 +60,7 @@ class TestModelCommand(celery.Task):
         model_meta.status = metadata.model.TRAINING
         model_meta.save()
 
-        print('Start train task: {}'.format(task_meta.id))
+        print('Start test task: {}'.format(task_meta.id))
 
     def update_state_success(self, task_meta, model_meta):
         self.update_state(state=states.SUCCESS)
@@ -70,7 +71,7 @@ class TestModelCommand(celery.Task):
         model_meta.status = metadata.model.READY
         model_meta.save()
 
-        print('End train task: {}'.format(task_meta.id))
+        print('End test task: {}'.format(task_meta.id))
 
     def test_model(self, dataset_meta, model_meta, task_meta):
         config = task_meta.config
@@ -86,18 +87,30 @@ class TestModelCommand(celery.Task):
         print('Input shape:', shape)
 
         # get x dataset
-        x = dataset['x']
-        y = dataset['y']
+        x = dataset['x'][10:]
+        y = dataset['y'][10:]
 
         # load model
         model_name = model_meta['url']
         model_path = storage.get_model_path(model_name)
         model = load_model(model_path)
 
-        result = model.evaluate(x, y, verbose=0)
+        print('Model loaded')
+
+        # ETA = Estimated Time of Arrival
+        result = model.evaluate(x, y, verbose=1)
+
+        print('Evaluate done!')
+
+        if isinstance(result, collections.Iterable):
+            metrics = {metric: value for value, metric in zip(result, model.metrics_names)}
+        else:
+            metrics = {
+                'loss': result
+            }
 
         # save result
-        task_meta.config['metrics'] = result
+        task_meta.history['metrics'] = metrics
         task_meta.save()
 
 

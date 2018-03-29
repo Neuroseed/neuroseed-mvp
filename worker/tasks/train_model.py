@@ -1,5 +1,9 @@
+import time
+import collections
+
 import celery
 from celery import states
+from keras import callbacks
 from keras.models import save_model
 import h5py
 
@@ -7,6 +11,71 @@ import metadata
 import storage
 from ..app import app
 from .. import constructor
+
+
+class HistoryCallback(callbacks.Callback):
+    UPDATE_ON_BATCH = 10
+
+    def __init__(self, task, epochs, batch_in_epoch):
+        super().__init__()
+
+        self._task = task
+        self.batch_in_epoch = batch_in_epoch
+
+        task.history['batch'] = {}
+        task.history['epoch'] = {}
+
+        task.history['epochs'] = epochs
+        task.history['current_epoch'] = 0
+
+        task.history['batches'] = batch_in_epoch * epochs
+        task.history['current_batch'] = 0
+        task.save()
+
+    @property
+    def task(self):
+        return self._task
+
+    def on_batch_end(self, batch, logs=None):
+        del logs['batch']  # delete batch number
+        del logs['size']  # delete batch size
+        logs['time'] = round(time.time(), 3)  # add current time
+
+        batch_history = self.task.history['batch']
+
+        for key in logs:
+            history = batch_history.setdefault(key, [])
+            value = float(logs[key])
+            history.append(value)
+
+        current_epoch = self.task.history['current_epoch']
+        batch = (current_epoch - 1) * self.batch_in_epoch + batch
+        self.task.history['current_batch'] = batch
+
+        if batch % self.UPDATE_ON_BATCH == 0:
+            self.task.save()
+
+    def on_epoch_begin(self, epoch, logs=None):
+        self.task.history['current_epoch'] = epoch + 1
+
+        self.task.save()
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs['time'] = round(time.time(), 3)  # add current time
+
+        epoch_history = self.task.history['epoch']
+
+        for key in logs:
+            history = epoch_history.setdefault(key, [])
+            value = float(logs[key])
+            history.append(value)
+
+        self.task.history['current_epoch'] = epoch + 1
+
+        self.task.save()
+
+    def on_train_end(self, logs=None):
+        pass
 
 
 class TrainModelCommand(celery.Task):
@@ -106,6 +175,7 @@ class TrainModelCommand(celery.Task):
 
         # create keras model
         architecture = architecture_meta.architecture
+        train_examples_number = x_train.shape[0]
         shape = x_train.shape[1:]
         print('Input shape:', shape)
         model = constructor.create_model(architecture, shape)
@@ -117,19 +187,43 @@ class TrainModelCommand(celery.Task):
         batch_size = config.get('batch_size', 32)
         epochs = config.get('epochs', 1)
 
+        batch_in_epoch = train_examples_number // batch_size + 1
+
+        h = HistoryCallback(task_meta, epochs, batch_in_epoch)
+        callbacks = [h]
+
         # train keras model
-        history = model.fit(
+        model.fit(
             x_train,
             y_train,
             batch_size=batch_size,
             epochs=epochs,
             validation_data=(x_test, y_test),
-            shuffle="batch")
-
-        task_meta.config['history'] = history.history
-        task_meta.save()
+            shuffle="batch",
+            callbacks=callbacks)
 
         self.save_model(model, model_meta)
+
+        print('Evaluate...')
+
+        result = model.evaluate(x_test, y_test, verbose=1)
+
+        print('Evaluate done!')
+
+        if isinstance(result, collections.Iterable):
+            metrics = {metric: value for value, metric in zip(result, model.metrics_names)}
+        else:
+            metrics = {
+                'loss': result
+            }
+
+        print('metrics:', metrics)
+
+        # save model metrics
+        model_meta.base.metrics = metrics
+        model_meta.save()
+
+        print('Train done!')
 
 
 @app.task(bind=True, base=TrainModelCommand, name='model.train')
@@ -138,11 +232,10 @@ def init_train_model(self):
 
     task_meta = self.get_task(task_id)
 
-    dataset_id = task_meta.config['dataset']
-    dataset_meta = self.get_dataset(dataset_id)
-
     model_id = task_meta.config['model']
     model_meta = self.get_model(model_id)
+
+    dataset_meta = model_meta.base.dataset
 
     architecture_meta = model_meta.base.architecture
 
