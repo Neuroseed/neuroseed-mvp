@@ -19,15 +19,15 @@ class HistoryCallback(callbacks.Callback):
         super().__init__()
 
         self._task = task
+        self.batch_in_epoch = batch_in_epoch
+
         task.history['batch'] = {}
         task.history['epoch'] = {}
-        task.history['train'] = {}
 
         task.history['epochs'] = epochs
         task.history['current_epoch'] = 0
 
-        task.history['batch_in_epoch'] = batch_in_epoch
-        task.history['batch_in_train'] = batch_in_epoch * epochs
+        task.history['batches'] = batch_in_epoch * epochs
         task.history['current_batch'] = 0
         task.save()
 
@@ -47,6 +47,8 @@ class HistoryCallback(callbacks.Callback):
             value = float(logs[key])
             history.append(value)
 
+        current_epoch = self.task.history['current_epoch']
+        batch = (current_epoch - 1) * self.batch_in_epoch + batch
         self.task.history['current_batch'] = batch
 
         if batch % self.UPDATE_ON_BATCH == 0:
@@ -72,14 +74,7 @@ class HistoryCallback(callbacks.Callback):
         self.task.save()
 
     def on_train_end(self, logs=None):
-        train_history = self.task.history['train']
-
-        for key in logs:
-            history = train_history.setdefault(key, [])
-            value = float(logs[key])
-            history.append(value)
-
-        self.task.save()
+        pass
 
 
 class TrainModelCommand(celery.Task):
