@@ -126,7 +126,11 @@ def main(config):
     auth_middleware = NeuroseedAuthMiddleware(jwt_auth_backend)
 
     # Cross-origin resource sharing - "совместное использование ресурсов между разными источниками"
-    cors = CORS(allow_origins_list=['*'])
+    cors = CORS(
+        allow_all_origins=True,
+        allow_credentials_all_origins=True,
+        allow_all_methods=True,
+        allow_all_headers=True)
 
     middleware = [
         auth_middleware,
