@@ -12,7 +12,7 @@ import metadata
 import storage
 from . import apiv1
 from .authmiddleware import NeuroseedAuthMiddleware
-
+from .loggingmiddleware import LoggingMidleware
 
 __version__ = '0.1.0'
 
@@ -44,8 +44,11 @@ def _read(self, size, target):
     self._bytes_remaining -= len(raw)
     return raw
 
+
 import hashlib
-if hashlib.sha256(falcon.request_helpers.BoundedStream._read.__code__.co_code).hexdigest() != 'f01e0ef4b334be2ac60c8740a675223da618257bb0ae25a7a29bfbdd812be3a7':
+
+if hashlib.sha256(
+        falcon.request_helpers.BoundedStream._read.__code__.co_code).hexdigest() != 'f01e0ef4b334be2ac60c8740a675223da618257bb0ae25a7a29bfbdd812be3a7':
     logger.warning('Falcon fix BoundedStream.readline bug')
 
 falcon.request_helpers.BoundedStream._read = _read
@@ -111,6 +114,9 @@ def from_config(config_file):
     return config
 
 
+
+
+
 def main(config):
     key_file = config['auth_key_file']
 
@@ -132,14 +138,17 @@ def main(config):
         allow_all_methods=True,
         allow_all_headers=True)
 
+    logging_middleware = LoggingMidleware(logger)
+
     middleware = [
         auth_middleware,
+        logging_middleware,
         cors.middleware
     ]
 
     api = falcon.API(middleware=middleware)
     extra_handlers = {
-        #'multipart/form-data': NothingHandler()
+        # 'multipart/form-data': NothingHandler()
     }
     api.req_options.media_handlers.update(extra_handlers)
 
