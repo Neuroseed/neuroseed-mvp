@@ -6,6 +6,7 @@ import json
 import falcon
 from falcon import media
 from falcon_auth import JWTAuthBackend
+from falcon_cors import CORS
 
 import metadata
 import storage
@@ -123,7 +124,14 @@ def main(config):
         required_claims=['user_id'],
         auth_header_prefix='Bearer')
     auth_middleware = NeuroseedAuthMiddleware(jwt_auth_backend)
-    middleware = [auth_middleware]
+
+    # Cross-origin resource sharing - "совместное использование ресурсов между разными источниками"
+    cors = CORS(allow_origins_list=['*'])
+
+    middleware = [
+        auth_middleware,
+        cors.middleware
+    ]
 
     api = falcon.API(middleware=middleware)
     extra_handlers = {
