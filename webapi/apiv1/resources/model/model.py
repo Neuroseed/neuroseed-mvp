@@ -40,11 +40,10 @@ class ModelResource:
         except metadata.DoesNotExist:
             logger.debug('Model {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Model metadata does not exist'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -63,10 +62,10 @@ class ModelResource:
         }
 
     def get_description(self, req, resp):
-        resp.status = falcon.HTTP_404
-        resp.media = {
-            'error': 'Model metadata does not exist'
-        }
+        raise falcon.HTTPNotFound(
+            title="Model not found",
+            description="Model metadata does not exist"
+        )
 
     def on_post(self, req, resp, id=None):
         if id:
@@ -75,11 +74,10 @@ class ModelResource:
             self.create_model_meta(req, resp)
 
     def update_model_meta(self, req, resp, id):
-        resp.status = falcon.HTTP_400
-        resp.media = {
-            'error': 'Can not update model metadata'
-        }
-        return
+        raise falcon.HTTPBadRequest(
+            title="Bad Request",
+            description="Can not update model metadata"
+        )
 
     @jsonschema.validate(MODEL_SCHEMA)
     def create_model_meta(self, req, resp):
@@ -90,11 +88,10 @@ class ModelResource:
         try:
             architecture = metadata.ArchitectureMetadata.from_id(id=architecture_id, owner=user_id)
         except metadata.DoesNotExist:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Architectured does not exist'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
 
         # request to document mapping
         base = req.media.copy()

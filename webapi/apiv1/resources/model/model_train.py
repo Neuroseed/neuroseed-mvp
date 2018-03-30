@@ -28,18 +28,17 @@ class ModelTrainResource:
         except metadata.DoesNotExist:
             logger.debug('Model {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Model does not exists'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
 
         if model.status != metadata.model.PENDING:
-            resp.status = falcon.HTTP_304
-            resp.media = {
-                'error': 'Model already trained'
-            }
-            return
+            raise falcon.HTTPError(
+                code=falcon.HTTP_304,
+                title="Already Trained",
+                description="Model already trained"
+            )
 
         model.status = metadata.model.INITIALIZE
         model.save()
@@ -47,11 +46,10 @@ class ModelTrainResource:
         try:
             task_id = manager.train_model(req.media, id, user_id)
         except errors.ModelDoesNotExist:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Model does not exists'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
 
         logger.debug('User {uid} create task {did}'.format(uid=user_id, did=id))
 
@@ -71,11 +69,10 @@ class ModelTrainStatusResource:
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task does not exists'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Task not found",
+                description="Task metadata does not exist"
+            )
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -95,11 +92,10 @@ class ModelTrainResult:
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task does not exists'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Task not found",
+                description="Task metadata does not exist"
+            )
 
         resp.status = falcon.HTTP_200
         resp.media = task.history

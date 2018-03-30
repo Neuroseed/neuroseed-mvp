@@ -39,16 +39,18 @@ class DatasetsFullResource:
         from_ = int(req.params.get('from', 0))
 
         if from_ < 0:
-            resp.status = falcon.HTTP_400
-            resp.media = {'error': 'from must be greater than 0'}
-            return
+            raise falcon.HTTPBadRequest(
+                title="Bad Request",
+                description="From must be greater than 0"
+            )
 
         number = int(req.params.get('number', 99999))
 
         if number < 0:
-            resp.status = falcon.HTTP_400
-            resp.media = {'error': 'number must be greater than 0'}
-            return
+            raise falcon.HTTPBadRequest(
+                title="Bad Request",
+                description="Number must be greater than 0"
+            )
 
         query = Q(is_public=True)
 

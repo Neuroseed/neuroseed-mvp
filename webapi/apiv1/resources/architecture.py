@@ -40,11 +40,10 @@ class ArchitectureResource:
         except metadata.DoesNotExist:
             logger.debug('Architecture {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Architecture does not exist'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Architecture not found",
+                description="Architecture metadata does not exist"
+            )
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -58,10 +57,10 @@ class ArchitectureResource:
         }
 
     def get_description(self, req, resp):
-        resp.status = falcon.HTTP_404
-        resp.media = {
-            'error': 'Architecture does not exist'
-        }
+        raise falcon.HTTPNotFound(
+            title="Architecture not found",
+            description="Architecture metadata does not exist"
+        )
 
     def on_post(self, req, resp, id=None):
         if id:
@@ -87,10 +86,10 @@ class ArchitectureResource:
             resp.status = falcon.HTTP_200
             resp.media = {}
         else:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Architecture does not exist'
-            }
+            raise falcon.HTTPNotFound(
+                title="Architecture not found",
+                description="Architecture metadata does not exist"
+            )
 
     @jsonschema.validate(ARCHITECTURE_SCHEMA)
     def create_architecture(self, req, resp):

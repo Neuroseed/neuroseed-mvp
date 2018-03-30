@@ -28,11 +28,10 @@ class ModelTestResource:
         try:
             task_id = manager.test_model(config, id, user_id)
         except (errors.ModelDoesNotExist, metadata.DoesNotExist):
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Model does not exists'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
 
         logger.debug('User {uid} create task {tid}'.format(uid=user_id, tid=task_id))
 
@@ -52,11 +51,10 @@ class ModelTestStatusResource:
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task does not exists'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Task not found",
+                description="Task metadata does not exist"
+            )
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -75,18 +73,16 @@ class ModelTestResult:
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task does not exists'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Task not found",
+                description="Task metadata does not exist"
+            )
 
         if 'metrics' not in task.config:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task is not completed'
-            }
-            return
+            raise falcon.HTTPNotFound(
+                title="Task is not completed",
+                description="Task is not completed"
+            )
 
         resp.status = falcon.HTTP_200
         resp.media = task.config['metrics']
