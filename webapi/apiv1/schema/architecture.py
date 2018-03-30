@@ -1,3 +1,5 @@
+from .layers import LAYERS
+
 ARCHITECTURE_SCHEMA = {
     "type": "object",
     "properties": {
@@ -22,13 +24,7 @@ ARCHITECTURE_SCHEMA = {
                 "layers": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "config": {"type": "object"}
-                        },
-                        "required": ["name"],
-                        "additionalProperties": False
+                        "oneOf": LAYERS
                     },
                 }
             },
