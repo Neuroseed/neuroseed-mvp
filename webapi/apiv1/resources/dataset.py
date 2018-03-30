@@ -28,7 +28,6 @@ def file_to_hash(file_path):
 
     with open(file_path, 'rb') as f:
         while True:
-            print('read')
             raw = f.read(1024)
 
             if not raw:
