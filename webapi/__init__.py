@@ -114,7 +114,22 @@ def from_config(config_file):
     return config
 
 
+def falcon_error_serializer(_: falcon.Request, resp:falcon.Response, exc: falcon.HTTPError) -> None:
+    """ Serializer for native falcon HTTPError exceptions.
 
+    Serializes HTTPError classes as proper json:api error
+        see: http://jsonapi.org/format/#errors
+    """
+    error = {
+        'title': exc.title,
+        'error': exc.description,
+        'status': int(exc.status[0:3]),
+    }
+
+    if hasattr(exc, "link") and exc.link is not None:
+        error['links'] = {'about': exc.link['href']}
+
+    resp.body = json.dumps(error)
 
 
 def main(config):
@@ -151,6 +166,8 @@ def main(config):
         # 'multipart/form-data': NothingHandler()
     }
     api.req_options.media_handlers.update(extra_handlers)
+
+    api.set_error_serializer(falcon_error_serializer)
 
     apiv1.configure_api_v1(api, auth_middleware)
 
