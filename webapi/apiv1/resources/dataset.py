@@ -62,29 +62,27 @@ class DatasetResource:
                 dataset_meta = metadata.DatasetMetadata.from_id(**kwargs)
         except metadata.DoesNotExist:
             logger.debug('Dataset {id} does not exist'.format(id=id))
-            dataset_meta = None
 
-        if dataset_meta:
-            resp.status = falcon.HTTP_200
-            resp.media = {
-                'id': dataset_meta.id,
-                'is_public': dataset_meta.is_public,
-                'title': dataset_meta.base.title,
-                'description': dataset_meta.base.description,
-                'category': dataset_meta.base.category,
-                'labels': dataset_meta.base.labels
-            }
-        else:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Dataset metadata does not exist'
-            }
+            raise falcon.HTTPNotFound(
+                title="Dataset not found",
+                description="Dataset metadata does not exist"
+            )
+
+        resp.status = falcon.HTTP_200
+        resp.media = {
+            'id': dataset_meta.id,
+            'is_public': dataset_meta.is_public,
+            'title': dataset_meta.base.title,
+            'description': dataset_meta.base.description,
+            'category': dataset_meta.base.category,
+            'labels': dataset_meta.base.labels
+        }
     
     def get_description(self, req, resp):
-        resp.status = falcon.HTTP_404
-        resp.media = {
-            'error': 'Dataset metadata does not exist'
-        }
+        raise falcon.HTTPNotFound(
+            title="Dataset not found",
+            description="Dataset metadata does not exist"
+        )
 
     def on_post(self, req, resp, id=None):
         if id:
@@ -118,11 +116,10 @@ class DatasetResource:
         print('Content length:', req.content_length)
 
         if req.content_length > MAX_DATASET_SIZE:
-            resp.status = falcon.HTTP_413
-            resp.media = {
-                'error': 'Dataset is too large'
-            }
-            return
+            raise falcon.HTTPRequestEntityTooLarge(
+                title="Dataset is too large",
+                description="Dataset size must be less than {size} bytes".format(size=MAX_DATASET_SIZE)
+            )
 
         CHUNK_SIZE_BYTES = 4096
         env = req.env
@@ -153,19 +150,15 @@ class DatasetResource:
             except OSError as err:
                 os.remove(file_path)
 
-                resp.status = falcon.HTTP_415
-                resp.media = {
-                    'error': str(err)
-                }
-                return
+                raise falcon.HTTPUnsupportedMediaType(
+                    description="Can not open dataset. Invalid type."
+                )
             except KeyError as err:
                 os.remove(file_path)
 
-                resp.status = falcon.HTTP_415
-                resp.media = {
-                    'error': str(err)
-                }
-                return
+                raise falcon.HTTPUnsupportedMediaType(
+                    description="Dataset has not 'x' or 'y' keys"
+                )
 
             # save dataset size
             statinfo = os.stat(file_path)
@@ -186,10 +179,10 @@ class DatasetResource:
 
     def dataset_already_uploaded(self, req, resp, id):
         logger.debug('Dataset {id} alerady uploaded'.format(id=id))
-        resp.status = falcon.HTTP_405
-        resp.media = {
-            'error': 'Dataset already uploaded'
-        }
+
+        raise falcon.HTTPMethodNotAllowed(
+            title="Method Not Allowed",
+            description="Dataset already uploaded")
 
     def upload_dataset(self, req, resp, id):
         try:
@@ -209,10 +202,10 @@ class DatasetResource:
             elif dataset_meta.status == metadata.dataset.RECEIVED:
                 self.dataset_already_uploaded(req, resp, id)
         else:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Dataset metadata does not exist'
-            }
+            raise falcon.HTTPNotFound(
+                title="Dataset not found",
+                description="Dataset metadata does not exist"
+            )
 
     @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):

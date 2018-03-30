@@ -36,10 +36,10 @@ class TaskResource:
                 'config': task.configs
             }
         else:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task does not exists'
-            }
+            raise falcon.HTTPNotFound(
+                title="Task not found",
+                description="Task metadata does not exist"
+            )
 
     @jsonschema.validate(TASK_SCHEMA)
     def on_post(self, req, resp):
@@ -67,10 +67,10 @@ class TaskResource:
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
-            resp.status = falcon.HTTP_204
-            resp.media = {
-                'error': 'Task does not exists'
-            }
+            raise falcon.HTTPNotFound(
+                title="Task not found",
+                description="Task metadata does not exist"
+            )
 
         manager.terminate(id)
 
