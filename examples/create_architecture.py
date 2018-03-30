@@ -6,12 +6,42 @@ def create_architecture():
 
     architecture = {
         "layers": [
-            {"name": "input"},
-            {"name": "conv2d"},
-            {"name": "maxpooling2d"},
-            {"name": "conv2d"},
-            {"name": "flatten"},
-            {"name": "dense"}
+               {
+                   "name": "Dense",
+                   "config": {
+                       "units": 123,
+                       "activation": "asdsd",
+                       "use_bias": True,
+                       "kernel_initializer": "asdsrq",
+                       "bias_initializer": "asdasd",
+                       "kernel_regularizer": "adasdq1",
+                       "bias_regularizer": "112312",
+                       "activity_regularizer": "35654wd",
+                       "kernel_constraint": "ad123",
+                       "bias_constraint": "ad1356"
+                   }
+                },
+               {"name": "Dropout"},
+               {
+                   "name": "Conv2D",
+                   "config": {
+                       "filters": 123,
+                       "kernel_size": [1, 2, 3],
+                       "strides": [1,2],
+                       "padding": "in my ass",
+                       "dilation_rate": [1,2],
+                       "activation": "asda",
+                       "use_bias": True,
+                       "kernel_initializer": "asdsrq",
+                       "bias_initializer": "asdasd",
+                       "kernel_regularizer": "adasdq1",
+                       "bias_regularizer": "112312",
+                       "activity_regularizer": "35654wd",
+                       "kernel_constraint": "ad123",
+                       "bias_constraint": "ad1356"
+                   }
+                },
+               {"name": "Maxpooling2d"}
         ]
     }
 
