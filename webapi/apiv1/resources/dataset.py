@@ -71,6 +71,7 @@ class DatasetResource:
         resp.status = falcon.HTTP_200
         resp.media = {
             'id': dataset_meta.id,
+            'status': dataset_meta.status,
             'is_public': dataset_meta.is_public,
             'title': dataset_meta.base.title,
             'description': dataset_meta.base.description,
