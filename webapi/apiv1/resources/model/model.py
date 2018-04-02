@@ -48,6 +48,7 @@ class ModelResource:
         resp.status = falcon.HTTP_200
         resp.media = {
             'id': model_meta.id,
+            'status': model_meta.status,
             'is_public': model_meta.is_public,
             'hash': model_meta.hash,
             'owner': model_meta.base.owner,

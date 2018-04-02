@@ -72,6 +72,7 @@ class DatasetsFullResource:
         for dataset in datasets:
             dataset_meta = {
                 'id': dataset.id,
+                'status': dataset.status,
                 'is_public': dataset.is_public,
                 'title': dataset.base.title,
                 'description': dataset.base.description,

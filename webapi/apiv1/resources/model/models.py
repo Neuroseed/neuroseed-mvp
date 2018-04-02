@@ -72,6 +72,7 @@ class ModelsFullResource:
         for model in models:
             model_meta = {
                 'id': model.id,
+                'status': model.status,
                 'is_public': model.is_public,
                 'hash': model.hash,
                 'owner': model.base.owner,
