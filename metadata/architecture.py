@@ -38,4 +38,5 @@ class ArchitectureMetadata(Document, MetadataMixin):
 
     def from_dict(self, meta):
         for name in self._fields:
-            setattr(self, name, meta[name])
+            if name in meta:
+                setattr(self, name, meta[name])

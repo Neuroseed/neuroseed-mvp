@@ -92,10 +92,10 @@ class ArchitectureResource:
 
         id = req.media.get('id', None) or str(uuid.uuid4())
 
-        architecture = metadata.ArchitectureMetadata(**req.media)
-        architecture.id = id
-        architecture.owner = user_id
-        architecture.save()
+        with metadata.ArchitectureMetadata().save_context() as architecture:
+            architecture.from_dict(req.media)
+            architecture.id = id
+            architecture.owner = user_id
 
         logger.debug('User {uid} create architecture {did}'.format(uid=user_id, did=id))
 

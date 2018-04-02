@@ -207,19 +207,11 @@ class DatasetResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        base = req.media.copy()
-        document = {
-            'base': base
-        }
-        if 'is_public' in base:
-            del base['is_public']
-            document['is_public'] = req.media['is_public']
-
-        dataset_meta = metadata.DatasetMetadata(**document)
-        dataset_meta.id = str(uuid.uuid4())
-        dataset_meta.url = dataset_meta.id
-        dataset_meta.base.owner = user_id
-        dataset_meta.save()
+        with metadata.DatasetMetadata().save_context() as dataset_meta:
+            dataset_meta.from_flatten(req.media)
+            dataset_meta.id = str(uuid.uuid4())
+            dataset_meta.url = dataset_meta.id
+            dataset_meta.base.owner = user_id
 
         logger.debug('User {uid} create dataset {did}'.format(uid=user_id, did=dataset_meta.id))
 
