@@ -46,15 +46,9 @@ class ArchitectureResource:
             )
 
         resp.status = falcon.HTTP_200
-        resp.media = {
-            'id': architecture.id,
-            'is_public': architecture.is_public,
-            'owner': architecture.owner,
-            'title': architecture.title,
-            'description': architecture.description,
-            'category': architecture.category,
-            'architecture': architecture.architecture
-        }
+        architecture_dict = architecture.to_dict()
+        result_keys = ['id', 'is_public', 'owner', 'title', 'description', 'category', 'architecture']
+        resp.media = {key: architecture_dict[key] for key in result_keys if key in architecture_dict}
 
     def get_description(self, req, resp):
         raise falcon.HTTPNotFound(

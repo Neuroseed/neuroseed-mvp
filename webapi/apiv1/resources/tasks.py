@@ -63,13 +63,9 @@ class TasksFullResource:
         tasks_meta = []
 
         for task in tasks:
-            task_meta = {
-                'id': task.id,
-                'status': task.status,
-                'command': task.command,
-                'date': task.date,
-                'config': task.config
-            }
+            task_dict = task.to_dict()
+            result_keys = ['id', 'status', 'command', 'date', 'config']
+            task_meta = {key: task_dict[key] for key in result_keys if key in task_dict}
             tasks_meta.append(task_meta)
 
         return tasks_meta

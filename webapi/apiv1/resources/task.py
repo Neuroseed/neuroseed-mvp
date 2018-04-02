@@ -28,13 +28,9 @@ class TaskResource:
 
         if task:
             resp.status = falcon.HTTP_200
-            resp.media = {
-                'id': id,
-                'status': task.status,
-                'command': task.command,
-                'date': task.date,
-                'config': task.configs
-            }
+            task_dict = task.to_dict()
+            result_keys = ['id', 'status', 'command', 'date', 'config']
+            resp.media = {key: task_dict[key] for key in result_keys if key in task_dict}
         else:
             raise falcon.HTTPNotFound(
                 title="Task not found",
