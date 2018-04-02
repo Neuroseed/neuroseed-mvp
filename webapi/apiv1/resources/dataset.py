@@ -69,15 +69,9 @@ class DatasetResource:
             )
 
         resp.status = falcon.HTTP_200
-        resp.media = {
-            'id': dataset_meta.id,
-            'status': dataset_meta.status,
-            'is_public': dataset_meta.is_public,
-            'title': dataset_meta.base.title,
-            'description': dataset_meta.base.description,
-            'category': dataset_meta.base.category,
-            'labels': dataset_meta.base.labels
-        }
+        dataset_meta_dict = dataset_meta.to_dict()
+        result_keys = ['id', 'status', 'is_public', 'title', 'description', 'category', 'labels']
+        resp.media = {key: dataset_meta_dict[key] for key in result_keys if key in dataset_meta_dict}
     
     def get_description(self, req, resp):
         raise falcon.HTTPNotFound(

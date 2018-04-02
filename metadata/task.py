@@ -53,3 +53,18 @@ class TaskMetadata(Document, MetadataMixin):
         'db_alias': 'metadata',
         'collection': 'tasks'
     }
+
+    def to_dict(self):
+        meta = self.to_mongo().to_dict()
+
+        if '_id' in meta:
+            meta['id'] = meta['_id']
+            del meta['_id']
+
+        del meta['_cls']
+
+        return meta
+
+    def from_dict(self, meta):
+        for name in self._fields:
+            setattr(self, name, meta[name])

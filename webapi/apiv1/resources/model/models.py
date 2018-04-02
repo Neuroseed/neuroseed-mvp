@@ -70,21 +70,10 @@ class ModelsFullResource:
         models_meta = []
 
         for model in models:
-            model_meta = {
-                'id': model.id,
-                'status': model.status,
-                'is_public': model.is_public,
-                'hash': model.hash,
-                'owner': model.base.owner,
-                'size': model.base.size,
-                'date': model.base.date,
-                'title': model.base.title,
-                'description': model.base.description,
-                'category': model.base.category,
-                'labels': model.base.labels,
-                'metrics': model.base.metrics,
-                'dataset': model.base.dataset.id
-            }
+            model_meta_dict = model.to_dict()
+            result_keys = ['id', 'status', 'is_public', 'hash', 'owner', 'size', 'date', 'title', 'description',
+                           'category', 'labels', 'metrics', 'architecture', 'dataset']
+            model_meta = {key: model_meta_dict[key] for key in result_keys if key in model_meta_dict}
             models_meta.append(model_meta)
 
         return models_meta

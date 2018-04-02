@@ -70,15 +70,9 @@ class ArchitecturesFullResource:
         architectures_meta = []
 
         for architecture in architectures:
-            architecture_meta = {
-                'id': architecture.id,
-                'is_public': architecture.is_public,
-                'owner': architecture.owner,
-                'title': architecture.title,
-                'description': architecture.description,
-                'category': architecture.category,
-                'architecture': architecture.architecture
-            }
+            architecture_dict = architecture.to_dict()
+            result_keys = ['id', 'is_public', 'owner', 'title', 'description', 'category', 'architecture']
+            architecture_meta = {key: architecture_dict[key] for key in result_keys if key in architecture_dict}
             architectures_meta.append(architecture_meta)
 
         return architectures_meta

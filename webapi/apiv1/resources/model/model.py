@@ -46,21 +46,10 @@ class ModelResource:
             )
 
         resp.status = falcon.HTTP_200
-        resp.media = {
-            'id': model_meta.id,
-            'status': model_meta.status,
-            'is_public': model_meta.is_public,
-            'hash': model_meta.hash,
-            'owner': model_meta.base.owner,
-            'size': model_meta.base.size,
-            'date': model_meta.base.date,
-            'title': model_meta.base.title,
-            'description': model_meta.base.description,
-            'category': model_meta.base.category,
-            'labels': model_meta.base.labels,
-            'metrics': model_meta.base.metrics,
-            'dataset': model_meta.base.dataset.id
-        }
+        model_meta_dict = model_meta.to_dict()
+        result_keys = ['id', 'status', 'is_public', 'hash', 'owner', 'size', 'date', 'title', 'description',
+                       'category', 'labels', 'metrics', 'architecture', 'dataset']
+        resp.media = {key: model_meta_dict[key] for key in result_keys if key in model_meta_dict}
 
     def get_description(self, req, resp):
         raise falcon.HTTPNotFound(

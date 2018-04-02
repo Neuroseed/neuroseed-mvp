@@ -70,15 +70,9 @@ class DatasetsFullResource:
         datasets_meta = []
 
         for dataset in datasets:
-            dataset_meta = {
-                'id': dataset.id,
-                'status': dataset.status,
-                'is_public': dataset.is_public,
-                'title': dataset.base.title,
-                'description': dataset.base.description,
-                'category': dataset.base.category,
-                'labels': dataset.base.labels
-            }
+            dataset_meta_dict = dataset.to_dict()
+            result_keys = ['id', 'status', 'is_public', 'title', 'description', 'category', 'labels']
+            dataset_meta = {key: dataset_meta_dict[key] for key in result_keys if key in dataset_meta_dict}
             datasets_meta.append(dataset_meta)
 
         return datasets_meta
