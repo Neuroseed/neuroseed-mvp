@@ -42,10 +42,10 @@ class TaskResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        task = metadata.TaskMetadata(**req.media)
-        task.id = str(uuid.uuid4())
-        task.owner = user_id
-        task.save()
+        with metadata.TaskMetadata().save_context() as task:
+            task.from_dict(req.media)
+            task.id = str(uuid.uuid4())
+            task.owner = user_id
 
         logger.debug('User {uid} create model {did}'.format(uid=user_id, did=task.id))
 

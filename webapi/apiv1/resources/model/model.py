@@ -83,21 +83,26 @@ class ModelResource:
                 description="Model metadata does not exist"
             )
 
-        # request to document mapping
-        base = req.media.copy()
-        document = {
-            'base': base
-        }
-        if 'is_public' in req.media:
-            del base['is_public']
-            document['is_public'] = req.media['is_public']
+        req.media['architecture'] = architecture
+
+        dataset_id = req.media['dataset']
+        try:
+            query = Q(id=dataset_id) & (Q(is_public=True) | Q(base__owner=user_id))
+            dataset = metadata.DatasetMetadata.from_id(query)
+        except metadata.DoesNotExist:
+            raise falcon.HTTPNotFound(
+                title="Dataset not found",
+                description="Dataset metadata does not exist"
+            )
+
+        req.media['dataset'] = dataset
 
         # save model metadata to database
-        model_meta = metadata.ModelMetadata(**document)
-        model_meta.id = str(uuid.uuid4())
-        model_meta.url = model_meta.id
-        model_meta.base.owner = user_id
-        model_meta.save()
+        with metadata.ModelMetadata().save_context() as model_meta:
+            model_meta.from_flatten(req.media)
+            model_meta.id = str(uuid.uuid4())
+            model_meta.url = model_meta.id
+            model_meta.base.owner = user_id
 
         logger.debug('User {uid} create model {did}'.format(uid=user_id, did=model_meta.id))
 
