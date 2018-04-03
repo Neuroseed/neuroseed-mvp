@@ -85,25 +85,7 @@ class DatasetResource:
         else:
             self.create_dataset_meta(req, resp)
 
-    def save_dataset_v1(self, req, resp, dataset_meta):
-        """
-        Plain text base64 encoding dataset upload
-        """
-
-        url = dataset_meta.url
-        file_path = storage.get_dataset_path(url)
-
-        with open(file_path, 'wb') as f:
-            data = base64.b64decode(req.media)
-            f.write(data)
-
-        dataset_meta.status = metadata.dataset.RECEIVED
-        dataset_meta.save()
-
-        logger.debug('Dataset {id} received'.format(id=dataset_meta.id))
-        resp.media = {'id': dataset_meta.id}
-
-    def save_dataset_v2(self, req, resp, dataset_meta):
+    def save_dataset(self, req, resp, dataset_meta):
         """
         Multipart dataset upload        
         """
@@ -167,7 +149,11 @@ class DatasetResource:
             dataset_meta.status = metadata.dataset.RECEIVED
             dataset_meta.save()
         else:
-            logger.debug('No file item')
+            logger.debug('Multipart not contain file item')
+
+            raise falcon.HTTPUnsupportedMediaType(
+                description="Multipart must contain 'file' field"
+            )
 
         resp.status = falcon.HTTP_200
         resp.media = {'id': dataset_meta.id}
@@ -187,12 +173,7 @@ class DatasetResource:
 
         if dataset_meta:
             if dataset_meta.status == metadata.dataset.PENDING:
-                upload_version = 2
-
-                if upload_version == 1:
-                    self.save_dataset_v1(req, resp, dataset_meta)
-                elif upload_version == 2:
-                    self.save_dataset_v2(req, resp, dataset_meta)
+                self.save_dataset(req, resp, dataset_meta)
 
             elif dataset_meta.status == metadata.dataset.RECEIVED:
                 self.dataset_already_uploaded(req, resp, id)
