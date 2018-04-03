@@ -1,0 +1,11 @@
+{
+    "broker_url": "pyamqp://guest@rabbitmqserver:5671//",
+    "broker_use_ssl":true,
+    "result_backend": "rpc://",
+    "result_expires": 3600,
+    "task_serializer": "json",
+    "result_serializer": "json",
+    "accept_content": ["json"],
+    "timezone": "Europe/Oslo",
+    "enable_utc": true
+}

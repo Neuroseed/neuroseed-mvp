@@ -1,0 +1,9 @@
+__pycache__
+webapi.egg-info
+venv
+logs
+.idea
+.eggs
+*.py[cod]
+*.hdf5
+*.h5

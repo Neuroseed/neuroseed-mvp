@@ -1,0 +1,1 @@
+docker run -d --rm --net=host --name mongo mongo
