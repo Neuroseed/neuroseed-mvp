@@ -4,6 +4,17 @@ from keras import optimizers
 
 
 def create_model(architecture, shape):
+    if not type(architecture) is dict:
+        raise TypeError('type of architecture must be dict')
+
+    if not type(shape) in (tuple, list):
+        raise TypeError('shape must be iterable')
+
+    shape = tuple(shape)
+
+    if len(shape) == 0:
+        raise ValueError('len of shape must be greater than zero')
+
     input = output = layers.Input(shape=shape)
 
     for layer in architecture['layers']:
