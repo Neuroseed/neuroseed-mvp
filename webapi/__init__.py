@@ -48,7 +48,12 @@ def get_auth_key(key_file):
     return secret_key
 
 
-def get_auth_middleware(secret_key):
+def get_auth_middleware(secret_key=None, key_file=None):
+    if type(key_file) is str:
+        secret_key = get_auth_key(key_file)
+    elif not type(secret_key) is str:
+        raise TypeError('type of secret_key or key_file must be str')
+
     user_loader = lambda payload: payload['user_id']
     jwt_auth_backend = JWTAuthBackend(
         user_loader,
@@ -60,30 +65,36 @@ def get_auth_middleware(secret_key):
     return auth_middleware
 
 
+def get_cors_middleware():
+    cors = CORS(
+        allow_all_origins=True,
+        allow_credentials_all_origins=True,
+        allow_all_methods=True,
+        allow_all_headers=True)
+
+    return cors.middleware
+
+
 def main(config):
     if not type(config) is dict:
         raise TypeError('type of config must be dict')
 
-    key_file = config['auth_key_file']
-    secret_key = get_auth_key(key_file)
-
     middlewares = []
 
-    auth_middleware = get_auth_middleware(secret_key)
+    key_file = config['auth_key_file']
+    auth_middleware = get_auth_middleware(key_file=key_file)
     middlewares.append(auth_middleware)
 
     # Cross-origin resource sharing - "совместное использование ресурсов между разными источниками"
     use_cors = config.get('use_cors', True)
     if use_cors:
-        cors = CORS(
-            allow_all_origins=True,
-            allow_credentials_all_origins=True,
-            allow_all_methods=True,
-            allow_all_headers=True)
-        middlewares.append(cors.middleware)
+        logger.debug('User CORS')
+        cors = get_cors_middleware()
+        middlewares.append(cors)
 
     use_extend_logging = config.get('use_extend_logging', True)
     if use_extend_logging:
+        logging.debug('Use extend falcon logging')
         logging_middleware = LoggingMidleware(logger)
         middlewares.append(logging_middleware)
 
