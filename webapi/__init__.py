@@ -12,11 +12,11 @@ from .authmiddleware import NeuroseedAuthMiddleware
 from .loggingmiddleware import LoggingMidleware
 from . import serializers
 from .helpers import init_logging
+from .version import __version__
 
 # fix falcon bug
 from . import patch
 
-__version__ = '0.1.0'
 
 logger = logging.getLogger(__name__)
 

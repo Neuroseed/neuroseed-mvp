@@ -46,7 +46,7 @@ tests_require = [
 
 setup(
     name='webapi',
-    version=find_version('webapi/__init__.py'),
+    version=find_version('webapi/version.py'),
     description='webapi',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
