@@ -1,10 +1,7 @@
-import sys
-import os
 import logging
 import json
 
 import falcon
-from falcon import media
 from falcon_auth import JWTAuthBackend
 from falcon_cors import CORS
 
@@ -14,6 +11,7 @@ from . import apiv1
 from .authmiddleware import NeuroseedAuthMiddleware
 from .loggingmiddleware import LoggingMidleware
 from . import serializers
+from .helpers import init_logging
 
 # fix falcon bug
 from . import patch
@@ -21,38 +19,6 @@ from . import patch
 __version__ = '0.1.0'
 
 logger = logging.getLogger(__name__)
-
-
-def init_logging():
-    def excepthook(type, value, traceback):
-        logging.critical('Uncaught exception',
-                         exc_info=(type, value, traceback))
-
-        sys.__excepthook__(type, value, traceback)
-
-        sys.exit(1)
-
-    sys.excepthook = excepthook
-
-    if not os.path.isdir('logs'):
-        os.mkdir('logs')
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-
-    file_handler = logging.FileHandler('logs/log-web-api.txt', mode='w')
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-
-    logging.warning('Start logging')
 
 
 def from_config(config_file=None):
@@ -82,6 +48,18 @@ def get_auth_key(key_file):
     return secret_key
 
 
+def get_auth_middleware(secret_key):
+    user_loader = lambda payload: payload['user_id']
+    jwt_auth_backend = JWTAuthBackend(
+        user_loader,
+        secret_key,
+        required_claims=['user_id'],
+        auth_header_prefix='Bearer')
+    auth_middleware = NeuroseedAuthMiddleware(jwt_auth_backend)
+
+    return auth_middleware
+
+
 def main(config):
     if not type(config) is dict:
         raise TypeError('type of config must be dict')
@@ -91,13 +69,7 @@ def main(config):
 
     middlewares = []
 
-    user_loader = lambda payload: payload['user_id']
-    jwt_auth_backend = JWTAuthBackend(
-        user_loader,
-        secret_key,
-        required_claims=['user_id'],
-        auth_header_prefix='Bearer')
-    auth_middleware = NeuroseedAuthMiddleware(jwt_auth_backend)
+    auth_middleware = get_auth_middleware(secret_key)
     middlewares.append(auth_middleware)
 
     # Cross-origin resource sharing - "совместное использование ресурсов между разными источниками"
