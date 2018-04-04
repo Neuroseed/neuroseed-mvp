@@ -1,9 +1,5 @@
-import time
 import collections
 
-import celery
-from celery import states
-from keras import callbacks
 from keras.models import save_model
 import h5py
 
@@ -11,159 +7,86 @@ import metadata
 import storage
 from ..app import app
 from .. import constructor
+from .history_callback import HistoryCallback
+from . import base
 
 
-class HistoryCallback(callbacks.Callback):
-    UPDATE_ON_BATCH = 10
+class TrainModelCommand(base.BaseTask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def __init__(self, task, epochs, batches_in_epoch):
-        super().__init__()
+        self.dataset_meta = None
+        self.architecture_meta = None
+        self.model_meta = None
 
-        self._task = task
-        self.batches_in_epoch = batches_in_epoch
+    def train_model_from_meta(self):
+        task_id = self.request.id
 
-        task.history['batch'] = {}
-        task.history['epoch'] = {}
+        self.task_meta = self.get_task(task_id)
 
-        task.history['epochs'] = epochs
-        task.history['current_epoch'] = 0
+        model_id = self.task_meta.config['model']
+        self.model_meta = self.get_model(model_id)
 
-        task.history['batches'] = batches_in_epoch * epochs
-        task.history['current_batch'] = 0
+        self.dataset_meta = self.model_meta.base.dataset
 
-        task.history['batches_in_epoch'] = batches_in_epoch
-        task.history['current_batch_in_epoch'] = 0
+        self.architecture_meta = self.model_meta.base.architecture
 
-        task.save()
+        # state started
+        self.update_state_started()
 
-    @property
-    def task(self):
-        return self._task
+        config = self.task_meta.config
+        architecture = self.architecture_meta.architecture
 
-    def on_batch_end(self, batch, logs=None):
-        del logs['batch']  # delete batch number
-        del logs['size']  # delete batch size
-        logs['time'] = round(time.time(), 3)  # add current time
+        (x_train, y_train), (x_test, y_test) = self.get_dataset(self.dataset_meta)
 
-        batch_history = self.task.history['batch']
+        batch_size = config.get('batch_size', 32)
+        epochs = config.get('epochs', 1)
+        train_examples_number = x_train.shape[0]
+        batch_in_epoch = train_examples_number // batch_size + 1
 
-        for key in logs:
-            history = batch_history.setdefault(key, [])
-            value = float(logs[key])
-            history.append(value)
+        h = HistoryCallback(self.task_meta, epochs, batch_in_epoch)
+        callbacks = [h]
 
-        self.task.history['current_batch_in_epoch'] = batch
+        shape = x_train.shape[1:]
 
-        current_epoch = self.task.history['current_epoch']
-        batch = (current_epoch - 1) * self.batches_in_epoch + batch
-        self.task.history['current_batch'] = batch
+        model = self.create_model(architecture, shape)
+        metrics = self.train_model(model, x_train, y_train, x_test, y_test, config, callbacks)
 
-        if batch % self.UPDATE_ON_BATCH == 0:
-            self.task.save()
+        self.save_model(model, self.model_meta)
 
-    def on_epoch_begin(self, epoch, logs=None):
-        self.task.history['current_epoch'] = epoch + 1
-        self.task.history['current_batch'] = 0
-        self.task.history['current_batch_in_epoch'] = 0
+        # save model metrics
+        with self.model_meta.save_context():
+            self.model_meta.base.metrics = metrics
 
-        self.task.save()
+        # state success
+        self.update_state_success()
 
-    def on_epoch_end(self, epoch, logs=None):
-        logs['time'] = round(time.time(), 3)  # add current time
+    def update_state_started(self):
+        super().update_state_success()
 
-        epoch_history = self.task.history['epoch']
+        with self.model_meta.save_context():
+            self.model_meta.status = metadata.model.TRAINING
 
-        for key in logs:
-            history = epoch_history.setdefault(key, [])
-            value = float(logs[key])
-            history.append(value)
+        print('Start train task: {}'.format(self.task_meta.id))
 
-        self.task.history['current_epoch'] = epoch + 1
-        self.task.history['current_batch'] = self.batches_in_epoch * (epoch + 1)
-        self.task.history['current_batch_in_epoch'] = self.batches_in_epoch
+    def update_state_success(self):
+        super().update_state_success()
 
-        self.task.save()
+        with self.model_meta.save_context():
+            self.model_meta.status = metadata.model.READY
 
-    def on_train_end(self, logs=None):
-        pass
+        print('End train task: {}'.format(self.task_meta.id))
 
+    def open_dataset(self, file_name, *args, mode='r', **kwargs):
+        return h5py.File(file_name, *args, mode=mode, **kwargs)
 
-class TrainModelCommand(celery.Task):
-    def get_dataset(self, dataset_id):
-        try:
-            dataset_meta = metadata.DatasetMetadata.from_id(id=dataset_id)
-        except metadata.DoesNotExist:
-            print('dataset does not exist')
-            self.update_state(state=states.FAILURE)
-            raise
-
-        return dataset_meta
-
-    def get_architecture(self, architecture_id):
-        try:
-            architecture_meta = metadata.ArchitectureMetadata.from_id(id=architecture_id)
-        except metadata.DoesNotExist:
-            print('architecture does not exist')
-            self.update_state(state=states.FAILURE)
-            raise
-
-        return architecture_meta
-
-    def get_model(self, model_id):
-        try:
-            model_meta = metadata.ModelMetadata.from_id(id=model_id)
-        except metadata.DoesNotExist:
-            self.update_state(state=states.FAILURE)
-            raise
-
-        return model_meta
-
-    def get_task(self, task_id):
-        try:
-            task_meta = metadata.TaskMetadata.from_id(id=task_id)
-        except metadata.DoesNotExist:
-            self.update_state(state=states.FAILURE)
-            raise
-
-        return task_meta
-
-    def update_state_started(self, task_meta, model_meta):
-        self.update_state(state=states.STARTED)
-
-        task_meta.status = metadata.task.STARTED
-        task_meta.save()
-
-        model_meta.status = metadata.model.TRAINING
-        model_meta.save()
-
-        print('Start train task: {}'.format(task_meta.id))
-
-    def update_state_success(self, task_meta, model_meta):
-        self.update_state(state=states.SUCCESS)
-
-        task_meta.status = metadata.task.SUCCESS
-        task_meta.save()
-
-        model_meta.status = metadata.model.READY
-        model_meta.save()
-
-        print('End train task: {}'.format(task_meta.id))
-
-    def slice_dataset(self, dataset_meta):
-
-        # load dataset
-        dataset_name = dataset_meta.url
-        dataset_path = storage.get_dataset_path(dataset_name)
-        print('Open dataset:', dataset_path)
-        dataset = h5py.File(dataset_path, 'r')
-
+    def slice_dataset(self, dataset, div_factor=0.8):
         # get dataset shape
         x = dataset['x']
         y = dataset['y']
         examples = x.shape[0]
 
         # get train/test subsets
-        div_factor = 0.8
         border = int(examples * div_factor)
         x_train = x[border:]
         y_train = y[border:]
@@ -172,48 +95,22 @@ class TrainModelCommand(celery.Task):
 
         return (x_train, y_train), (x_test, y_test)
 
+    def get_dataset(self, dataset_meta):
+        dataset_name = dataset_meta.url
+        dataset_path = storage.get_dataset_path(dataset_name)
+
+        print('Open dataset:', dataset_path)
+        dataset = self.open_dataset(dataset_path)
+
+        return self.slice_dataset(dataset)
+
     def save_model(self, model, model_meta):
         # save model
         model_name = model_meta.url
         model_path = storage.get_model_path(model_name)
         save_model(model, model_path)
 
-    def train_model(self, dataset_meta, architecture_meta, model_meta, task_meta):
-        config = task_meta.config
-
-        (x_train, y_train), (x_test, y_test) = self.slice_dataset(dataset_meta)
-
-        # create keras model
-        architecture = architecture_meta.architecture
-        train_examples_number = x_train.shape[0]
-        shape = x_train.shape[1:]
-        print('Input shape:', shape)
-        model = constructor.create_model(architecture, shape)
-        model.summary()
-
-        constructor.compile_model(model, config)
-
-        # train
-        batch_size = config.get('batch_size', 32)
-        epochs = config.get('epochs', 1)
-
-        batch_in_epoch = train_examples_number // batch_size + 1
-
-        h = HistoryCallback(task_meta, epochs, batch_in_epoch)
-        callbacks = [h]
-
-        # train keras model
-        model.fit(
-            x_train,
-            y_train,
-            batch_size=batch_size,
-            epochs=epochs,
-            validation_data=(x_test, y_test),
-            shuffle="batch",
-            callbacks=callbacks)
-
-        self.save_model(model, model_meta)
-
+    def get_final_metrics(self, model, x_test, y_test):
         print('Evaluate...')
 
         result = model.evaluate(x_test, y_test, verbose=1)
@@ -227,34 +124,38 @@ class TrainModelCommand(celery.Task):
                 'loss': result
             }
 
-        print('metrics:', metrics)
+        print('Metrics:', metrics)
 
-        # save model metrics
-        model_meta.base.metrics = metrics
-        model_meta.save()
+        return metrics
+
+    def create_model(self, architecture, shape):
+        model = constructor.create_model(architecture, shape)
+        model.summary()
+
+        return model
+
+    def train_model(self, model, x_train, y_train, x_test, y_test, config, callbacks):
+        constructor.compile_model(model, config)
+
+        batch_size = config.get('batch_size', 32)
+        epochs = config.get('epochs', 1)
+
+        model.fit(
+            x_train,
+            y_train,
+            batch_size=batch_size,
+            epochs=epochs,
+            validation_data=(x_test, y_test),
+            shuffle="batch",
+            callbacks=callbacks)
+
+        metrics = self.get_final_metrics(model, x_test, y_test)
 
         print('Train done!')
+
+        return metrics
 
 
 @app.task(bind=True, base=TrainModelCommand, name='model.train')
 def init_train_model(self):
-    task_id = self.request.id
-
-    task_meta = self.get_task(task_id)
-
-    model_id = task_meta.config['model']
-    model_meta = self.get_model(model_id)
-
-    dataset_meta = model_meta.base.dataset
-
-    architecture_meta = model_meta.base.architecture
-
-    # state started
-    self.update_state_started(task_meta, model_meta)
-
-    self.train_model(dataset_meta, architecture_meta, model_meta, task_meta)
-
-    # state success
-    self.update_state_success(task_meta, model_meta)
-
-    return {}
+    return self.train_model_from_meta()

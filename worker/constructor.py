@@ -1,10 +1,12 @@
+import collections
+
 from keras import models
 from keras import layers
 from keras import optimizers
 
 
 def create_model(architecture, shape):
-    if not type(architecture) is dict:
+    if not isinstance(architecture, collections.Mapping):
         raise TypeError('type of architecture must be dict')
 
     if not type(shape) in (tuple, list):
