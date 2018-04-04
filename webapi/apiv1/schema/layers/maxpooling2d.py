@@ -5,7 +5,7 @@ MAXPOOLING2D_LAY = {
     "properties":{
         "name":{
             "type": "string",
-            "pattern": "^Maxpooling2D$"
+            "pattern": "^MaxPooling2D$"
         },
         "config":{
             "type": "object",

@@ -5,7 +5,7 @@ AVERAGEPOOLING2D_LAY = {
     "properties": {
         "name": {
             "type": "string",
-            "pattern": "^Averagepooling2D$"
+            "pattern": "^AveragePooling2D$"
         },
         "config": {
             "type": "object",
