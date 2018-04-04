@@ -2,18 +2,18 @@ import metadata
 
 AVERAGEPOOLING2D_LAY = {
     "type": "object",
-    "properties":{
-        "name":{
+    "properties": {
+        "name": {
             "type": "string",
             "pattern": "^Averagepooling2D$"
         },
-        "config":{
+        "config": {
             "type": "object",
-            "properties":{
+            "properties": {
                 "pool_size": {
                     "type": "array",
                     "maxItems": 2,
-                    "items":{
+                    "items": {
                         "type": "integer",
                     },
                 },
@@ -33,9 +33,9 @@ AVERAGEPOOLING2D_LAY = {
                     "type": "string",
                 },
             },
-        },
-        "required": ["pool_size"],
-        "additionalProperties": False
+            "required": ["pool_size"],
+            "additionalProperties": False
+        }
     },
     "required": ["name", "config"],
     "additionalProperties": False

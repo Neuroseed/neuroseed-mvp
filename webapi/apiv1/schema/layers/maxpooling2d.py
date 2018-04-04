@@ -33,9 +33,9 @@ MAXPOOLING2D_LAY = {
                     "type": "string",
                 },
             },
-        },
-        "required": ["pool_size"],
-        "additionalProperties": False
+            "required": ["pool_size"],
+            "additionalProperties": False
+        }
     },
     "required": ["name", "config"],
     "additionalProperties": False

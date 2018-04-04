@@ -10,8 +10,8 @@ FLATTEN_LAY = {
         "config": {
             "type": "object",
             "properties": {},
-        },
-        "additionalProperties": False
+            "additionalProperties": False
+        }
     },
     "required": ["name"],
     "additionalProperties": False
