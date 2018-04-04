@@ -39,7 +39,7 @@ def create_dataset_metadata():
     
     raise RuntimeError('Status_code', r.status_code, r.text)
 
-def mnist_to_hdf5(file_path):
+def mnist_to_hdf5(file_name):
     if os.path.exists(file_name):
         return
     
@@ -64,7 +64,7 @@ def mnist_to_hdf5(file_path):
     numpy.random.shuffle(x)
     numpy.random.shuffle(y)
 
-    with h5py.File(file_path, 'w') as f:
+    with h5py.File(file_name, 'w') as f:
         f.create_dataset('x', data=x, compression='gzip')
         f.create_dataset('y', data=y, compression='gzip')
 
