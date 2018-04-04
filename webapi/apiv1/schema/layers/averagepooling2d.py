@@ -5,7 +5,7 @@ AVERAGEPOOLING2D_LAY = {
     "properties":{
         "name":{
             "type": "string",
-            "pattern": "^Averagepooling2d$"
+            "pattern": "^Averagepooling2D$"
         },
         "config":{
             "type": "object",
@@ -25,12 +25,18 @@ AVERAGEPOOLING2D_LAY = {
                     },
                 },
                 "padding":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "data_format":{
+                    "maxLength": 16,
                     "type": "string",
                 },
             },
-        }
-    }
+        },
+        "required": ["pool_size"],
+        "additionalProperties": False
+    },
+    "required": ["name", "config"],
+    "additionalProperties": False
 }
