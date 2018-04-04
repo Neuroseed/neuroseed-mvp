@@ -28,6 +28,7 @@ CONV2D_LAY = {
                     },
                 },
                 "padding":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "dilation_rate":{
@@ -38,30 +39,38 @@ CONV2D_LAY = {
                     }
                 },
                 "activation":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "use_bias":{
                     "type": "boolean",
                 },
                 "kernel_initializer":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "bias_initializer":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "kernel_regularizer":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "bias_regularizer":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "activity_regularizer":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "kernel_constraint":{
+                    "maxLength": 16,
                     "type": "string",
                 },
                 "bias_constraint":{
+                    "maxLength": 16,
                     "type": "string",
                 },
             },

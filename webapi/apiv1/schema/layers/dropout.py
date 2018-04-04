@@ -30,6 +30,10 @@ DROPOUT_LAY = {
                     },
                 },
             },
+            "required": ["rate"],
+            "additionalProperties": False
         },
     },
+    "required": ["name", "config"],
+    "additionalProperties": False
 }
