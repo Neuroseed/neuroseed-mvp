@@ -24,30 +24,37 @@ DENSE_LAY = {
                     "type": "boolean",
                 },
                 "kernel_initializer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "bias_initializer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "kernel_regularizer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "bias_regularizer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "activity_regularizer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "kernel_constraint":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "bias_constraint":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },

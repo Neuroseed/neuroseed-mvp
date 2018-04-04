@@ -12,6 +12,7 @@ MAXPOOLING2D_LAY = {
             "properties":{
                 "pool_size": {
                     "type": "array",
+                    "minItems": 2,
                     "maxItems": 2,
                     "items":{
                         "type": "integer",
@@ -20,15 +21,18 @@ MAXPOOLING2D_LAY = {
                 "strides":{
                     "type": "array",
                     "minItems": 2,
+                    "maxItems": 2,
                     "items":{
                         "type": "integer",
                     },
                 },
                 "padding":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "data_format":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },

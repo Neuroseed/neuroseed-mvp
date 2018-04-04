@@ -15,30 +15,35 @@ CONV2D_LAY = {
                 },
                 "kernel_size":{
                     "type": "array",
-                    "minItems": 1,
+                    "minItems": 2,
+                    "maxItems": 2,
                     "items":{
                         "type": "integer",
                     },
                 },
                 "strides":{
                     "type": "array",
+                    "minItems": 2,
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
                     },
                 },
                 "padding":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "dilation_rate":{
                     "type": "array",
+                    "minItems": 2,
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
                     }
                 },
                 "activation":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
@@ -46,30 +51,37 @@ CONV2D_LAY = {
                     "type": "boolean",
                 },
                 "kernel_initializer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "bias_initializer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "kernel_regularizer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "bias_regularizer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "activity_regularizer":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "kernel_constraint":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },
                 "bias_constraint":{
+                    "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
                 },

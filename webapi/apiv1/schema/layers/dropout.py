@@ -18,6 +18,7 @@ DROPOUT_LAY = {
                 "noise_shape":{
                     "type": "array",
                     "minItems": 1,
+                    "maxItems": 1,
                     "items":{
                         "type": "integer",
                     },
