@@ -1,27 +1,20 @@
 import metadata
+from .constants import *
 
 CONV2D_LAY = {
     "type": "object",
-    "properties":{
-        "name":{
+    "properties": {
+        "name": {
             "type": "string",
             "pattern": "^Conv2D$"
         },
-        "config":{
+        "config": {
             "type": "object",
-            "properties":{
+            "properties": {
                 "filters": {
                     "type": "integer",
                 },
-                "kernel_size":{
-                    "type": "array",
-                    "minItems": 2,
-                    "maxItems": 2,
-                    "items":{
-                        "type": "integer",
-                    },
-                },
-                "strides":{
+                "kernel_size": {
                     "type": "array",
                     "minItems": 2,
                     "maxItems": 2,
@@ -29,12 +22,19 @@ CONV2D_LAY = {
                         "type": "integer",
                     },
                 },
-                "padding":{
-                    "minLength": 6,
-                    "maxLength": 16,
-                    "type": "string",
+                "strides": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                        "type": "integer",
+                    },
                 },
-                "dilation_rate":{
+                "padding": {
+                    "type": "string",
+                    "enum": PADDING
+                },
+                "dilation_rate": {
                     "type": "array",
                     "minItems": 2,
                     "maxItems": 2,
@@ -42,48 +42,40 @@ CONV2D_LAY = {
                         "type": "integer",
                     }
                 },
-                "activation":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "activation": {
                     "type": "string",
+                    "enum": ACTIVATIONS
                 },
-                "use_bias":{
+                "use_bias": {
                     "type": "boolean",
                 },
-                "kernel_initializer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "kernel_initializer": {
                     "type": "string",
+                    "enum": INITIALIZERS
                 },
-                "bias_initializer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "bias_initializer": {
                     "type": "string",
+                    "enum": INITIALIZERS
                 },
-                "kernel_regularizer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "kernel_regularizer": {
                     "type": "string",
+                     "enum": REGULARIZERS
                 },
-                "bias_regularizer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "bias_regularizer": {
                     "type": "string",
+                    "enum": REGULARIZERS
                 },
-                "activity_regularizer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "activity_regularizer": {
                     "type": "string",
+                    "enum": REGULARIZERS
                 },
-                "kernel_constraint":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "kernel_constraint": {
                     "type": "string",
+                    "enum": CONSTRAINTS
                 },
-                "bias_constraint":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "bias_constraint": {
                     "type": "string",
+                    "enum": CONSTRAINTS
                 },
             },
             "required": ["filters", "kernel_size"],

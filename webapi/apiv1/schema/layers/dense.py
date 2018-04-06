@@ -1,5 +1,5 @@
 import metadata
-from .constants import ACTIVATIONS
+from .constants import *
 
 DENSE_LAY = {
     "type": "object",
@@ -8,55 +8,48 @@ DENSE_LAY = {
             "type": "string",
             "pattern": "^Dense$"
                 },
-        "config":{
+        "config": {
             "type": "object",
-            "properties":{
+            "properties": {
                 "units": {
                     "minimum": 1,
                     "maximum": 10000,
                     "type": "integer",
                 },
-                "activation":{
+                "activation": {
                     "type": "string",
                     "enum": ACTIVATIONS
                 },
-                "use_bias":{
+                "use_bias": {
                     "type": "boolean",
                 },
-                "kernel_initializer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "kernel_initializer": {
                     "type": "string",
+                    "enum": INITIALIZERS
                 },
-                "bias_initializer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "bias_initializer": {
                     "type": "string",
+                    "enum": INITIALIZERS
                 },
-                "kernel_regularizer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "kernel_regularizer": {
                     "type": "string",
+                    "enum": REGULARIZERS
                 },
-                "bias_regularizer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "bias_regularizer": {
                     "type": "string",
+                    "enum": REGULARIZERS
                 },
-                "activity_regularizer":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "activity_regularizer": {
                     "type": "string",
+                    "enum": REGULARIZERS
                 },
-                "kernel_constraint":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "kernel_constraint": {
                     "type": "string",
+                    "enum": CONSTRAINTS
                 },
-                "bias_constraint":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "bias_constraint": {
                     "type": "string",
+                    "enum": CONSTRAINTS
                 },
             },
             "required": ["units"],

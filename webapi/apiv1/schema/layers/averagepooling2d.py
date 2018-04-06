@@ -1,4 +1,5 @@
 import metadata
+from .constants import *
 
 AVERAGEPOOLING2D_LAY = {
     "type": "object",
@@ -22,16 +23,15 @@ AVERAGEPOOLING2D_LAY = {
                     "type": "array",
                     "minItems": 2,
                     "maxItems": 2,
-                    "items":{
+                    "items": {
                         "type": "integer",
                     },
                 },
-                "padding":{
-                    "minLength": 6,
-                    "maxLength": 16,
+                "padding": {
                     "type": "string",
+                    "enum": PADDING
                 },
-                "data_format":{
+                "data_format": {
                     "minLength": 6,
                     "maxLength": 16,
                     "type": "string",
