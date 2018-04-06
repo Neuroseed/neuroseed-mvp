@@ -1,20 +1,35 @@
 # Neuroseed MVP
 
-Release Version 0.1.0
+Release Version 0.2.3
 
 ## Dependencies
 
-* falcon=1.4.1
 * celery==4.1.0
 * pymongo==3.6.0
-* PyJWT==1.5.3
+* mongoengine==0.15.0
+* falcon==1.4.1
+* jsonschema==2.6.0
+* PyJWT==1.6.0
+* falcon-auth==1.1.0
+* falcon-cors==1.1.7
+* gevent==1.2.2
 
 ## Install Dependencies
 
+### WEB API Dependencies
+
 ```bahs
-virtualenv venv
+python3 -m venv venv
 . venv/bin/activate
-python3 setup.py develop
+pip3 install -r requirements.txt
+```
+
+### Worker Dependencies
+
+```bahs
+python3 -m venv venv
+. venv/bin/activate
+pip3 install -r worker-requirements.txt
 ```
 
 ## Development
@@ -31,15 +46,15 @@ Start celery worker:
 python3 celery_worker.py
 ```
 
-Celery worker configuration file: repo/celery_config.json
+Celery worker configuration file: *config/celery_config.json*
 
-Start rabbitmq server (version 3.7.0):
+### Start rabbitmq server (version 3.7.0)
 
 ```bash
-docker run -d --rm --net=host --name rabbitmq rabbitmq:3.7.0
+source docker/start-rabbitmq.sh
 ```
 
-**Start Mongo Database server with Docker:**
+### Start Mongo Database server with Docker
 
 Create volume:
 
@@ -50,18 +65,57 @@ docker volume create mongov
 Run mongodb container:
 
 ```bash
-docker run -d --rm --net=host -v mongov:/data/db --name mongo mongo:3.6.0
+source docker/start-mongo.sh
 ```
 
-Run mongodb container with authentication:
+## Stop rabbitmq and mongodb
 
 ```bash
-docker run -d --rm --net=host -v mongov:/data/db --name mongo mongo:3.6.0 --auth
+docker kill rabbitmq
+docker kill mongo
+```
+
+## Usage examples
+
+Example scripts in *examples* directory.
+
+For example create upload cifar10 dataset:
+
+```bash
+python3 examples/upload_cifar10.py
+```
+
+For example train neural network on cifar10 dataset:
+
+```bash
+python3 examples/train_cnn_cifar10.py
+```
+
+## Unit Tests
+
+Install tests dependencies:
+
+```bash
+pip3 install -e .[testing]
+```
+
+Start unit tests by **bash** commands:
+
+```bash
+python3 setup.py test
 ```
 
 
 ## Production
 
-```bash
-gunicorn web_api:api
-```
+Replace authentication key: *config/auth.key*
+
+Replace certificates in *config/celery_ssl* and *config/rabbitmq*
+
+Add users for rbbitmq: *config/rabbitmq/rabbitmq.conf*
+
+Edit config files in *config* directory
+
+## Logging
+
+Logs saved in *logs* directory.
