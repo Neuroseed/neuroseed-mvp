@@ -30,12 +30,7 @@ AVERAGEPOOLING2D_LAY = {
                 "padding": {
                     "type": "string",
                     "enum": PADDING
-                },
-                "data_format": {
-                    "minLength": 6,
-                    "maxLength": 16,
-                    "type": "string",
-                },
+                }
             },
             "required": ["pool_size"],
             "additionalProperties": False
