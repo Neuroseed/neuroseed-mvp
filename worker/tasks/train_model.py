@@ -37,7 +37,11 @@ class TrainModelCommand(base.BaseTask):
         config = self.task_meta.config
         architecture = self.architecture_meta.architecture
 
-        (x_train, y_train), (x_test, y_test) = self.get_dataset(self.dataset_meta)
+        dataset = base.prepare_dataset(self.dataset_meta)
+        print('Dataset loaded')
+
+        (x_train, y_train), (x_test, y_test) = base.slice_dataset(dataset, 0.8)
+        print('Dataset sliced')
 
         batch_size = config.get('batch_size', 32)
         epochs = config.get('epochs', 1)
@@ -76,33 +80,6 @@ class TrainModelCommand(base.BaseTask):
             self.model_meta.status = metadata.model.READY
 
         print('End train task: {}'.format(self.task_meta.id))
-
-    def open_dataset(self, file_name, *args, mode='r', **kwargs):
-        return h5py.File(file_name, *args, mode=mode, **kwargs)
-
-    def slice_dataset(self, dataset, div_factor=0.8):
-        # get dataset shape
-        x = dataset['x']
-        y = dataset['y']
-        examples = x.shape[0]
-
-        # get train/test subsets
-        border = int(examples * div_factor)
-        x_train = x[border:]
-        y_train = y[border:]
-        x_test = x[:border]
-        y_test = y[:border]
-
-        return (x_train, y_train), (x_test, y_test)
-
-    def get_dataset(self, dataset_meta):
-        dataset_name = dataset_meta.url
-        dataset_path = storage.get_dataset_path(dataset_name)
-
-        print('Open dataset:', dataset_path)
-        dataset = self.open_dataset(dataset_path)
-
-        return self.slice_dataset(dataset)
 
     def save_model(self, model, model_meta):
         # save model
