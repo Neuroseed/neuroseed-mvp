@@ -1,9 +1,6 @@
-import uuid
+import traceback
 
-import celery
 from celery import states
-from keras.models import load_model
-import h5py
 
 import metadata
 import storage
@@ -69,4 +66,19 @@ class PreditctModelCommand(base.BaseTask):
 
 @app.task(bind=True, base=PreditctModelCommand, name='model.predict')
 def init_predict_model(self):
-    self.predict_from_meta()
+    task_id = self.request.id
+    task = metadata.TaskMetadata.from_id(id=task_id)
+
+    try:
+        self.predict_from_meta()
+    except Exception as ex:
+        self.update_state(state=states.STARTED)
+
+        with task.save_context():
+            task.history['error'] = {
+                'type': type(ex).__name__,
+                'error': str(ex),
+                'traceback': traceback.format_exc()
+            }
+
+        raise

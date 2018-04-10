@@ -1,6 +1,8 @@
+import traceback
 import collections
 
 from keras.models import save_model as keras_save_models
+from celery import states
 
 import metadata
 import storage
@@ -126,4 +128,16 @@ def init_train_model(self):
     task_id = self.request.id
     task = metadata.TaskMetadata.from_id(id=task_id)
 
-    return train(task=task)
+    try:
+        train(task=task)
+    except Exception as ex:
+        self.update_state(state=states.STARTED)
+
+        with task.save_context():
+            task.history['error'] = {
+                'type': type(ex).__name__,
+                'error': str(ex),
+                'traceback': traceback.format_exc()
+            }
+
+        raise

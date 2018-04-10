@@ -1,4 +1,7 @@
+import traceback
 import collections
+
+from celery import states
 
 import metadata
 from ..app import app
@@ -81,4 +84,19 @@ class TestModelCommand(base.BaseTask):
 
 @app.task(bind=True, base=TestModelCommand, name='model.test')
 def init_test_model(self):
-    self.test_from_meta()
+    task_id = self.request.id
+    task = metadata.TaskMetadata.from_id(id=task_id)
+
+    try:
+        self.test_from_meta()
+    except Exception as ex:
+        self.update_state(state=states.STARTED)
+
+        with task.save_context():
+            task.history['error'] = {
+                'type': type(ex).__name__,
+                'error': str(ex),
+                'traceback': traceback.format_exc()
+            }
+
+        raise
