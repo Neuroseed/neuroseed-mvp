@@ -1,7 +1,6 @@
 import collections
 
-from keras.models import save_model
-import h5py
+from keras.models import save_model as keras_save_models
 
 import metadata
 import storage
@@ -11,128 +10,120 @@ from .history_callback import HistoryCallback
 from . import base
 
 
-class TrainModelCommand(base.BaseTask):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+def create_model(architecture, shape):
+    model = constructor.create_model(architecture, shape)
+    model.summary()
 
-        self.dataset_meta = None
-        self.architecture_meta = None
-        self.model_meta = None
-
-    def train_model_from_meta(self):
-        task_id = self.request.id
-
-        self.task_meta = self.get_task(task_id)
-
-        model_id = self.task_meta.config['model']
-        self.model_meta = self.get_model(model_id)
-
-        self.dataset_meta = self.model_meta.base.dataset
-
-        self.architecture_meta = self.model_meta.base.architecture
-
-        # state started
-        self.update_state_started()
-
-        config = self.task_meta.config
-        architecture = self.architecture_meta.architecture
-
-        dataset = base.prepare_dataset(self.dataset_meta)
-        print('Dataset loaded')
-
-        (x_train, y_train), (x_test, y_test) = base.slice_dataset(dataset, 0.8)
-        print('Dataset sliced')
-
-        batch_size = config.get('batch_size', 32)
-        epochs = config.get('epochs', 1)
-        train_examples_number = x_train.shape[0]
-        batch_in_epoch = train_examples_number // batch_size + 1
-
-        h = HistoryCallback(self.task_meta, epochs, batch_in_epoch)
-        callbacks = [h]
-
-        shape = x_train.shape[1:]
-
-        model = self.create_model(architecture, shape)
-        metrics = self.train_model(model, x_train, y_train, x_test, y_test, config, callbacks)
-
-        self.save_model(model, self.model_meta)
-
-        # save model metrics
-        with self.model_meta.save_context():
-            self.model_meta.base.metrics = metrics
-
-        # state success
-        self.update_state_success()
-
-    def update_state_started(self):
-        super().update_state_success()
-
-        with self.model_meta.save_context():
-            self.model_meta.status = metadata.model.TRAINING
-
-        print('Start train task: {}'.format(self.task_meta.id))
-
-    def update_state_success(self):
-        super().update_state_success()
-
-        with self.model_meta.save_context():
-            self.model_meta.status = metadata.model.READY
-
-        print('End train task: {}'.format(self.task_meta.id))
-
-    def save_model(self, model, model_meta):
-        # save model
-        model_name = model_meta.url
-        model_path = storage.get_model_path(model_name)
-        save_model(model, model_path)
-
-    def get_final_metrics(self, model, x_test, y_test):
-        print('Evaluate...')
-
-        result = model.evaluate(x_test, y_test, verbose=1)
-
-        print('Evaluate done!')
-
-        if isinstance(result, collections.Iterable):
-            metrics = {metric: value for value, metric in zip(result, model.metrics_names)}
-        else:
-            metrics = {
-                'loss': result
-            }
-
-        print('Metrics:', metrics)
-
-        return metrics
-
-    def create_model(self, architecture, shape):
-        model = constructor.create_model(architecture, shape)
-        model.summary()
-
-        return model
-
-    def train_model(self, model, x_train, y_train, x_test, y_test, config, callbacks):
-        constructor.compile_model(model, config)
-
-        batch_size = config.get('batch_size', 32)
-        epochs = config.get('epochs', 1)
-
-        model.fit(
-            x_train,
-            y_train,
-            batch_size=batch_size,
-            epochs=epochs,
-            validation_data=(x_test, y_test),
-            shuffle="batch",
-            callbacks=callbacks)
-
-        metrics = self.get_final_metrics(model, x_test, y_test)
-
-        print('Train done!')
-
-        return metrics
+    return model
 
 
-@app.task(bind=True, base=TrainModelCommand, name='model.train')
+def get_final_metrics(model, x_test, y_test):
+    print('Evaluate...')
+
+    result = model.evaluate(x_test, y_test, verbose=1)
+
+    print('Evaluate done!')
+
+    if isinstance(result, collections.Iterable):
+        metrics = {metric: value for value, metric in zip(result, model.metrics_names)}
+    else:
+        metrics = {
+            'loss': result
+        }
+
+    print('Metrics:', metrics)
+
+    return metrics
+
+
+def train_model(model, x_train, y_train, x_test, y_test, config, callbacks):
+    constructor.compile_model(model, config)
+
+    batch_size = config.get('batch_size', 32)
+    epochs = config.get('epochs', 1)
+
+    model.fit(
+        x_train,
+        y_train,
+        batch_size=batch_size,
+        epochs=epochs,
+        validation_data=(x_test, y_test),
+        shuffle="batch",
+        callbacks=callbacks)
+
+    metrics = get_final_metrics(model, x_test, y_test)
+
+    print('Train done!')
+
+    return metrics
+
+
+def save_model(model, meta=None, path=None):
+    if meta:
+        model_name = meta.url
+        path = storage.get_model_path(model_name)
+
+    keras_save_models(model, path)
+
+
+def train(architecture=None, dataset_meta=None, config=None, task=None):
+    model_meta = None
+
+    if task:
+        model_id = task.config['model']
+        model_meta = metadata.ModelMetadata.from_id(id=model_id)
+
+        dataset_meta = model_meta.base.dataset
+
+        architecture_meta = model_meta.base.architecture
+        architecture = architecture_meta.architecture
+
+        config = task.config
+
+    if not config:
+        config = {}
+
+    dataset = base.prepare_dataset(dataset_meta)
+    print('Dataset loaded')
+
+    (x_train, y_train), (x_test, y_test) = base.slice_dataset(dataset, 0.8)
+    print('Dataset sliced')
+
+    batch_size = config.get('batch_size', 32)
+    epochs = config.get('epochs', 1)
+    train_examples_number = x_train.shape[0]
+    batch_in_epoch = train_examples_number // batch_size + 1
+
+    callbacks = []
+    if task:
+        h = HistoryCallback(task, epochs, batch_in_epoch)
+        callbacks.append(h)
+
+    shape = x_train.shape[1:]
+
+    model = create_model(architecture, shape)
+
+    if model_meta:
+        with model_meta.save_context():
+            model_meta.status = metadata.model.TRAINING
+
+    metrics = train_model(model, x_train, y_train, x_test, y_test, config, callbacks)
+
+    print('model meta: {}'.format(model_meta))
+    save_model(model, model_meta)
+
+    # save model metrics
+    if model_meta:
+        with model_meta.save_context():
+            model_meta.status = metadata.model.READY
+            model_meta.base.metrics = metrics
+
+    return metrics
+
+
+@app.task(bind=True, name='model.train')
 def init_train_model(self):
-    return self.train_model_from_meta()
+    task_id = self.request.id
+    task = metadata.TaskMetadata.from_id(id=task_id)
+
+    return train(task=task)

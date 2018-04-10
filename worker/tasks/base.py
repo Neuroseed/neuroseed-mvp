@@ -126,4 +126,4 @@ def slice_dataset(dataset, slice):
         y = (None, None)
         print('Warning: dataset not contain y attribute')
 
-    return x, y
+    return list(zip(x, y))

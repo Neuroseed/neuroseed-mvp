@@ -48,7 +48,7 @@ class TestModelCommand(base.BaseTask):
         dataset = base.prepare_dataset(self.dataset_meta)
         print('Dataset loaded')
 
-        (x, _), (y, _) = base.slice_dataset(dataset, 1.0)
+        (x, y), (_, _) = base.slice_dataset(dataset, 1.0)
         print('Dataset sliced')
 
         model = base.prepare_model(self.model_meta)
