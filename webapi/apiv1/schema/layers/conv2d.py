@@ -17,8 +17,8 @@ CONV2D_LAY = {
             "properties": {
                 "filters": {
                     "type": "integer",
-                    "min": 1,
-                    "max": 2**14,
+                    "minimum": 1,
+                    "maximum": 2**14,
                     "title": "Filters",
                     "description": "Number of convolution filters",
                     "default": 32

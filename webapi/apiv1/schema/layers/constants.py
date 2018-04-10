@@ -47,3 +47,8 @@ PADDING = [
     "same"
 ]
 
+INTEGERS = [
+    1,
+    2
+]
+
