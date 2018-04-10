@@ -1,102 +1,69 @@
-import uuid
 import collections
 
-import celery
-from celery import states
-from keras.models import load_model
-import h5py
-
 import metadata
-import storage
 from ..app import app
-from .. import constructor
+from . import base
 
 
-class TestModelCommand(celery.Task):
-    def get_dataset(self, dataset_id):
-        try:
-            dataset_meta = metadata.DatasetMetadata.from_id(id=dataset_id)
-        except metadata.DoesNotExist:
-            print('dataset does not exist')
-            self.update_state(state=states.FAILURE)
-            raise
+class TestModelCommand(base.BaseTask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        return dataset_meta
+        self.dataset_meta = None
+        self.architecture_meta = None
+        self.model_meta = None
 
-    def get_architecture(self, architecture_id):
-        try:
-            architecture_meta = metadata.ArchitectureMetadata.from_id(id=architecture_id)
-        except metadata.DoesNotExist:
-            print('architecture does not exist')
-            self.update_state(state=states.FAILURE)
-            raise
+    def update_state_started(self):
+        super().update_state_success()
 
-        return architecture_meta
+        with self.model_meta.save_context():
+            self.model_meta.status = metadata.model.TESTING
 
-    def get_model(self, model_id):
-        try:
-            model_meta = metadata.ModelMetadata.from_id(id=model_id)
-        except metadata.DoesNotExist:
-            self.update_state(state=states.FAILURE)
-            raise
+        print('Start test task: {}'.format(self.task_meta.id))
 
-        return model_meta
+    def update_state_success(self):
+        super().update_state_success()
 
-    def get_task(self, task_id):
-        try:
-            task_meta = metadata.TaskMetadata.from_id(id=task_id)
-        except metadata.DoesNotExist:
-            self.update_state(state=states.FAILURE)
-            raise
+        with self.model_meta.save_context():
+            self.model_meta.status = metadata.model.READY
 
-        return task_meta
+        print('End test task: {}'.format(self.task_meta.id))
 
-    def update_state_started(self, task_meta, model_meta):
-        self.update_state(state=states.STARTED)
+    def test_from_meta(self):
+        task_id = self.request.id
 
-        task_meta.status = metadata.task.STARTED
-        task_meta.save()
+        self.task_meta = self.get_task(task_id)
 
-        model_meta.status = metadata.model.TRAINING
-        model_meta.save()
+        config = self.task_meta.config
 
-        print('Start test task: {}'.format(task_meta.id))
+        dataset_id = config['dataset']
+        self.dataset_meta = self.get_dataset(dataset_id)
 
-    def update_state_success(self, task_meta, model_meta):
-        self.update_state(state=states.SUCCESS)
+        model_id = config['model']
+        self.model_meta = self.get_model(model_id)
 
-        task_meta.status = metadata.task.SUCCESS
-        task_meta.save()
+        # state started
+        self.update_state_started()
 
-        model_meta.status = metadata.model.READY
-        model_meta.save()
+        dataset = base.prepare_dataset(self.dataset_meta)
+        print('Dataset loaded')
 
-        print('End test task: {}'.format(task_meta.id))
+        (x, _), (y, _) = base.slice_dataset(dataset, 1.0)
+        print('Dataset sliced')
 
-    def test_model(self, dataset_meta, model_meta, task_meta):
-        config = task_meta.config
-
-        # load dataset
-        dataset_name = dataset_meta.url
-        dataset_path = storage.get_dataset_path(dataset_name)
-        print('Open dataset:', dataset_path)
-        dataset = h5py.File(dataset_path, 'r')
-
-        # get dataset shape
-        shape = dataset['x'].shape[1:]
-        print('Input shape:', shape)
-
-        # get x dataset
-        x = dataset['x'][10:]
-        y = dataset['y'][10:]
-
-        # load model
-        model_name = model_meta['url']
-        model_path = storage.get_model_path(model_name)
-        model = load_model(model_path)
-
+        model = base.prepare_model(self.model_meta)
         print('Model loaded')
 
+        metrics = self.test_model(x, y, model)
+
+        # save result
+        with self.task_meta.save_context():
+            self.task_meta.history['metrics'] = metrics
+
+        # state success
+        self.update_state_success()
+
+    def test_model(self, x, y, model):
         # ETA = Estimated Time of Arrival
         result = model.evaluate(x, y, verbose=1)
 
@@ -109,29 +76,9 @@ class TestModelCommand(celery.Task):
                 'loss': result
             }
 
-        # save result
-        task_meta.history['metrics'] = metrics
-        task_meta.save()
+        return metrics
 
 
 @app.task(bind=True, base=TestModelCommand, name='model.test')
 def init_test_model(self):
-    task_id = self.request.id
-
-    task_meta = self.get_task(task_id)
-
-    dataset_id = task_meta.config['dataset']
-    dataset_meta = self.get_dataset(dataset_id)
-
-    model_id = task_meta.config['model']
-    model_meta = self.get_model(model_id)
-
-    # state started
-    self.update_state_started(task_meta, model_meta)
-
-    self.test_model(dataset_meta, model_meta, task_meta)
-
-    # state success
-    self.update_state_success(task_meta, model_meta)
-
-    return {}
+    self.test_from_meta()

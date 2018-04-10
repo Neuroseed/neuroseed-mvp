@@ -2,6 +2,8 @@ import os
 from os import path
 import json
 
+import h5py
+
 HOME_DIR = 'home'
 
 
@@ -23,6 +25,15 @@ def from_config(config_file):
 
 def get_dataset_path(name):
     return path.join(HOME_DIR, 'datasets', name + '.hdf5')
+
+
+def open_dataset(url, *args, prefix=None, **kwargs):
+    if prefix is None:
+        url = get_dataset_path(url)
+    if prefix:
+        url = path.join(prefix, url)
+
+    return h5py.File(url, *args, **kwargs)
 
 
 def get_model_path(name):
