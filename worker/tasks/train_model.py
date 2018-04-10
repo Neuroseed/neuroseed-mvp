@@ -68,38 +68,38 @@ def save_model(model, meta=None, path=None):
     keras_save_models(model, path)
 
 
-def train(architecture=None, dataset_meta=None, config=None, task=None):
-    model_meta = None
+def train_on_task(task):
+    model_id = task.config['model']
+    model_meta = metadata.ModelMetadata.from_id(id=model_id)
 
-    if task:
-        model_id = task.config['model']
-        model_meta = metadata.ModelMetadata.from_id(id=model_id)
+    config = task.config
 
-        dataset_meta = model_meta.base.dataset
-
-        architecture_meta = model_meta.base.architecture
-        architecture = architecture_meta.architecture
-
-        config = task.config
-
-    if not config:
-        config = {}
-
+    dataset_meta = model_meta.base.dataset
     dataset = base.prepare_dataset(dataset_meta)
-    print('Dataset loaded')
-
-    (x_train, y_train), (x_test, y_test) = base.slice_dataset(dataset, 0.8)
-    print('Dataset sliced')
+    (x_train, _), _ = base.slice_dataset(dataset, 1.0)
 
     batch_size = config.get('batch_size', 32)
     epochs = config.get('epochs', 1)
     train_examples_number = x_train.shape[0]
     batch_in_epoch = train_examples_number // batch_size + 1
 
-    callbacks = []
-    if task:
-        h = HistoryCallback(task, epochs, batch_in_epoch)
-        callbacks.append(h)
+    h = HistoryCallback(task, epochs, batch_in_epoch)
+    callbacks = [h]
+
+    return train_on_model(model_meta, config, callbacks)
+
+
+def train_on_model(model_meta, config, callbacks=[]):
+    dataset_meta = model_meta.base.dataset
+
+    architecture_meta = model_meta.base.architecture
+    architecture = architecture_meta.architecture
+
+    dataset = base.prepare_dataset(dataset_meta)
+    print('Dataset loaded')
+
+    (x_train, y_train), (x_test, y_test) = base.slice_dataset(dataset, 0.8)
+    print('Dataset sliced')
 
     shape = x_train.shape[1:]
 
@@ -129,7 +129,7 @@ def init_train_model(self):
     task = metadata.TaskMetadata.from_id(id=task_id)
 
     try:
-        train(task=task)
+        train_on_task(task)
     except Exception as ex:
         self.update_state(state=states.STARTED)
 

@@ -32,6 +32,11 @@ def open_dataset(url, *args, prefix=None, **kwargs):
         url = get_dataset_path(url)
     if prefix:
         url = path.join(prefix, url)
+        url = get_tmp_path(url)
+
+        dir = os.path.dirname(url)
+        if not os.path.exists(dir):
+            os.makedirs(dir, exist_ok=True)
 
     return h5py.File(url, *args, **kwargs)
 
