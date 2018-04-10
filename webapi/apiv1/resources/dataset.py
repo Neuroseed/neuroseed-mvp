@@ -89,8 +89,6 @@ class DatasetResource:
         """
         Multipart dataset upload        
         """
-        print('Content type:', req.content_type)
-        print('Content length:', req.content_length)
 
         if req.content_length > MAX_DATASET_SIZE:
             raise falcon.HTTPRequestEntityTooLarge(
