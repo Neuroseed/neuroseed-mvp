@@ -1,17 +1,14 @@
-import os
 import logging
 import hashlib
 import uuid
-import base64
 import cgi
 
 from mongoengine.queryset.visitor import Q
 import falcon
 from falcon.media.validators import jsonschema
-import h5py
 
 import metadata
-import storage
+import manager
 from ..schema.dataset import DATASET_SCHEMA
 
 __all__ = [
@@ -21,21 +18,6 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 MAX_DATASET_SIZE = 1 * 10**9  # in bytes
-
-
-def file_to_hash(file_path):
-    hash = hashlib.sha256()
-
-    with open(file_path, 'rb') as f:
-        while True:
-            raw = f.read(1024)
-
-            if not raw:
-                break
-
-            hash.update(raw)
-
-    return hash.hexdigest()
 
 
 class DatasetResource:
@@ -98,7 +80,6 @@ class DatasetResource:
                 description="Dataset size must be less than {size} bytes".format(size=MAX_DATASET_SIZE)
             )
 
-        CHUNK_SIZE_BYTES = 4096
         env = req.env
         env.setdefault('QUERY_STRING', '')
 
@@ -106,48 +87,18 @@ class DatasetResource:
 
         file_item = form['file']
         if file_item.file:
-            url = dataset_meta.url
-            file_path = storage.get_dataset_path(url)
+            file = file_item.file
 
-            # save dataset
-            with open(file_path, 'wb') as f:
-                logger.debug('Save dataset to file {path}'.format(path=file_path))
-
-                while True:
-                    chunk = file_item.file.read(CHUNK_SIZE_BYTES)
-                    if not chunk:
-                        break
-                    f.write(chunk)
-
-            # validate hdf5
             try:
-                with h5py.File(file_path, 'r') as f:
-                    _ = f['x']
-                    _ = f['y']
+                manager.save_dataset(dataset_meta, file)
             except OSError as err:
-                os.remove(file_path)
-
                 raise falcon.HTTPUnsupportedMediaType(
                     description="Can not open dataset. Invalid type."
                 )
             except KeyError as err:
-                os.remove(file_path)
-
                 raise falcon.HTTPUnsupportedMediaType(
                     description="Dataset has not 'x' or 'y' keys"
                 )
-
-            # save dataset size
-            statinfo = os.stat(file_path)
-            file_size = statinfo.st_size
-            dataset_meta.base.size = int(file_size)
-
-            # save dataset hash
-            dataset_meta.base.hash = file_to_hash(file_path)
-
-            # change status
-            dataset_meta.status = metadata.dataset.RECEIVED
-            dataset_meta.save()
         else:
             logger.debug('Multipart not contain file item')
 
