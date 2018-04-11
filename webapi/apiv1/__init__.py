@@ -109,8 +109,9 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'tasks/number', tasks_number_resource)
 
     # schema resource
-    schema_layers_resource = SchemaLayersResource()
-    api.add_route(BASE + 'schema/layers', schema_layers_resource)
+    schema_model_layers_resource = SchemaModelLayersResource()
+    api.add_route(BASE + 'schema/model/layers', schema_model_layers_resource)
+    api.add_route(BASE + 'schema/layers', schema_model_layers_resource)  # TODO: delete line
 
     schema_dataset_resource = SchemaDatasetResource()
     api.add_route(BASE + 'schema/dataset', schema_dataset_resource)

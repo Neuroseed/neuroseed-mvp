@@ -11,7 +11,7 @@ from ..schema import layers
 
 
 __all__ = [
-    'SchemaLayersResource',
+    'SchemaModelLayersResource',
     'SchemaDatasetResource',
     'SchemaArchitectureResource',
     'SchemaModelResource',
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class SchemaLayersResource:
+class SchemaModelLayersResource:
     auth = {
         'exempt_methods': ['GET']
     }
