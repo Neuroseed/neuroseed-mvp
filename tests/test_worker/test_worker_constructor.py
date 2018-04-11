@@ -5,7 +5,7 @@ from keras import models
 from worker import constructor
 
 
-class TestWorker(unittest.TestCase):
+class TestConstructor(unittest.TestCase):
     def test_constructor(self):
         layers = [
             {
