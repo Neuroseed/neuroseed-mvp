@@ -3,7 +3,6 @@ from .layers import LAYERS
 ARCHITECTURE_SCHEMA = {
     "type": "object",
     "properties": {
-        "id": {"type": "string"},
         "is_public": {"type": "boolean"},
         "title": {
             "type": "string",

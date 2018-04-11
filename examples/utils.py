@@ -56,3 +56,10 @@ def post(*args, **kwargs):
     headers.update(get_auth_header())
 
     return requests.post(*args, **kwargs)
+
+
+def delete(*args, **kwargs):
+    headers = kwargs.setdefault('headers', {})
+    headers.update(get_auth_header())
+
+    return requests.delete(*args, **kwargs)

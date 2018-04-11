@@ -1,5 +1,6 @@
 
 ACTIVATIONS = [
+   "linear",
    "softmax",
    "elu",
    "selu",
