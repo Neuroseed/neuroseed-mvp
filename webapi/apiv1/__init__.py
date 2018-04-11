@@ -108,4 +108,29 @@ def configure_api_v1(api, auth):
     tasks_number_resource = TasksNumberResource()
     api.add_route(BASE + 'tasks/number', tasks_number_resource)
 
+    # schema resource
+    schema_layers_resource = SchemaLayersResource()
+    api.add_route(BASE + 'schema/layers', schema_layers_resource)
+
+    schema_dataset_resource = SchemaDatasetResource()
+    api.add_route(BASE + 'schema/dataset', schema_dataset_resource)
+
+    schema_architecture_resource = SchemaArchitectureResource()
+    api.add_route(BASE + 'schema/architecture', schema_architecture_resource)
+
+    schema_model_resource = SchemaModelResource()
+    api.add_route(BASE + 'schema/model', schema_model_resource)
+
+    schema_model_train_resource = SchemaModelTrainResource()
+    api.add_route(BASE + 'schema/model/train', schema_model_train_resource)
+
+    schema_model_test_resource = SchemaModelTestResource()
+    api.add_route(BASE + 'schema/model/test', schema_model_test_resource)
+
+    schema_model_predict_resource = SchemaModelPredictResource()
+    api.add_route(BASE + 'schema/model/predict', schema_model_predict_resource)
+
+    schema_task_resource = SchemaTaskResource()
+    api.add_route(BASE + 'schema/task', schema_task_resource)
+
     logger.debug('api v1 initialized')

@@ -8,3 +8,5 @@ from .model import *
 
 from .task import *
 from .tasks import *
+
+from .schema import *
