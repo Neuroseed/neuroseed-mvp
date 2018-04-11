@@ -69,6 +69,7 @@ class TaskResource:
             )
 
         manager.terminate(id)
+        task.delete()
 
         resp.status = falcon.HTTP_200
         resp.media = {}
