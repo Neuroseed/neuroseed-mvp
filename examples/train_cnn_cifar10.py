@@ -13,7 +13,12 @@ def create_architecture():
                     "kernel_size": [3, 3]
                 }
             },
-            {"name": "MaxPooling2D"},
+            {
+                "name": "MaxPooling2D",
+                "config": {
+                    "pool_size": [2, 2]
+                }
+            },
             {
                 "name": "Conv2D",
                 "config": {
@@ -69,7 +74,7 @@ def train_cnn_cifar10(model_id):
     url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=model_id)
 
     config = {
-        "epochs": 3,
+        "epochs": 1,
         "optimizer": {
             "name": "SGD"
         },
