@@ -22,7 +22,7 @@ AVERAGEPOOLING2D_LAY = {
                     "items": {
                         "type": "integer",
                         "minimum": 2,
-                        "maximum": 2*10,
+                        "maximum": 2**10,
                     },
                     "title": "Pool size",
                     "default": [2, 2]
@@ -34,7 +34,7 @@ AVERAGEPOOLING2D_LAY = {
                     "items": {
                         "type": "integer",
                         "minimum": 2,
-                        "maximum": 2*10
+                        "maximum": 2**10
                     },
                     "title": "Strides",
                     "default": None

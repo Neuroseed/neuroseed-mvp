@@ -78,48 +78,48 @@ CONV2D_LAY = {
                     "title": "Use bias",
                     "default": True
                 },
-                "kernel_initializer": {
-                    "type": "string",
-                    "enum": INITIALIZERS,
-                    "title": "Kernel initializer",
-                    "default": None
-                },
-                "bias_initializer": {
-                    "type": "string",
-                    "enum": INITIALIZERS,
-                    "title": "Bias initializer",
-                    "default": None
-                },
-                "kernel_regularizer": {
-                    "type": "string",
-                     "enum": REGULARIZERS,
-                    "title": "Kernel regularizer",
-                    "default": None
-                },
-                "bias_regularizer": {
-                    "type": "string",
-                    "enum": REGULARIZERS,
-                    "title": "Bias regularizer",
-                    "default": None
-                },
-                "activity_regularizer": {
-                    "type": "string",
-                    "enum": REGULARIZERS,
-                    "title": "Activity regularizer",
-                    "default": None
-                },
-                "kernel_constraint": {
-                    "type": "string",
-                    "enum": CONSTRAINTS,
-                    "title": "Kernel constraint",
-                    "default": None
-                },
-                "bias_constraint": {
-                    "type": "string",
-                    "enum": CONSTRAINTS,
-                    "title": "Bias constraint",
-                    "default": None
-                },
+                # "kernel_initializer": {
+                #     "type": "string",
+                #     "enum": INITIALIZERS,
+                #     "title": "Kernel initializer",
+                #     "default": None
+                # },
+                # "bias_initializer": {
+                #     "type": "string",
+                #     "enum": INITIALIZERS,
+                #     "title": "Bias initializer",
+                #     "default": None
+                # },
+                # "kernel_regularizer": {
+                #     "type": "string",
+                #      "enum": REGULARIZERS,
+                #     "title": "Kernel regularizer",
+                #     "default": None
+                # },
+                # "bias_regularizer": {
+                #     "type": "string",
+                #     "enum": REGULARIZERS,
+                #     "title": "Bias regularizer",
+                #     "default": None
+                # },
+                # "activity_regularizer": {
+                #     "type": "string",
+                #     "enum": REGULARIZERS,
+                #     "title": "Activity regularizer",
+                #     "default": None
+                # },
+                # "kernel_constraint": {
+                #     "type": "string",
+                #     "enum": CONSTRAINTS,
+                #     "title": "Kernel constraint",
+                #     "default": None
+                # },
+                # "bias_constraint": {
+                #     "type": "string",
+                #     "enum": CONSTRAINTS,
+                #     "title": "Bias constraint",
+                #     "default": None
+                # },
             },
             "required": ["filters", "kernel_size"],
             "additionalProperties": False

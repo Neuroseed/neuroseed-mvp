@@ -21,25 +21,25 @@ DROPOUT_LAY = {
                     "title": "Rate",
                     "default": 0.25
                 },
-                "noise_shape": {
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 5,
-                    "items": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "maximum": 2*20,
-                    },
-                    "title": "Noise shape",
-                    "default": None
-                },
-                "seed": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 2*10,
-                    "title": "Seed",
-                    "default": None
-                },
+                # "noise_shape": {
+                #     "type": "array",
+                #     "minItems": 1,
+                #     "maxItems": 5,
+                #     "items": {
+                #         "type": "integer",
+                #         "minimum": 1,
+                #         "maximum": 2**20,
+                #     },
+                #     "title": "Noise shape",
+                #     "default": None
+                # },
+                # "seed": {
+                #     "type": "integer",
+                #     "minimum": 1,
+                #     "maximum": 2**10,
+                #     "title": "Seed",
+                #     "default": None
+                # },
             },
             "required": ["rate"],
             "additionalProperties": False
