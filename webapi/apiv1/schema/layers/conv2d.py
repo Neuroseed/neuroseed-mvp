@@ -1,68 +1,81 @@
 import metadata
+from .constants import *
 
 CONV2D_LAY = {
     "type": "object",
-    "properties":{
-        "name":{
+    "properties": {
+        "name": {
             "type": "string",
             "pattern": "^Conv2D$"
         },
-        "config":{
+        "config": {
             "type": "object",
-            "properties":{
+            "properties": {
                 "filters": {
                     "type": "integer",
                 },
-                "kernel_size":{
+                "kernel_size": {
                     "type": "array",
-                    "minItems": 1,
-                    "items":{
-                        "type": "integer",
-                    },
-                },
-                "strides":{
-                    "type": "array",
+                    "minItems": 2,
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
                     },
                 },
-                "padding":{
-                    "type": "string",
-                },
-                "dilation_rate":{
+                "strides": {
                     "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                        "type": "integer",
+                    },
+                },
+                "padding": {
+                    "type": "string",
+                    "enum": PADDING
+                },
+                "dilation_rate": {
+                    "type": "array",
+                    "minItems": 2,
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
                     }
                 },
-                "activation":{
+                "activation": {
                     "type": "string",
+                    "enum": ACTIVATIONS
                 },
-                "use_bias":{
+                "use_bias": {
                     "type": "boolean",
                 },
-                "kernel_initializer":{
+                "kernel_initializer": {
                     "type": "string",
+                    "enum": INITIALIZERS
                 },
-                "bias_initializer":{
+                "bias_initializer": {
                     "type": "string",
+                    "enum": INITIALIZERS
                 },
-                "kernel_regularizer":{
+                "kernel_regularizer": {
                     "type": "string",
+                     "enum": REGULARIZERS
                 },
-                "bias_regularizer":{
+                "bias_regularizer": {
                     "type": "string",
+                    "enum": REGULARIZERS
                 },
-                "activity_regularizer":{
+                "activity_regularizer": {
                     "type": "string",
+                    "enum": REGULARIZERS
                 },
-                "kernel_constraint":{
+                "kernel_constraint": {
                     "type": "string",
+                    "enum": CONSTRAINTS
                 },
-                "bias_constraint":{
+                "bias_constraint": {
                     "type": "string",
+                    "enum": CONSTRAINTS
                 },
             },
             "required": ["filters", "kernel_size"],

@@ -1,136 +1,68 @@
-import uuid
+import traceback
 
-import celery
 from celery import states
-from keras.models import load_model
-import h5py
 
 import metadata
 import storage
 from ..app import app
-from .. import constructor
+from . import base
 
 
-class PreditctModelCommand(celery.Task):
-    def get_dataset(self, dataset_id):
-        try:
-            dataset_meta = metadata.DatasetMetadata.from_id(id=dataset_id)
-        except metadata.DoesNotExist:
-            print('dataset does not exist')
-            self.update_state(state=states.FAILURE)
-            raise
+def predict_model(model, x):
 
-        return dataset_meta
+    result = model.predict(x, verbose=1)
 
-    def get_architecture(self, architecture_id):
-        try:
-            architecture_meta = metadata.ArchitectureMetadata.from_id(id=architecture_id)
-        except metadata.DoesNotExist:
-            print('architecture does not exist')
-            self.update_state(state=states.FAILURE)
-            raise
+    print('Predict done!')
 
-        return architecture_meta
+    return result
 
-    def get_model(self, model_id):
-        try:
-            model_meta = metadata.ModelMetadata.from_id(id=model_id)
-        except metadata.DoesNotExist:
-            self.update_state(state=states.FAILURE)
-            raise
 
-        return model_meta
+def predict_on_task(task):
+    config = task.config
 
-    def get_task(self, task_id):
-        try:
-            task_meta = metadata.TaskMetadata.from_id(id=task_id)
-        except metadata.DoesNotExist:
-            self.update_state(state=states.FAILURE)
-            raise
+    dataset_id = config['dataset']
+    dataset_meta = metadata.DatasetMetadata.from_id(id=dataset_id)
 
-        return task_meta
+    model_id = config['model']
+    model_meta = metadata.ModelMetadata.from_id(id=model_id)
 
-    def update_state_started(self, task_meta, model_meta):
-        self.update_state(state=states.STARTED)
+    dataset = base.prepare_dataset(dataset_meta)
+    print('Dataset loaded')
 
-        task_meta.status = metadata.task.STARTED
-        task_meta.save()
+    (x, _), _ = base.slice_dataset(dataset, 1.0)
+    print('Dataset sliced')
 
-        model_meta.status = metadata.model.TRAINING
-        model_meta.save()
+    model = base.prepare_model(model_meta)
+    print('Model loaded')
 
-        print('Start predict task: {}'.format(task_meta.id))
+    result = predict_model(model, x)
 
-    def update_state_success(self, task_meta, model_meta):
-        self.update_state(state=states.SUCCESS)
+    # save result
+    tmp_id = task.id
+    tmp_name = tmp_id + '.hdf5'
 
-        task_meta.status = metadata.task.SUCCESS
-        task_meta.save()
-
-        model_meta.status = metadata.model.READY
-        model_meta.save()
-
-        print('End predict task: {}'.format(task_meta.id))
-
-    def predict_model(self, dataset_meta, model_meta, task_meta):
-        config = task_meta.config
-
-        # load dataset
-        dataset_name = dataset_meta.url
-        dataset_path = storage.get_dataset_path(dataset_name)
-        print('Open dataset:', dataset_path)
-        dataset = h5py.File(dataset_path, 'r')
-
-        # get dataset shape
-        shape = dataset['x'].shape[1:]
-        print('Input shape:', shape)
-
-        # get x dataset
-        x = dataset['x']
-
-        # load model
-        model_name = model_meta['url']
-        model_path = storage.get_model_path(model_name)
-        model = load_model(model_path)
-
-        print('Model loaded')
-
-        result = model.predict(x, verbose=1)
-
-        print('Predict done!')
-
-        # save result
-        tmp_id = str(uuid.uuid4())
-        tmp_name = tmp_id + '.hdf5'
-        tmp_path = storage.get_tmp_path(tmp_name)
-        print("Save result to:", tmp_path)
-
-        h5 = h5py.File(tmp_path, 'w')
+    with storage.open_dataset(tmp_name, mode='w', prefix='tmp') as h5:
         h5.create_dataset('y', data=result)
-        h5.close()
 
-        task_meta.history['result'] = tmp_id
-        task_meta.save()
+    with task.save_context():
+        task.history['result'] = tmp_id
 
 
-@app.task(bind=True, base=PreditctModelCommand, name='model.predict')
+@app.task(bind=True, name='model.predict')
 def init_predict_model(self):
     task_id = self.request.id
+    task = metadata.TaskMetadata.from_id(id=task_id)
 
-    task_meta = self.get_task(task_id)
+    try:
+        predict_on_task(task)
+    except Exception as ex:
+        self.update_state(state=states.STARTED)
 
-    dataset_id = task_meta.config['dataset']
-    dataset_meta = self.get_dataset(dataset_id)
+        with task.save_context():
+            task.history['error'] = {
+                'type': type(ex).__name__,
+                'error': str(ex),
+                'traceback': traceback.format_exc()
+            }
 
-    model_id = task_meta.config['model']
-    model_meta = self.get_model(model_id)
-
-    # state started
-    self.update_state_started(task_meta, model_meta)
-
-    self.predict_model(dataset_meta, model_meta, task_meta)
-
-    # state success
-    self.update_state_success(task_meta, model_meta)
-
-    return {}
+        raise

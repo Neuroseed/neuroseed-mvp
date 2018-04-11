@@ -1,36 +1,41 @@
 import metadata
+from .constants import *
 
 MAXPOOLING2D_LAY = {
     "type": "object",
-    "properties":{
-        "name":{
+    "properties": {
+        "name": {
             "type": "string",
-            "pattern": "^Maxpooling2d$"
+            "pattern": "^MaxPooling2D$"
         },
-        "config":{
+        "config": {
             "type": "object",
-            "properties":{
+            "properties": {
                 "pool_size": {
                     "type": "array",
+                    "minItems": 2,
                     "maxItems": 2,
-                    "items":{
+                    "items": {
                         "type": "integer",
                     },
                 },
-                "strides":{
+                "strides": {
                     "type": "array",
                     "minItems": 2,
-                    "items":{
+                    "maxItems": 2,
+                    "items": {
                         "type": "integer",
                     },
                 },
-                "padding":{
+                "padding": {
                     "type": "string",
-                },
-                "data_format":{
-                    "type": "string",
-                },
+                    "enum": PADDING
+                }
             },
-        },
+            "required": ["pool_size"],
+            "additionalProperties": False
+        }
     },
+    "required": ["name", "config"],
+    "additionalProperties": False
 }

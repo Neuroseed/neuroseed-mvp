@@ -183,7 +183,14 @@ class TestArchitecture(TestInitAPI):
         json = {
             'title': 'title',
             'architecture': {
-                'layers': []
+                'layers': [
+                    {
+                        "name": "Dense",
+                        "config": {
+                            "units": 3
+                        }
+                    }
+                ]
             }
         }
         token = self.create_token('u1')

@@ -3,7 +3,8 @@ import requests
 import jwt
 from requests_toolbelt.multipart import encoder
 
-def get_auth_header():
+
+def get_auth_token(user_id='u1'):
     here = os.path.abspath(os.path.dirname(__file__))
     auth_key_file = os.path.join(here, '../config/auth.key')
     # print('Load auth key from:', auth_key_file)
@@ -14,7 +15,12 @@ def get_auth_header():
     payload = {
         'user_id': 'u1',
     }
-    token = jwt.encode(payload, secret_key, algorithm='HS256').decode('utf-8')
+
+    return jwt.encode(payload, secret_key, algorithm='HS256').decode('utf-8')
+
+
+def get_auth_header(user_id='u1'):
+    token = get_auth_token(user_id)
 
     return {
         'Authorization': 'Bearer {token}'.format(token=token)

@@ -7,29 +7,34 @@ DROPOUT_LAY = {
             "type": "string",
             "pattern": "^Dropout$"
         },
-        "config":{
+        "config": {
             "type": "object",
-            "properties":{
+            "properties": {
                 "rate": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 1,
                 },
-                "noise_shape":{
+                "noise_shape": {
                     "type": "array",
                     "minItems": 1,
-                    "items":{
+                    "maxItems": 1,
+                    "items": {
                         "type": "integer",
                     },
                 },
-                "seed":{
+                "seed": {
                     "type": "array",
                     "minItems": 1,
-                    "items":{
+                    "items": {
                         "type": "integer",
                     },
                 },
             },
+            "required": ["rate"],
+            "additionalProperties": False
         },
     },
+    "required": ["name", "config"],
+    "additionalProperties": False
 }
