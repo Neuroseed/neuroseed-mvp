@@ -1,4 +1,19 @@
-0.0
+v0.2.3
 ---
+- Update layers json-schemas
+- Validate values in json-schemas
+- Edit readme.md
+- Worker handle exceptions
+- Refactor worker code
+- Improve docker containers start scripts
+- Add simple worker tests
 
-- Initial version.
+v0.2.2rc
+---
+- Add WEB API
+- Add Worker
+- Add Dataset, Architecture, Model, Task resources
+- Add WEB API Authorization
+- Add data validation on json-schemas
+- Add examples code
+- Add test for WEB API
