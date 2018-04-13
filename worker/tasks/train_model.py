@@ -130,10 +130,14 @@ def init_train_model(self):
 
     try:
         train_on_task(task)
+
+        with task.save_context():
+            task.status = metadata.task.SUCCESS
     except Exception as ex:
         self.update_state(state=states.STARTED)
 
         with task.save_context():
+            task.status = metadata.task.FAILURE
             task.history['error'] = {
                 'type': type(ex).__name__,
                 'error': str(ex),
