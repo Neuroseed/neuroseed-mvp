@@ -11,6 +11,8 @@ from .. import constructor
 from .history_callback import HistoryCallback
 from . import base
 
+DATASET_SLICE_FACTOR = 0.8
+
 
 def create_model(architecture, shape):
     model = constructor.create_model(architecture, shape)
@@ -68,27 +70,6 @@ def save_model(model, meta=None, path=None):
     keras_save_models(model, path)
 
 
-def train_on_task(task):
-    model_id = task.config['model']
-    model_meta = metadata.ModelMetadata.from_id(id=model_id)
-
-    config = task.config
-
-    dataset_meta = model_meta.base.dataset
-    dataset = base.prepare_dataset(dataset_meta)
-    (x_train, _), _ = base.slice_dataset(dataset, 1.0)
-
-    batch_size = config.get('batch_size', 32)
-    epochs = config.get('epochs', 1)
-    train_examples_number = x_train.shape[0]
-    batch_in_epoch = train_examples_number // batch_size + 1
-
-    h = HistoryCallback(task, epochs, batch_in_epoch)
-    callbacks = [h]
-
-    return train_on_model(model_meta, config, callbacks)
-
-
 def train_on_model(model_meta, config, callbacks=[]):
     dataset_meta = model_meta.base.dataset
 
@@ -98,7 +79,7 @@ def train_on_model(model_meta, config, callbacks=[]):
     dataset = base.prepare_dataset(dataset_meta)
     print('Dataset loaded')
 
-    (x_train, y_train), (x_test, y_test) = base.slice_dataset(dataset, 0.8)
+    (x_train, y_train), (x_test, y_test) = base.slice_dataset(dataset, DATASET_SLICE_FACTOR)
     print('Dataset sliced')
 
     shape = x_train.shape[1:]
@@ -123,19 +104,41 @@ def train_on_model(model_meta, config, callbacks=[]):
     return metrics
 
 
-@app.task(bind=True, name='model.train')
-def init_train_model(self):
-    task_id = self.request.id
-    task = metadata.TaskMetadata.from_id(id=task_id)
+def train_on_task_exc(task):
+    if type(task) is str:
+        task = metadata.TaskMetadata.from_id(id=task)
+
+    model_id = task.config['model']
+    model_meta = metadata.ModelMetadata.from_id(id=model_id)
+
+    config = task.config
+
+    dataset_meta = model_meta.base.dataset
+    dataset = base.prepare_dataset(dataset_meta)
+    (x_train, _), _ = base.slice_dataset(dataset, DATASET_SLICE_FACTOR)
+
+    batch_size = config.get('batch_size', 32)
+    epochs = config.get('epochs', 1)
+    examples = x_train.shape[0]
+    train_examples_number = examples
+    batch_in_epoch = train_examples_number // batch_size + 1
+
+    h = HistoryCallback(task, epochs, batch_in_epoch, examples)
+    callbacks = [h]
+
+    return train_on_model(model_meta, config, callbacks)
+
+
+def train_on_task(task):
+    if type(task) is str:
+        task = metadata.TaskMetadata.from_id(id=task)
 
     try:
-        train_on_task(task)
+        train_on_task_exc(task)
 
         with task.save_context():
             task.status = metadata.task.SUCCESS
     except Exception as ex:
-        self.update_state(state=states.STARTED)
-
         with task.save_context():
             task.status = metadata.task.FAILURE
             task.history['error'] = {
@@ -143,5 +146,17 @@ def init_train_model(self):
                 'error': str(ex),
                 'traceback': traceback.format_exc()
             }
+
+        raise
+
+
+@app.task(bind=True, name='model.train')
+def init_train_model(self):
+    task_id = self.request.id
+
+    try:
+        train_on_task(task_id)
+    except Exception:
+        self.update_state(state=states.STARTED)
 
         raise
