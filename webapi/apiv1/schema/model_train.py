@@ -35,30 +35,58 @@ ENUM_METRICS = [
 
 MODEL_TRAIN_SCHEMA = {
     "type": "object",
+    "title": "Train model",
+    "description": "Train model task",
     "properties": {
-        "epochs": {"type": "number"},
+        "epochs": {
+            "type": "number",
+            "minimal": 1,
+            "maximal": 10000,
+            "title": "Epochs",
+            "description": "Number of epochs to train the model. An epoch is an iteration over the entire dataset.",
+            "default": 1
+        },
         "optimizer": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
-                    "enum": ENUM_OPTIMIZER_NAME
+                    "enum": ENUM_OPTIMIZER_NAME,
+                    "title": "Optimizer",
+                    "description": "Optimizer name",
+                    "default": "SGD"
                 },
-                "config": {"type": "object"}
+                "config": {
+                    "type": "object",
+                    "title": "Config",
+                    "description": "Optimizer config",
+                    "default": {}
+                }
             },
+            "title": "Optimizer",
+            "description": "Optimizer name",
+            "default": {"name": "SGD"},
             "required": ["name"],
             "additionalProperties": False
         },
         "loss": {
             "type": "string",
-            "enum": ENUM_LOSS
+            "enum": ENUM_LOSS,
+            "title": "Loss function",
+            "description": "Name of loss function",
+            "default": "mean_squared_error"
         },
         "metrics": {
             "type": "array",
+            "minItems": 0,
+            "maxItems": len(ENUM_METRICS),
             "items": {
                 "type": "string",
                 "enum": ENUM_METRICS
             },
+            "title": "Metrics",
+            "description": "Metrics array",
+            "default": [],
             "uniqueItems": True
         }
     },

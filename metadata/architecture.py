@@ -3,6 +3,7 @@ import uuid
 from mongoengine import Document
 from mongoengine import fields
 
+from .dataset import DATASET_CATEGORIES
 from .mixin import MetadataMixin
 
 __all__ = [
@@ -16,7 +17,7 @@ class ArchitectureMetadata(Document, MetadataMixin):
     owner = fields.StringField(required=True)
     title = fields.StringField(required=True)
     description = fields.StringField()
-    category = fields.StringField()
+    category = fields.StringField(choices=DATASET_CATEGORIES)
     architecture = fields.DictField(required=True)
 
     meta = {
