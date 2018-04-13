@@ -219,7 +219,9 @@ class TestArchitecture(TestInitAPI):
         json = {
             'title': 'title',
             'architecture': {
-                'layers': []
+                'layers': [
+                    {'name': 'Flatten'}
+                ]
             }
         }
         token = self.create_token('u1')

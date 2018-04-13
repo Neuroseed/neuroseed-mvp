@@ -6,6 +6,7 @@ from falcon_auth import JWTAuthBackend
 from falcon_cors import CORS
 
 import metadata
+import manager
 import storage
 from . import apiv1
 from .authmiddleware import NeuroseedAuthMiddleware
@@ -29,6 +30,10 @@ def from_config(config_file=None):
         config = config_file
     elif config_file is None:
         return {}
+
+    celery_config = config.get('celery_config', None)
+    if celery_config:
+        manager.from_config(celery_config)
 
     metadata_config = config.get('metadata_config', None)
     if metadata_config:

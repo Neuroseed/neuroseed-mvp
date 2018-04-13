@@ -24,7 +24,10 @@ def test_model(model, x, y):
     return metrics
 
 
-def test_on_task(task):
+def test_on_task_exc(task):
+    if type(task) is str:
+        task = metadata.TaskMetadata.from_id(id=task)
+
     config = task.config
 
     dataset_id = config['dataset']
@@ -49,21 +52,30 @@ def test_on_task(task):
         task.history['metrics'] = metrics
 
 
-@app.task(bind=True, name='model.test')
-def init_test_model(self):
-    task_id = self.request.id
-    task = metadata.TaskMetadata.from_id(id=task_id)
+def test_on_task(task):
+    if type(task) is str:
+        task = metadata.TaskMetadata.from_id(id=task)
 
     try:
-        test_on_task(task)
+        test_on_task_exc(task)
     except Exception as ex:
-        self.update_state(state=states.STARTED)
-
         with task.save_context():
             task.history['error'] = {
                 'type': type(ex).__name__,
                 'error': str(ex),
                 'traceback': traceback.format_exc()
             }
+
+        raise
+
+
+@app.task(bind=True, name='model.test')
+def celery_test_model(self):
+    task_id = self.request.id
+
+    try:
+        test_on_task(task_id)
+    except Exception:
+        self.update_state(state=states.STARTED)
 
         raise

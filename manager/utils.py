@@ -4,6 +4,7 @@ import logging
 
 import celery
 from celery.result import AsyncResult
+import gevent
 
 import metadata
 
@@ -11,19 +12,26 @@ logger = logging.getLogger(__name__)
 
 app = celery.Celery('tasks')
 
+CELERY_CONNECTION_TIMEOUT = 5
 
-def configure(filepath):
-    with open('config/celery_config.json') as f:
-        celery_config = json.load(f)
-        app.config_from_object(celery_config)
+
+def from_config(config_file):
+    if type(config_file) is str:
+        with open(config_file) as f:
+            config = json.load(f)
+    elif type(config_file) is dict:
+        config = config_file
+
+    app.config_from_object(config)
 
 
 def start_task(name, *args, task_id=None, **kwargs):
-    task = app.send_task(
-        name,
-        args=args,
-        kwargs=kwargs,
-        task_id=task_id)
+    with gevent.Timeout(CELERY_CONNECTION_TIMEOUT):
+        task = app.send_task(
+            name,
+            args=args,
+            kwargs=kwargs,
+            task_id=task_id)
 
     logger.debug('Send task {id} to worker'.format(id=task_id))
 
