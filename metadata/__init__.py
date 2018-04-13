@@ -24,4 +24,8 @@ def from_config(config_file):
     mongo_url = config['mongo_url']
 
     database = 'metadata'
-    connect(database, host=mongo_url, alias='metadata')
+    connect(database, host=mongo_url, alias='metadata',
+            connect=True, socketTimeoutMS=5000, connectTimeoutMS=5000, serverSelectionTimeoutMS=5000,
+            heartbeatFrequencyMS=1000)
+    # more args:
+    # https://api.mongodb.com/python/current/api/pymongo/mongo_client.html#pymongo.mongo_client.MongoClient
