@@ -151,7 +151,7 @@ def train_on_task(task):
 
 
 @app.task(bind=True, name='model.train')
-def init_train_model(self):
+def celery_train_model(self):
     task_id = self.request.id
 
     try:
