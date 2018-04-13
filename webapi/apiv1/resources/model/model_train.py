@@ -97,5 +97,8 @@ class ModelTrainResult:
                 description="Task metadata does not exist"
             )
 
-        resp.status = falcon.HTTP_200
+        if task.status in (metadata.task.SUCCESS, metadata.task.FAILURE):
+            resp.status = falcon.HTTP_201
+        else:
+            resp.status = falcon.HTTP_200
         resp.media = task.history

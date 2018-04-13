@@ -17,7 +17,10 @@ def predict_model(model, x):
     return result
 
 
-def predict_on_task(task):
+def predict_on_task_exc(task):
+    if type(task) is str:
+        task = metadata.TaskMetadata.from_id(id=task)
+
     config = task.config
 
     dataset_id = config['dataset']
@@ -48,15 +51,13 @@ def predict_on_task(task):
         task.history['result'] = tmp_id
 
 
-@app.task(bind=True, name='model.predict')
-def init_predict_model(self):
-    task_id = self.request.id
-    task = metadata.TaskMetadata.from_id(id=task_id)
+def predict_on_task(task):
+    if type(task) is str:
+        task = metadata.TaskMetadata.from_id(id=task)
 
     try:
-        predict_on_task(task)
+        predict_on_task_exc(task)
     except Exception as ex:
-        self.update_state(state=states.STARTED)
 
         with task.save_context():
             task.history['error'] = {
@@ -64,5 +65,17 @@ def init_predict_model(self):
                 'error': str(ex),
                 'traceback': traceback.format_exc()
             }
+
+        raise
+
+
+@app.task(bind=True, name='model.predict')
+def celery_predict_model(self):
+    task_id = self.request.id
+
+    try:
+        predict_on_task(task_id)
+    except Exception:
+        self.update_state(state=states.STARTED)
 
         raise
