@@ -4,12 +4,15 @@ import logging
 
 import celery
 from celery.result import AsyncResult
+import gevent
 
 import metadata
 
 logger = logging.getLogger(__name__)
 
 app = celery.Celery('tasks')
+
+CELERY_CONNECTION_TIMEOUT = 5
 
 
 def from_config(config_file):
@@ -23,11 +26,12 @@ def from_config(config_file):
 
 
 def start_task(name, *args, task_id=None, **kwargs):
-    task = app.send_task(
-        name,
-        args=args,
-        kwargs=kwargs,
-        task_id=task_id)
+    with gevent.Timeout(CELERY_CONNECTION_TIMEOUT):
+        task = app.send_task(
+            name,
+            args=args,
+            kwargs=kwargs,
+            task_id=task_id)
 
     logger.debug('Send task {id} to worker'.format(id=task_id))
 
