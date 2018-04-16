@@ -1,18 +1,14 @@
 import json
-import uuid
+import functools
 import logging
 
 import celery
-from celery.result import AsyncResult
-import gevent
 
 import metadata
 
 logger = logging.getLogger(__name__)
 
 app = celery.Celery('tasks')
-
-CELERY_CONNECTION_TIMEOUT = 5
 
 
 def from_config(config_file):
@@ -25,45 +21,19 @@ def from_config(config_file):
     app.config_from_object(config)
 
 
-def start_task(name, *args, task_id=None, **kwargs):
-    with gevent.Timeout(CELERY_CONNECTION_TIMEOUT):
-        task = app.send_task(
-            name,
-            args=args,
-            kwargs=kwargs,
-            task_id=task_id)
+def prepare_metadata(metadata_cls, metadata):
+    if isinstance(metadata, str):
+        metadata = metadata_cls.from_id(id=metadata)
+    elif isinstance(metadata, metadata_cls):
+        pass
+    else:
+        type_ = type(metadata)
+        msg = 'type of metadata must be str or {metatype}, not {type}'.format(metatype=metadata_cls, type=type_)
+        raise TypeError(msg)
 
-    logger.debug('Send task {id} to worker'.format(id=task_id))
+    return metadata
 
-    return task
-
-
-def get_task(task_id):
-    return AsyncResult(task_id)
-
-
-def wait_task(task_id):
-    task = AsyncResult(task_id)
-    return task.get(timeout=10)
-
-
-def create_task(command, config, owner, id=None, start=True):
-    if not type(command) is str:
-        raise TypeError('command type must be str')
-
-    if not type(config) is dict:
-        raise TypeError('config type must be dict')
-
-    id = id or str(uuid.uuid4())
-
-    task = metadata.TaskMetadata()
-    task.id = id
-    task.owner = owner
-    task.command = command
-    task.config = config
-    task.save()
-
-    if start:
-        start_task(command, task_id=id)
-
-    return id
+prepare_dataset = functools.partial(prepare_metadata, metadata.DatasetMetadata)
+prepare_architecture = functools.partial(prepare_metadata, metadata.ArchitectureMetadata)
+prepare_model = functools.partial(prepare_metadata, metadata.ModelMetadata)
+prepare_task = functools.partial(prepare_metadata, metadata.TaskMetadata)
