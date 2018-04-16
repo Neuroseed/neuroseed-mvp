@@ -39,7 +39,7 @@ MODEL_TRAIN_SCHEMA = {
     "description": "Train model task",
     "properties": {
         "epochs": {
-            "type": "number",
+            "type": "integer",
             "minimal": 1,
             "maximal": 10000,
             "title": "Epochs",
