@@ -101,7 +101,12 @@ class DatasetResource:
             )
 
         resp.status = falcon.HTTP_200
-        resp.media = {'id': dataset_meta.id}
+        resp.media = {
+            'id': dataset_meta.id,
+            'date': dataset_meta.base.date,
+            'size': dataset_meta.base.size,
+            'hash': dataset_meta.base.hash
+        }
 
     def dataset_already_uploaded(self, req, resp, id):
         logger.debug('Dataset {id} alerady uploaded'.format(id=id))
