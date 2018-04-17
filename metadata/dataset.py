@@ -2,11 +2,14 @@ import uuid
 
 from mongoengine import Document, EmbeddedDocument
 from mongoengine import fields
+from mongoengine.queryset.visitor import Q
 
 from .mixin import MetadataMixin
 
 __all__ = [
-    'DatasetMetadata'
+    'DatasetMetadata',
+    'get_dataset',
+    'get_datasets'
 ]
 
 
@@ -99,3 +102,48 @@ class DatasetMetadata(Document, MetadataMixin):
                 setattr(self.base, name, meta[name])
 
     from_dict = from_flatten
+
+
+def get_dataset(id, context):
+    if not isinstance(id, str):
+        raise TypeError('Type of id must be str')
+
+    if not isinstance(context, dict):
+        raise TypeError('Type of context must be dict')
+
+    if 'user_id' in context and context['user_id']:
+        user_id = context['user_id']
+        query = Q(id=id) & (Q(base__owner=user_id) | Q(is_public=True))
+        meta = DatasetMetadata.from_id(query)
+    else:
+        kwargs = {'id': id, 'is_public': True}
+        meta = DatasetMetadata.from_id(**kwargs)
+
+    return meta
+
+
+def get_datasets(context, filter=None):
+    if not isinstance(context, dict):
+        raise TypeError('Type of context must be dict')
+
+    if not isinstance(filter, (dict, type(None))):
+        raise TypeError('Type of context must be dict')
+
+    query = Q(is_public=True)
+
+    if 'user_id' in context and context['user_id']:
+        user_id = context['user_id']
+        query = query | (Q(is_public=False) & Q(base__owner=user_id))
+
+    metas = DatasetMetadata.objects(query)
+
+    if filter:
+        if 'from' in filter:
+            from_ = filter['from']
+            metas = metas.skip(from_)
+
+        if 'number' in filter:
+            number = filter['number']
+            metas = metas.limit(number)
+
+    return metas

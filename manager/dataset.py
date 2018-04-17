@@ -4,6 +4,7 @@ import hashlib
 
 import metadata
 import storage
+from metadata.dataset import *
 
 logger = logging.getLogger(__file__)
 

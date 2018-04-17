@@ -36,12 +36,8 @@ class DatasetResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            if user_id:
-                query = Q(id=id) & (Q(base__owner=user_id) | Q(is_public=True))
-                dataset_meta = metadata.DatasetMetadata.from_id(query)
-            else:
-                kwargs = {'id': id, 'is_public': True}
-                dataset_meta = metadata.DatasetMetadata.from_id(**kwargs)
+            context = {'user_id': user_id}
+            dataset_meta = manager.get_dataset(id, context)
         except metadata.DoesNotExist:
             logger.debug('Dataset {id} does not exist'.format(id=id))
 
@@ -115,22 +111,22 @@ class DatasetResource:
             description="Dataset already uploaded")
 
     def upload_dataset(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
         try:
-            dataset_meta = metadata.DatasetMetadata.from_id(id=id)
+            context = {'user_id': user_id}
+            dataset_meta = manager.get_dataset(id, context)
         except metadata.DoesNotExist:
-            dataset_meta = None
-
-        if dataset_meta:
-            if dataset_meta.status == metadata.dataset.PENDING:
-                self.save_dataset(req, resp, dataset_meta)
-
-            elif dataset_meta.status == metadata.dataset.RECEIVED:
-                self.dataset_already_uploaded(req, resp, id)
-        else:
             raise falcon.HTTPNotFound(
                 title="Dataset not found",
                 description="Dataset metadata does not exist"
             )
+
+        if dataset_meta.status == metadata.dataset.PENDING:
+            self.save_dataset(req, resp, dataset_meta)
+        elif dataset_meta.status == metadata.dataset.RECEIVED:
+            self.dataset_already_uploaded(req, resp, id)
 
     @jsonschema.validate(DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
