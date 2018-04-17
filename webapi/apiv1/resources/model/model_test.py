@@ -24,8 +24,19 @@ class ModelTestResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
+            context = {'user_id': user_id}
+            model = metadata.get_model(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
+
+        try:
             config = req.media
-            context = {'user_id': 'user_id'}
+            context = {'user_id': user_id}
             task = manager.test_model(id, config, context)
             task_id = task.id
         except (errors.ModelDoesNotExist, metadata.DoesNotExist):
@@ -53,7 +64,8 @@ class ModelTestStatusResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
@@ -75,7 +87,8 @@ class ModelTestResult:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 

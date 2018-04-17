@@ -1,6 +1,5 @@
 import logging
 
-from mongoengine.queryset.visitor import Q
 import falcon
 import metadata
 
@@ -18,12 +17,9 @@ class DatasetsResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        datasets = metadata.DatasetMetadata.objects(is_public=True)
+        context = {'user_id': user_id}
+        datasets = metadata.get_datasets(context)
         ids = [meta.id for meta in datasets]
-
-        if user_id:
-            datasets = metadata.DatasetMetadata.objects(is_public=False, base__owner=user_id)
-            ids = [meta.id for meta in datasets] + ids
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -52,12 +48,9 @@ class DatasetsFullResource:
                 description="Number must be greater than 0"
             )
 
-        query = Q(is_public=True)
-
-        if user_id:
-            query = query | (Q(is_public=False) & Q(base__owner=user_id))
-
-        datasets = metadata.DatasetMetadata.objects(query).skip(from_).limit(number)
+        context = {'user_id': user_id}
+        filter = {'from': from_, 'number': number}
+        datasets = metadata.get_datasets(context, filter)
         datasets_meta = self.get_datasets_meta(datasets)
 
         resp.status = falcon.HTTP_200
@@ -83,10 +76,8 @@ class DatasetsNumberResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        number = metadata.DatasetMetadata.objects(is_public=True).count()
-
-        if user_id:
-            number += metadata.DatasetMetadata.objects(is_public=False, base__owner=user_id).count()
+        context = {'user_id': user_id}
+        number = metadata.get_datasets(context).count()
 
         resp.status = falcon.HTTP_200
         resp.media = number

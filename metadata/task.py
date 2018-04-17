@@ -3,11 +3,15 @@ import uuid
 
 from mongoengine import Document
 from mongoengine import fields
+from mongoengine.queryset.visitor import Q
+from mongoengine.errors import DoesNotExist
 
 from .mixin import MetadataMixin
 
 __all__ = [
-    'TaskMetadata'
+    'TaskMetadata',
+    'get_task',
+    'get_tasks'
 ]
 
 PENDING = 'PENDING'
@@ -69,3 +73,46 @@ class TaskMetadata(Document, MetadataMixin):
         for name in self._fields:
             if name in meta:
                 setattr(self, name, meta[name])
+
+
+def get_task(id, context):
+    if not isinstance(id, str):
+        raise TypeError('Type of id must be str')
+
+    if not isinstance(context, dict):
+        raise TypeError('Type of context must be dict')
+
+    if 'user_id' in context and context['user_id']:
+        user_id = context['user_id']
+        query = Q(id=id) & Q(owner=user_id)
+        meta = TaskMetadata.from_id(query)
+    else:
+        raise DoesNotExist('task does not exists for None user')
+
+    return meta
+
+
+def get_tasks(context, filter=None):
+    if not isinstance(context, dict):
+        raise TypeError('Type of context must be dict')
+
+    if not isinstance(filter, (dict, type(None))):
+        raise TypeError('Type of context must be dict')
+
+    if 'user_id' not in context and not context['user_id']:
+        raise DoesNotExist('task does not exists for None user')
+
+    user_id = context['user_id']
+    query = Q(owner=user_id)
+    metas = TaskMetadata.objects(query)
+
+    if filter:
+        if 'from' in filter:
+            from_ = filter['from']
+            metas = metas.skip(from_)
+
+        if 'number' in filter:
+            number = filter['number']
+            metas = metas.limit(number)
+
+    return metas
