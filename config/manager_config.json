@@ -1,0 +1,4 @@
+{
+    "celery_config": "config/celery_config.json",
+    "embedded_worker": false
+}

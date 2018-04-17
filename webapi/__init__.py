@@ -22,18 +22,14 @@ from . import patch
 logger = logging.getLogger(__name__)
 
 
-def from_config(config_file=None):
-    if type(config_file) is str:
-        with open(config_file) as f:
+def from_config(config=None):
+    if type(config) is str:
+        with open(config) as f:
             config = json.load(f)
-    elif type(config_file) is dict:
-        config = config_file
-    elif config_file is None:
+    elif type(config) is dict:
+        pass
+    elif config is None:
         return {}
-
-    celery_config = config.get('celery_config', None)
-    if celery_config:
-        manager.from_config(celery_config)
 
     metadata_config = config.get('metadata_config', None)
     if metadata_config:
@@ -42,6 +38,10 @@ def from_config(config_file=None):
     storage_config = config.get('storage_config', None)
     if storage_config:
         storage.from_config(storage_config)
+
+    manager_config = config.get('manager_config', None)
+    if manager_config:
+        manager.from_config(manager_config)
 
     return config
 

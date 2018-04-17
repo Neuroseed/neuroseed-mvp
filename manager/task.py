@@ -27,15 +27,37 @@ def terminate(task):
     task.delete()
 
 
+def start_embedded_task(task, *args, **kwargs):
+    import threading
+
+    def _target():
+        import worker
+        worker.start_task(task)
+
+    t = threading.Thread(target=_target)
+    t.daemon = True
+    t.start()
+
+
+def celery_send_task(task, *args, **kwargs):
+    try:
+        with gevent.Timeout(CELERY_CONNECTION_TIMEOUT):
+            task = app.send_task(
+                task.command,
+                args=args,
+                kwargs=kwargs,
+                task_id=task.id)
+    except gevent.timeout.Timeout:
+        raise RuntimeError('Can not send task')
+
+
 def start_task(task, *args, **kwargs):
     task = utils.prepare_task(task)
 
-    with gevent.Timeout(CELERY_CONNECTION_TIMEOUT):
-        task = app.send_task(
-            task.command,
-            args=args,
-            kwargs=kwargs,
-            task_id=task.id)
+    if utils.EMBEDDED_WORKER:
+        start_embedded_task(task, *args, **kwargs)
+    else:
+        celery_send_task(task, *args, **kwargs)
 
     logger.debug('Send task {id} to worker'.format(id=task.id))
 
@@ -71,10 +93,7 @@ def create_task(command, config, context, start=True):
     task.config = config
 
     if start:
-        try:
-            start_task(task)
-        except gevent.timeout.Timeout:
-            raise RuntimeError('Can not send task')
+        start_task(task)
 
     task.save()
 

@@ -1,6 +1,9 @@
 import sys
 import json
 
+import keras.backend as K
+import tensorflow as tf
+
 from .tasks import *
 from .app import app
 
@@ -34,6 +37,18 @@ def from_config(config_file):
     log_level = config['log_level']
     sys.argv.extend(['-l', log_level])
     sys.argv.append('--autoscale=10,1')
+
+
+def start_task(task):
+    with tf.Session(graph=tf.Graph()) as sess:
+        K.set_session(sess)
+
+        if task.command == 'model.train':
+            train_on_task(task)
+        if task.command == 'model.test':
+            test_on_task(task)
+        if task.command == 'model.predict':
+            predict_on_task(task)
 
 
 def main(*args, **kwargs):

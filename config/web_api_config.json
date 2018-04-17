@@ -2,7 +2,7 @@
     "host": "127.0.0.1",
     "port": 8080,
     "auth_key_file": "config/auth.key",
-    "celery_config": "config/celery_config.json",
     "metadata_config": "config/metadata_config.json",
-    "storage_config": "config/storage_config.json"
+    "storage_config": "config/storage_config.json",
+    "manager_config": "config/manager_config.json"
 }
