@@ -1,1 +1,1 @@
-from metadata import ArchitectureMetadata
+from metadata.architecture import *
