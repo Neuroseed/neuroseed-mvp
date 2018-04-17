@@ -64,7 +64,8 @@ class ModelTestStatusResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
@@ -86,7 +87,8 @@ class ModelTestResult:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
