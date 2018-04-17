@@ -1,7 +1,6 @@
 import uuid
 import logging
 
-from mongoengine.queryset.visitor import Q
 import falcon
 from falcon.media.validators import jsonschema
 
@@ -31,12 +30,8 @@ class ModelResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            if user_id:
-                query = Q(id=id) & (Q(base__owner=user_id) | Q(is_public=True))
-                model_meta = metadata.ModelMetadata.from_id(query)
-            else:
-                kwargs = {'id': id, 'is_public': True}
-                model_meta = metadata.ModelMetadata.from_id(**kwargs)
+            context = {'user_id': user_id}
+            model_meta = metadata.get_model(id, context)
         except metadata.DoesNotExist:
             logger.debug('Model {id} does not exist'.format(id=id))
 
@@ -72,11 +67,12 @@ class ModelResource:
     @jsonschema.validate(MODEL_SCHEMA)
     def create_model_meta(self, req, resp):
         user_id = req.context['user']
+        context = {'user_id': user_id}
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         architecture_id = req.media['architecture']
         try:
-            architecture = metadata.ArchitectureMetadata.from_id(id=architecture_id, owner=user_id)
+            architecture = metadata.get_architecture(architecture_id, context)
         except metadata.DoesNotExist:
             raise falcon.HTTPNotFound(
                 title="Model not found",
@@ -87,8 +83,7 @@ class ModelResource:
 
         dataset_id = req.media['dataset']
         try:
-            query = Q(id=dataset_id) & (Q(is_public=True) | Q(base__owner=user_id))
-            dataset = metadata.DatasetMetadata.from_id(query)
+            dataset = metadata.get_dataset(dataset_id, context)
         except metadata.DoesNotExist:
             raise falcon.HTTPNotFound(
                 title="Dataset not found",

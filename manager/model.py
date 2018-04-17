@@ -1,6 +1,6 @@
 import functools
 
-from metadata.model import ModelMetadata
+from metadata.model import *
 from . import task
 from . import utils
 

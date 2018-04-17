@@ -18,12 +18,9 @@ class ModelsResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        models = metadata.ModelMetadata.objects(is_public=True)
+        context = {'user_id': user_id}
+        models = metadata.get_models(context)
         ids = [meta.id for meta in models]
-
-        if user_id:
-            models = metadata.ModelMetadata.objects(is_public=False, base__owner=user_id)
-            ids = [meta.id for meta in models] + ids
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -52,12 +49,9 @@ class ModelsFullResource:
                 description="Number must be greater than 0"
             )
 
-        query = Q(is_public=True)
-
-        if user_id:
-            query = query | (Q(is_public=False) & Q(base__owner=user_id))
-
-        models = metadata.ModelMetadata.objects(query).skip(from_).limit(number)
+        context = {'user_id': user_id}
+        filter = {'from': from_, 'number': number}
+        models = metadata.get_models(context, filter)
         models_meta = self.get_models_meta(models)
 
         resp.status = falcon.HTTP_200
@@ -84,10 +78,8 @@ class ModelsNumberResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        number = metadata.ModelMetadata.objects(is_public=True).count()
-
-        if user_id:
-            number += metadata.ModelMetadata.objects(is_public=False, base__owner=user_id).count()
+        context = {'user_id': user_id}
+        number = metadata.get_models(context).count()
 
         resp.status = falcon.HTTP_200
         resp.media = number
