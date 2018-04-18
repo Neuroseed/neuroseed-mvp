@@ -48,7 +48,7 @@ class DatasetResource:
 
         resp.status = falcon.HTTP_200
         dataset_meta_dict = dataset_meta.to_dict()
-        result_keys = ['id', 'status', 'is_public', 'title', 'description', 'category', 'labels']
+        result_keys = ['id', 'status', 'is_public', 'owner', 'hash', 'size', 'date', 'title', 'description', 'category', 'labels']
         resp.media = {key: dataset_meta_dict[key] for key in result_keys if key in dataset_meta_dict}
     
     def get_description(self, req, resp):
