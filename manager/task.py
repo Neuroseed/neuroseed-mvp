@@ -63,19 +63,20 @@ def create_task(command, config, context, start=True):
     else:
         raise KeyError('To create task need context user_id')
 
-    task = metadata.TaskMetadata()
-
-    task.id = str(uuid.uuid4())
-    task.owner = user_id
-    task.command = command
-    task.config = config
+    with metadata.TaskMetadata().save_context() as task:
+        task.id = str(uuid.uuid4())
+        task.owner = user_id
+        task.command = command
+        task.config = config
 
     if start:
         try:
             start_task(task)
         except gevent.timeout.Timeout:
-            raise RuntimeError('Can not send task')
+            with task.save_context():
+                task.state = metadata.task.FAILURE
+                task.history['error'] = 'Can not send task'
 
-    task.save()
+            raise RuntimeError('Can not send task')
 
     return task
