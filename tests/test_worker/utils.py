@@ -8,10 +8,10 @@ from keras.datasets import cifar10
 
 
 @functools.lru_cache(1)
-def get_cifar10():
+def get_cifar10(part=0.0001):
     _, file_path = tempfile.mkstemp('cifar10.hdf5')
     print('Temp dataset file:', file_path)
-    cifar10_to_hdf5(file_path, part=0.0001)
+    cifar10_to_hdf5(file_path, part=part)
 
     return file_path
 

@@ -36,9 +36,10 @@ class ModelTrainResource:
 
         if model.status != metadata.model.PENDING:
             raise falcon.HTTPError(
-                code=falcon.HTTP_304,
+                falcon.HTTP_304,
                 title="Already Trained",
-                description="Model already trained"
+                description="Model already trained",
+                code=304
             )
 
         model.status = metadata.model.INITIALIZE
