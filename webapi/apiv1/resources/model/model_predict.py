@@ -1,4 +1,5 @@
 import logging
+import os
 
 import falcon
 from falcon.media.validators import jsonschema
@@ -98,19 +99,17 @@ class ModelPredictResult:
                 description="Task metadata does not exist"
             )
 
-        if 'result' not in task.config:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task is not completed'
-            }
-            return
+        if 'result' not in task.history:
+            raise falcon.HTTPNotFound(
+                title='Task is not completed',
+                description='Task is not completed'
+            )
 
-        temp_id = task.config['result']
-        temp_path = storage.get_tmp_path(temp_id)
+        temp_id = task.history['result']
+        temp_path = storage.get_dataset_path(temp_id, prefix='tmp')
 
         resp.status = falcon.HTTP_200
 
-        # TODO: send by multipart stream
-        with open(temp_path) as f:
-            raw = f.read()
-            resp.stream.write(raw)
+        resp.content_type = 'application/octet-stream'
+        resp.stream_len = os.path.getsize(temp_path)
+        resp.stream = open(temp_path, 'rb')
