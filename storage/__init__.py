@@ -23,20 +23,22 @@ def from_config(config_file):
     os.makedirs(path.join(HOME_DIR, 'tmp'), exist_ok=True)
 
 
-def get_dataset_path(name):
-    return path.join(HOME_DIR, 'datasets', name + '.hdf5')
-
-
-def open_dataset(url, *args, prefix=None, raw=False, **kwargs):
+def get_dataset_path(name, prefix=None):
     if prefix is None:
-        url = get_dataset_path(url)
+        url = path.join(HOME_DIR, 'datasets', name + '.hdf5')
     if prefix:
-        url = path.join(prefix, url)
+        url = path.join(prefix, name + '.hdf5')
         url = get_tmp_path(url)
 
         dir = os.path.dirname(url)
         if not os.path.exists(dir):
             os.makedirs(dir, exist_ok=True)
+
+    return url
+
+
+def open_dataset(name, *args, prefix=None, raw=False, **kwargs):
+    url = get_dataset_path(name, prefix)
 
     if raw:
         return open(url, *args, **kwargs)

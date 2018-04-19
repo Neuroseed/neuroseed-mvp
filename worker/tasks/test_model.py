@@ -56,10 +56,17 @@ def test_on_task(task):
     if type(task) is str:
         task = metadata.TaskMetadata.from_id(id=task)
 
+    with task.save_context():
+        task.status = metadata.task.STARTED
+
     try:
         test_on_task_exc(task)
+
+        with task.save_context():
+            task.status = metadata.task.SUCCESS
     except Exception as ex:
         with task.save_context():
+            task.status = metadata.task.FAILURE
             task.history['error'] = {
                 'type': type(ex).__name__,
                 'error': str(ex),
@@ -76,6 +83,6 @@ def celery_test_model(self):
     try:
         test_on_task(task_id)
     except Exception:
-        self.update_state(state=states.STARTED)
+        self.update_state(state=states.FAILURE)
 
         raise

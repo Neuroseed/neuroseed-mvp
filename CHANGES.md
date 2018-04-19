@@ -1,5 +1,23 @@
-v0.3.2
-------
+# Neuroseed MVP Versions History
+
+## v0.3.3
+
+---
+
+- Добавлена обработка невозможности подключения к rabbitmq
+- Файл CHANGES.txt преобразован к формату Markdown
+- Добавлен монитор задач Celery Flower
+- Роут загрузки датасета возвращает информацию о полученом файле
+- Логика программы перенесена с falcon WEB API в manager/metadata
+- Добавлена возможность использовать консольные команды celery
+- Worker сохраняет в базу данных статус задачи SUCCESS, FAILURE
+- Исправлены ошибки в роуте model/predict/<tid>/result
+- WEB API возвращает дополнительные данные для датасетов owner, hash, size, date
+
+## v0.3.2
+
+---
+
 - MVP REST API теперь доступна по домену https://api.neuroseed.net
 - Воркер тепрь не сохраняет информацию о метриках на бтачах для повышения производительности
 - Воркер сохраняет информацию о количестве пройденных примеров
@@ -7,16 +25,20 @@ v0.3.2
 - Во все json-схемы добавлены поля title, description, default
 - Добавлен таймаут подключения к mongodb и rabbitmq (celery)
 
-v0.3.1
-------
+## v0.3.1
+
+---
+
 - В json-схемы добавлены поля title, description, default
 - Из json-схемы удалены не используемые поля
 - Протестирован роут DELETE /api/v1/task/<id> - остановка и удаление запущенной задачи
 - Переименован роут schema/layer -> schema/model/layers
 - При создании архитектуры id назначается автоматически
 
-v0.3.0
-------
+## v0.3.0
+
+---
+
 - Добавлены роуты возвращающие json-схемы валидации данных
 - /api/v1/schema/dataset
 - /api/v1/schema/architecture
@@ -28,8 +50,10 @@ v0.3.0
 - /api/v1/schema/layers
 - Добавлено описание новых роутов во внутреннюю документацию
 
-v0.2.3
-------
+## v0.2.3
+
+---
+
 - Update layers json-schemas
 - Validate values in json-schemas
 - Edit readme.md
@@ -38,8 +62,10 @@ v0.2.3
 - Improve docker containers start scripts
 - Add simple worker tests
 
-v0.2.2rc
---------
+## v0.2.2rc
+
+---
+
 - Add WEB API
 - Add Worker
 - Add Dataset, Architecture, Model, Task resources

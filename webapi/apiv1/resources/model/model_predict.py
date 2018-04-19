@@ -1,4 +1,5 @@
 import logging
+import os
 
 import falcon
 from falcon.media.validators import jsonschema
@@ -24,14 +25,31 @@ class ModelPredictResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        config = req.media
+        try:
+            context = {'user_id': user_id}
+            model = metadata.get_model(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
 
         try:
-            task_id = manager.predict_model(config, id, user_id)
+            config = req.media
+            context = {'user_id': user_id}
+            task = manager.predict_model(id, config, context)
+            task_id = task.id
         except errors.ModelDoesNotExist:
             raise falcon.HTTPNotFound(
                 title="Model not found",
                 description="Model metadata does not exist"
+            )
+        except RuntimeError:
+            raise falcon.HTTPInternalServerError(
+                title="Can not create task",
+                description="Can not create task. Internal connection error. Task is deleted."
             )
 
         logger.debug('User {uid} create task {tid}'.format(uid=user_id, tid=task_id))
@@ -48,7 +66,8 @@ class ModelPredictStatusResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
@@ -70,7 +89,8 @@ class ModelPredictResult:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
@@ -79,19 +99,17 @@ class ModelPredictResult:
                 description="Task metadata does not exist"
             )
 
-        if 'result' not in task.config:
-            resp.status = falcon.HTTP_404
-            resp.media = {
-                'error': 'Task is not completed'
-            }
-            return
+        if 'result' not in task.history:
+            raise falcon.HTTPNotFound(
+                title='Task is not completed',
+                description='Task is not completed'
+            )
 
-        temp_id = task.config['result']
-        temp_path = storage.get_tmp_path(temp_id)
+        temp_id = task.history['result']
+        temp_path = storage.get_dataset_path(temp_id, prefix='tmp')
 
         resp.status = falcon.HTTP_200
 
-        # TODO: send by multipart stream
-        with open(temp_path) as f:
-            raw = f.read()
-            resp.stream.write(raw)
+        resp.content_type = 'application/octet-stream'
+        resp.stream_len = os.path.getsize(temp_path)
+        resp.stream = open(temp_path, 'rb')

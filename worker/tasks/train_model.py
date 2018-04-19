@@ -133,6 +133,9 @@ def train_on_task(task):
     if type(task) is str:
         task = metadata.TaskMetadata.from_id(id=task)
 
+    with task.save_context():
+        task.status = metadata.task.STARTED
+
     try:
         train_on_task_exc(task)
 
@@ -157,6 +160,6 @@ def celery_train_model(self):
     try:
         train_on_task(task_id)
     except Exception:
-        self.update_state(state=states.STARTED)
+        self.update_state(state=states.FAILURE)
 
         raise

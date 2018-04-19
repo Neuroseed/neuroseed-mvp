@@ -7,7 +7,7 @@ import webapi
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = ''
-with open(os.path.join(here, 'CHANGES.txt')) as f:
+with open(os.path.join(here, 'CHANGES.md')) as f:
     CHANGES = f.read()
 
 

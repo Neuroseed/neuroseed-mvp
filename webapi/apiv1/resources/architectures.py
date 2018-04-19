@@ -1,6 +1,5 @@
 import logging
 
-from mongoengine.queryset.visitor import Q
 import falcon
 import metadata
 
@@ -18,12 +17,9 @@ class ArchitecturesResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        architectures = metadata.ArchitectureMetadata.objects(is_public=True)
+        context = {'user_id': user_id}
+        architectures = metadata.get_architectures(context)
         ids = [meta.id for meta in architectures]
-
-        if user_id:
-            architectures = metadata.ArchitectureMetadata.objects(is_public=False, owner=user_id)
-            ids = [meta.id for meta in architectures] + ids
 
         resp.status = falcon.HTTP_200
         resp.media = {
@@ -52,12 +48,9 @@ class ArchitecturesFullResource:
                 description="Number must be greater than 0"
             )
 
-        query = Q(is_public=True)
-
-        if user_id:
-            query = query | (Q(is_public=False) & Q(owner=user_id))
-
-        architectures = metadata.ArchitectureMetadata.objects(query).skip(from_).limit(number)
+        context = {'user_id': user_id}
+        filter = {'from': from_, 'number': number}
+        architectures = metadata.get_architectures(context, filter)
         architectures_meta = self.get_architecture_meta(architectures)
 
         resp.status = falcon.HTTP_200
@@ -83,10 +76,8 @@ class ArchitecturesNumberResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        number = metadata.ArchitectureMetadata.objects(is_public=True).count()
-
-        if user_id:
-            number += metadata.ArchitectureMetadata.objects(is_public=False, owner=user_id).count()
+        context = {'user_id': user_id}
+        number = metadata.get_architectures(context).count()
 
         resp.status = falcon.HTTP_200
         resp.media = number

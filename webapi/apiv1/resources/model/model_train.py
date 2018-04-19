@@ -24,7 +24,8 @@ class ModelTrainResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            model = metadata.ModelMetadata.from_id(id=id, base__owner=user_id)
+            context = {'user_id': user_id}
+            model = metadata.get_model(id, context)
         except metadata.DoesNotExist:
             logger.debug('Model {id} does not exist'.format(id=id))
 
@@ -44,11 +45,19 @@ class ModelTrainResource:
         model.save()
 
         try:
-            task_id = manager.train_model(req.media, id, user_id)
+            config = req.media
+            context = {'user_id': user_id}
+            task = manager.train_model(id, config, context)
+            task_id = task.id
         except errors.ModelDoesNotExist:
             raise falcon.HTTPNotFound(
                 title="Model not found",
                 description="Model metadata does not exist"
+            )
+        except RuntimeError:
+            raise falcon.HTTPInternalServerError(
+                title="Can not create task",
+                description="Can not create task. Internal connection error. Task is deleted."
             )
 
         logger.debug('User {uid} create task {did}'.format(uid=user_id, did=id))
@@ -65,7 +74,8 @@ class ModelTrainStatusResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
@@ -88,7 +98,8 @@ class ModelTrainResult:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 

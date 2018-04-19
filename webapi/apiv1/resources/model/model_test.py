@@ -23,14 +23,31 @@ class ModelTestResource:
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
 
-        config = req.media
+        try:
+            context = {'user_id': user_id}
+            model = metadata.get_model(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
 
         try:
-            task_id = manager.test_model(config, id, user_id)
+            config = req.media
+            context = {'user_id': user_id}
+            task = manager.test_model(id, config, context)
+            task_id = task.id
         except (errors.ModelDoesNotExist, metadata.DoesNotExist):
             raise falcon.HTTPNotFound(
                 title="Model not found",
                 description="Model metadata does not exist"
+            )
+        except RuntimeError:
+            raise falcon.HTTPInternalServerError(
+                title="Can not create task",
+                description="Can not create task. Internal connection error. Task is deleted."
             )
 
         logger.debug('User {uid} create task {tid}'.format(uid=user_id, tid=task_id))
@@ -47,7 +64,8 @@ class ModelTestStatusResource:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 
@@ -69,7 +87,8 @@ class ModelTestResult:
         logger.debug('Authorize user {id}'.format(id=user_id))
 
         try:
-            task = metadata.TaskMetadata.from_id(id=tid, owner=user_id)
+            context = {'user_id': user_id}
+            task = metadata.get_task(tid, context)
         except metadata.DoesNotExist:
             logger.debug('Task {id} does not exist'.format(id=id))
 

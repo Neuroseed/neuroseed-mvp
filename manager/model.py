@@ -1,28 +1,20 @@
-import metadata
-from metadata import ModelMetadata
+import functools
+
+from metadata.model import *
+from . import task
 from . import utils
 
 
-def create_model_task(command, config, model_id, owner):
-    try:
-        model = ModelMetadata.from_id(id=model_id)
-    except metadata.DoesNotExist as err:
-        raise
+def create_model_task(command, model, config, context):
+    model = utils.prepare_model(model)
 
-    config["model"] = model_id
+    config["model"] = model.id
 
-    id = utils.create_task(command, config, owner)
+    task_ = task.create_task(command, config, context)
 
-    return id
+    return task_
 
 
-def train_model(config, model_id, owner):
-    return create_model_task('model.train', config, model_id, owner)
-
-
-def test_model(config, model_id, owner):
-    return create_model_task('model.test', config, model_id, owner)
-
-
-def predict_model(config, model_id, owner):
-    return create_model_task('model.predict', config, model_id, owner)
+train_model = functools.partial(create_model_task, 'model.train')
+test_model = functools.partial(create_model_task, 'model.test')
+predict_model = functools.partial(create_model_task, 'model.predict')

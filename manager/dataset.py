@@ -1,9 +1,11 @@
 import logging
 import os
+import time
 import hashlib
 
 import metadata
 import storage
+from metadata.dataset import *
 
 logger = logging.getLogger(__file__)
 
@@ -52,6 +54,9 @@ def save_dataset(meta, fileio):
         raise
 
     with meta.save_context():
+        # save date
+        meta.base.date = int(time.time())
+
         # save dataset size
         statinfo = os.stat(dataset_path)
         file_size = statinfo.st_size
