@@ -29,8 +29,8 @@ CONV2D_LAY = {
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
-                        "min": 2,
-                        "max": 128
+                        "minimum": 2,
+                        "maximum": 128
                     },
                     "title": "Kernel size",
                     "description": "List of 2 integers specifying the width and height of the 2D convolution window",
@@ -42,8 +42,8 @@ CONV2D_LAY = {
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
-                        "min": 2,
-                        "max": 128
+                        "minimum": 2,
+                        "maximum": 128
                     },
                     "title": "Strides",
                     "description": "List of 2 integers specifying the strides of the convolution along the width and height",
@@ -61,8 +61,8 @@ CONV2D_LAY = {
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
-                        "min": 2,
-                        "max": 128
+                        "minimum": 2,
+                        "maximum": 128
                     },
                     "title": "Dilation rate",
                     "default": [2, 2]

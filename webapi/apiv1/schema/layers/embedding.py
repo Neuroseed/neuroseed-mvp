@@ -36,13 +36,8 @@ EMBEDDING_LAY = {
                 "mask_zero": {
                     "type": "boolean",
                 },
-                "input_dim": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 100000,
-                },
             },
-            "required": ["rate"],
+            "required": ["input_dim"],
             "additionalProperties": False
         },
     },
