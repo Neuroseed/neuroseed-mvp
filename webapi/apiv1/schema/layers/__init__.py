@@ -19,6 +19,8 @@ from .embedding import EMBEDDING_LAY
 from .batchnormalization import BATCHNORMALIZATION_LAY
 from .gaussiannoise import GAUSSIANNOISE_LAY
 from .gaussiandropout import GAUSSIANDROPOUT_LAY
+from .simplernn import SIMPLERNN_LAY
+from .convlstm2d import CONVLSTM2D_LAY
 
 LAYERS = [
           DENSE_LAY,
@@ -41,5 +43,7 @@ LAYERS = [
           EMBEDDING_LAY,
           BATCHNORMALIZATION_LAY,
           GAUSSIANNOISE_LAY,
-          GAUSSIANDROPOUT_LAY
+          GAUSSIANDROPOUT_LAY,
+          SIMPLERNN_LAY,
+          CONVLSTM2D_LAY
 ]
