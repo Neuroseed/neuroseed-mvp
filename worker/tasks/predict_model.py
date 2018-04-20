@@ -41,14 +41,13 @@ def predict_on_task_exc(task):
     result = predict_model(model, x)
 
     # save result
-    tmp_id = task.id
-    tmp_name = tmp_id + '.hdf5'
+    tmp_name = task.id
 
     with storage.open_dataset(tmp_name, mode='w', prefix='tmp') as h5:
         h5.create_dataset('y', data=result)
 
     with task.save_context():
-        task.history['result'] = tmp_id
+        task.history['result'] = tmp_name
 
 
 def predict_on_task(task):
