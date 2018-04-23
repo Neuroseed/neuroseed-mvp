@@ -1,6 +1,5 @@
 
-ACTIVATIONS = [
-   "linear",
+ACTIVATIONS_NO_LINEAR = [
    "softmax",
    "elu",
    "selu",
@@ -11,6 +10,8 @@ ACTIVATIONS = [
    "sigmoid",
    "hard_sigmoid"
 ]
+
+ACTIVATIONS = ["linear"] + ACTIVATIONS_NO_LINEAR
 
 INITIALIZERS = [
     "Initializer",
