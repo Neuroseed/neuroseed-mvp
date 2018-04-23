@@ -27,9 +27,16 @@ class SchemaModelLayersResource:
         'exempt_methods': ['GET']
     }
 
+    def __init__(self, enable_new_layer=True):
+        self.enable_new_layer = enable_new_layer
+
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
-        resp.media = layers.LAYERS
+
+        if self.enable_new_layer:
+            resp.media = layers.LAYERS
+        else:
+            resp.media = layers.OLD_LAYERS
 
 
 class SchemaDatasetResource:

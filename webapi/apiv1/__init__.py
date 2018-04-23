@@ -5,7 +5,7 @@ from .resources import *
 logger = logging.getLogger(__name__)
 
 
-def configure_api_v1(api, auth):
+def configure_api_v1(api, auth, config):
     BASE = '/api/v1/'
 
     # dataset operations
@@ -109,7 +109,8 @@ def configure_api_v1(api, auth):
     api.add_route(BASE + 'tasks/number', tasks_number_resource)
 
     # schema resource
-    schema_model_layers_resource = SchemaModelLayersResource()
+    enable_new_layer = config.get('enable_new_layer', True)
+    schema_model_layers_resource = SchemaModelLayersResource(enable_new_layer)
     api.add_route(BASE + 'schema/model/layers', schema_model_layers_resource)
     api.add_route(BASE + 'schema/layers', schema_model_layers_resource)  # TODO: delete line
 
