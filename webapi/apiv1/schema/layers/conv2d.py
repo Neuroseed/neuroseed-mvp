@@ -47,7 +47,7 @@ CONV2D_LAY = {
                     },
                     "title": "Strides",
                     "description": "List of 2 integers specifying the strides of the convolution along the width and height",
-                    "default": [2, 2]
+                    "default": [1, 1]
                 },
                 "padding": {
                     "type": "string",
@@ -65,7 +65,7 @@ CONV2D_LAY = {
                         "maximum": 128
                     },
                     "title": "Dilation rate",
-                    "default": [2, 2]
+                    "default": [1, 1]
                 },
                 "activation": {
                     "type": "string",

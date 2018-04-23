@@ -43,6 +43,7 @@ def main(*args, **kwargs):
 
     log_level = CONFIG['log_level']
     sys.argv.extend(['-l', log_level])
+    sys.argv.append('--logfile=logs/%p-%i.log')
     sys.argv.append('--autoscale=10,1')
 
     app.worker_main(*args, **kwargs)
