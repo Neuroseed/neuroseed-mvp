@@ -2,9 +2,6 @@ import sys
 import json
 
 from flower.__main__ import main
-#
-#with open('config/celery_config.json', 'r') as f:
-#    config = json.load(f)
 
 with open('config/flower_config.json', 'r') as f:
     config = json.load(f)
