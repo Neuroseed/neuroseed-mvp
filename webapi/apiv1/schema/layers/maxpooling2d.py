@@ -37,7 +37,7 @@ MAXPOOLING2D_LAY = {
                         "maximum": 2**10
                     },
                     "title": "Strides",
-                    "default": None
+                    "default": [1, 1]
                 },
                 "padding": {
                     "type": "string",
