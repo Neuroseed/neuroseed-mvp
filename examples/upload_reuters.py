@@ -44,7 +44,7 @@ def reuters_to_hdf5(file_name):
     if os.path.exists(file_name):
         return
 
-    (x_train, y_train), (x_test, y_test) = reuters.load_data(num_words=10000, maxlen=500)
+    (x_train, y_train), (x_test, y_test) = reuters.load_data(num_words=1000)
     word_index = reuters.get_word_index(path="reuters_word_index.json")
     print('x_train shape:', x_train.shape)
     print(x_train.shape[0], 'train samples')
@@ -59,7 +59,7 @@ def reuters_to_hdf5(file_name):
     x = numpy.concatenate((x_train, x_test), axis=0)
     x = sequence.pad_sequences(x, maxlen=400)
     y = numpy.concatenate((y_train, y_test), axis=0)
-    y = sequence.pad_sequences(y, maxlen=400)
+#    y = sequence.pad_sequences(y, maxlen=400)
 
 
     with h5py.File(file_name, 'w') as f:

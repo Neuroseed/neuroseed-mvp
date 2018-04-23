@@ -4,5 +4,6 @@
     "auth_key_file": "config/auth.key",
     "celery_config": "config/celery_config.json",
     "metadata_config": "config/metadata_config.json",
-    "storage_config": "config/storage_config.json"
+    "storage_config": "config/storage_config.json",
+    "enable_new_layer": true
 }

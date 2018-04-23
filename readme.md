@@ -1,6 +1,6 @@
 # Neuroseed MVP
 
-Release Version 0.3.4
+Release Version 0.4.0
 
 ## Dependencies
 

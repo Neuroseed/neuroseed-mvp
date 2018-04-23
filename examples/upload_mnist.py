@@ -16,7 +16,7 @@ TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256',).decode('utf-8')
 
 hdf5_file = 'mnist.hdf5'
 batch_size = 32
-num_classes = 100
+num_classes = 10
 
 def create_dataset_metadata():
     url = 'http://localhost:8080/api/v1/dataset'

@@ -1,5 +1,38 @@
 # Neuroseed MVP Versions History
 
+## v0.4.0
+
+---
+
+- Добавлены схемы для новых слоев:
+- Activation
+- Reshape
+- Permute
+- RepeatVector
+- ActivityRegularization
+- Masking
+- Conv1D
+- Cropping1D
+- Cropping2D
+- MaxPooling1D
+- AveragePooling1D
+- SimpleRNN
+- ConvLSTM2D
+- GRU
+- LSTM
+- Embedding
+- BatchNormalization
+- GaussianNoise
+- GaussianDropout
+- TimeDistributed
+- Добавлены примеры создания и обучения нейронных сетей:
+- CNN IMDB
+- LSTM IMDB
+- CNN LSTM IMDB
+- MLP Reuters
+- MLP mnist
+- Новые слои доступны опционально
+
 ## v0.3.4
 
 ---

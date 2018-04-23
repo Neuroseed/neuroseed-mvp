@@ -43,7 +43,7 @@ def imdb_to_hdf5(file_name):
     if os.path.exists(file_name):
         return
     
-    (x_train, y_train), (x_test, y_test) = imdb.load_data()
+    (x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=20000)
     word_index = imdb.get_word_index(path="imdb_word_index.json")
     print('x_train shape:', x_train.shape)
     print(x_train.shape[0], 'train samples')
@@ -56,9 +56,9 @@ def imdb_to_hdf5(file_name):
     x_test = x_test.astype('object')
 
     x = numpy.concatenate((x_train, x_test), axis=0)
-    x = sequence.pad_sequences(x, maxlen=400)
+    x = sequence.pad_sequences(x, maxlen=80)
     y = numpy.concatenate((y_train, y_test), axis=0)
-    y = sequence.pad_sequences(y, maxlen=400)
+#    y = sequence.pad_sequences(y, maxlen=400)
 
 
     with h5py.File(file_name, 'w') as f:

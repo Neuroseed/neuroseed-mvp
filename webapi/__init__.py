@@ -107,7 +107,7 @@ def main(config):
 
     api.set_error_serializer(serializers.falcon_error_serializer)
 
-    apiv1.configure_api_v1(api, auth_middleware)
+    apiv1.configure_api_v1(api, auth_middleware, config)
 
     return api
 
