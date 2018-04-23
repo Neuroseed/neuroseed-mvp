@@ -1,4 +1,5 @@
 import logging
+import logging.handlers
 import sys
 import os
 
@@ -22,7 +23,7 @@ def init_logging():
 
     formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 
-    file_handler = logging.FileHandler('logs/log-web-api.txt', mode='w')
+    file_handler = logging.handlers.RotatingFileHandler('logs/log-web-api.txt', mode='a', maxBytes=2**20, backupCount=5)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
