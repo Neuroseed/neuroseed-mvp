@@ -42,7 +42,7 @@ CONV2D_LAY = {
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
-                        "minimum": 2,
+                        "minimum": 1,
                         "maximum": 128
                     },
                     "title": "Strides",

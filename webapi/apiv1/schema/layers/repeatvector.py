@@ -2,10 +2,15 @@ import metadata
 
 REPEATVECTOR_LAY = {
     "type": "object",
+    "title": "RepeatVector",
+    "description": "Repeats the input n times",
     "properties": {
         "name": {
             "type": "string",
-            "pattern": "^RepeatVector$"
+            "pattern": "^RepeatVector$",
+            "title": "Layer name",
+            "description": "Name of layer",
+            "default": "RepeatVector"
         },
         "config": {
             "type": "object",
@@ -13,7 +18,9 @@ REPEATVECTOR_LAY = {
                 "n": {
                     "minimum": 2,
                     "maximum": 6,
-                    "type": "integer"
+                    "type": "integer",
+                    "title": "n",
+                    "description": "Integer, repetition factor"
                 }
             },
             "required": ["n"],

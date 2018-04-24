@@ -2,10 +2,15 @@ import metadata
 
 CROPPING1D_LAY = {
     "type": "object",
+    "title": "Cropping1D",
+    "description": "Cropping layer for 1D input",
     "properties": {
         "name": {
             "type": "string",
-            "pattern": "^Cropping1D$"
+            "pattern": "^Cropping1D$",
+            "title": "Layer name",
+            "description": "Name of layer",
+            "default": "Cropping1D"
         },
         "config": {
             "type": "object",
@@ -16,7 +21,9 @@ CROPPING1D_LAY = {
                     "maxItems": 2,
                     "items": {
                         "type": "integer"
-                    }
+                    },
+                    "title": "Cropping",
+                    "description": "How many units should be trimmed off at the beginning and end of the cropping dimension (axis 1)"
                 },
             },
             "required": ["cropping"],

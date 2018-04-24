@@ -2,10 +2,15 @@ import metadata
 
 GAUSSIANDROPOUT_LAY = {
     "type": "object",
+    "title": "GaussianDropout",
+    "description": "Apply multiplicative 1-centered Gaussian noise",
     "properties": {
         "name": {
             "type": "string",
-            "pattern": "^GaussianDropout$"
+            "pattern": "^GaussianDropout$",
+            "title": "Layer name",
+            "description": "Name of layer",
+            "default": "GaussianDropout"
         },
         "config": {
             "type": "object",
@@ -14,6 +19,8 @@ GAUSSIANDROPOUT_LAY = {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 1,
+                    "title": "Rate",
+                    "default": 0.25
                 },
             },
             "required": ["rate"],
