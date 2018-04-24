@@ -33,7 +33,7 @@ MAXPOOLING2D_LAY = {
                     "maxItems": 2,
                     "items": {
                         "type": "integer",
-                        "minimum": 2,
+                        "minimum": 1,
                         "maximum": 2**10
                     },
                     "title": "Strides",
