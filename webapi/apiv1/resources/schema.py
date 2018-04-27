@@ -46,7 +46,7 @@ class SchemaDatasetResource:
 
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
-        resp.media = dataset.DATASET_SCHEMA
+        resp.media = dataset.CREATE_DATASET_SCHEMA
 
 
 class SchemaArchitectureResource:

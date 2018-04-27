@@ -10,6 +10,7 @@ from .errors import ResourcePublishedException
 __all__ = [
     'DatasetMetadata',
     'get_dataset',
+    'update_dataset',
     'delete_dataset',
     'get_datasets'
 ]
@@ -124,6 +125,48 @@ def get_dataset(id, context):
     return meta
 
 
+def update_dataset(dataset, data, context=None):
+    """Delete dataset by id or directly
+    Args:
+        dataset (str or DatasetMetadata): dataset to delete
+        data (dict): update fields data
+        context (None or dict): context for delete
+        
+    Returns:
+        None
+        
+    Raises:
+        TypeError - invalid argument type
+        DoesNotExist - dataset does not exist
+        KeyError - context not contain user_id key
+        ValueError - invalid access rights
+    """
+
+    if not isinstance(dataset, (str, DatasetMetadata)):
+        raise TypeError('type of dataset must be str or DatasetMetadata')
+
+    if not isinstance(data, dict):
+        raise TypeError('type of data must be dict')
+
+    if not isinstance(context, (dict, type(None))):
+        raise TypeError('type of context must be dict or None')
+
+    if isinstance(dataset, str):
+        if isinstance(context, type(None)):
+            raise ValueError('to access to dataset need user_id')
+
+        user_id = context.get('user_id', None)
+
+        if user_id:
+            query = Q(id=dataset) & Q(base__owner=user_id)
+            dataset = DatasetMetadata.from_id(query)
+        else:
+            raise KeyError('context must contain user_id key')
+
+    with dataset.save_context():
+        dataset.from_flatten(data)
+
+
 def delete_dataset(dataset, context=None):
     """Delete dataset by id or directly
     Args:
@@ -134,6 +177,7 @@ def delete_dataset(dataset, context=None):
         None
         
     Raises:
+        TypeError - invalid argument type
         DoesNotExist - dataset does not exist
         KeyError - context not contain user_id key
         ValueError - invalid access rights
