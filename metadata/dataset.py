@@ -5,10 +5,12 @@ from mongoengine import fields
 from mongoengine.queryset.visitor import Q
 
 from .mixin import MetadataMixin
+from .errors import ResourcePublishedException
 
 __all__ = [
     'DatasetMetadata',
     'get_dataset',
+    'delete_dataset',
     'get_datasets'
 ]
 
@@ -120,6 +122,46 @@ def get_dataset(id, context):
         meta = DatasetMetadata.from_id(**kwargs)
 
     return meta
+
+
+def delete_dataset(dataset, context=None):
+    """Delete dataset by id or directly
+    Args:
+        dataset (str or DatasetMetadata): dataset to delete
+        context (None or dict): context for delete
+        
+    Returns:
+        None
+        
+    Raises:
+        DoesNotExist - dataset does not exist
+        KeyError - context not contain user_id key
+        ValueError - invalid access rights
+        ResourcePublishedException - can not delete published dataset
+    """
+
+    if not isinstance(dataset, (str, DatasetMetadata)):
+        raise TypeError('Type of dataset must be str or DatasetMetadata')
+
+    if not isinstance(context, (dict, type(None))):
+        raise TypeError('Type of context must be dict or None')
+
+    if isinstance(dataset, str):
+        if isinstance(context, type(None)):
+            raise ValueError('to access to dataset need user_id')
+
+        user_id = context.get('user_id', None)
+
+        if user_id:
+            query = Q(id=dataset) & Q(base__owner=user_id)
+            dataset = DatasetMetadata.from_id(query)
+        else:
+            raise KeyError('context must contain user_id key')
+
+    if dataset.status == PUBLISHED:
+        raise ResourcePublishedException('can not delete published dataset')
+
+    dataset.delete()
 
 
 def get_datasets(context, filter=None):

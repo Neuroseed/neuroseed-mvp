@@ -150,3 +150,25 @@ class DatasetResource:
         resp.media = {
             'id': dataset_meta.id
         }
+
+    def on_delete(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.delete_dataset(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Dataset {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Dataset not found",
+                description="Dataset metadata does not exist"
+            )
+        except metadata.errors.ResourcePublishedException:
+            raise falcon.HTTPConflict(
+                title='Dataset already published',
+                description='Can not delete dataset. Dataset already published on blockchain'
+            )
+
+        resp.status = falcon.HTTP_200
