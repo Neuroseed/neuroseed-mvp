@@ -3,7 +3,7 @@ import falcon
 from .test_dataset import TestInitAPI
 
 
-class TestCreateDataset(TestInitAPI):
+class TestUpdateDataset(TestInitAPI):
     def test_update_dataset_no_auth(self):
         user_id = 'u1'
         d1 = self.create_dataset_metadata(True, user_id)
