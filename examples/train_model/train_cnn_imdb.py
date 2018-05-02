@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -9,39 +9,42 @@ def create_architecture():
             {
                 "name": "Embedding",
                 "config": {
-                    "input_dim": 20000,
-                    "output_dim": 128
+                    "input_dim": 5000,
+                    "output_dim": 50
                 }
             },
             {
                 "name": "Dropout",
                 "config": {
-                    "rate": 0.25
+                    "rate": 0.2
                 }
             },
             {
                 "name": "Conv1D",
                 "config": {
-                    "filters": 64,
-                    "kernel_size": [5],
+                    "filters": 250,
+                    "kernel_size": [3],
                     "padding": "valid",
                     "activation": "relu",
                     "strides": [1]
                 }
             },
             {
-                "name": "MaxPooling1D",
+                "name": "Flatten"
+            },
+            {
+                "name": "Dense",
                 "config": {
-                   "pool_size": 4
+                    "units": 250
                 }
             },
             {
-                "name": "LSTM",
-                "config": {
-                    "units": 70
-                }
-            },
-            {
+               "name": "Dropout",
+               "config": {
+                   "rate": 0.2
+               }
+           },
+           {
                "name": "Dense",
                "config": {
                    "units": 2
@@ -52,7 +55,7 @@ def create_architecture():
 
     data = {
         "is_public": True,
-        "title": "LSTM architecture for imdb dataset",
+        "title": "CNN architecture for imdb dataset",
         "architecture": architecture
     }
 
@@ -88,7 +91,7 @@ def train_cnn_cifar10(model_id):
     url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=model_id)
 
     config = {
-        "epochs": 5,
+        "epochs": 1,
         "optimizer": {
             "name": "Adam"
         },

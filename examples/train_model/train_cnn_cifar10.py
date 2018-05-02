@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -7,31 +7,38 @@ def create_architecture():
     architecture = {
         "layers": [
             {
-                "name": "Dense",
+                "name": "Conv2D",
                 "config": {
-                    "units": 512,
-                   "activation": "relu"
+                    "filters": 32,
+                    "kernel_size": [3, 3]
                 }
             },
             {
-                "name": "Dropout",
+                "name": "MaxPooling2D",
                 "config": {
-                    "rate": 0.5
+                    "pool_size": [2, 2]
                 }
             },
             {
+                "name": "Conv2D",
+                "config": {
+                    "filters": 32,
+                    "kernel_size": [3, 3]
+                }
+            },
+            {"name": "Flatten"},
+            {
                 "name": "Dense",
                 "config": {
-                   "units": 46,
-                   "activation": "softmax"
-                   }
-            },
+                    "units": 10
+                }
+            }
         ]
     }
 
     data = {
         "is_public": True,
-        "title": "LSTM architecture for imdb dataset",
+        "title": "CNN architecture fo cifar10 dataset",
         "architecture": architecture
     }
 
@@ -49,7 +56,7 @@ def create_model(architecture_id, dataset_id):
 
     model = {
         "is_public": True,
-        "title": "Classification CNN on imdb",
+        "title": "Classification CNN on cifar10",
         "architecture": architecture_id,
         "dataset": dataset_id
     }
@@ -69,7 +76,7 @@ def train_cnn_cifar10(model_id):
     config = {
         "epochs": 1,
         "optimizer": {
-            "name": "Adam"
+            "name": "SGD"
         },
         "loss": "categorical_crossentropy"
     }

@@ -5,7 +5,7 @@ import h5py
 import keras
 from keras.datasets import cifar10
 
-import utils
+from examples import utils
 
 
 hdf5_file = 'cifar10.hdf5'

@@ -6,7 +6,7 @@ import keras
 from keras.preprocessing import sequence
 from keras.datasets import imdb
 
-import utils
+from examples import utils
 
 
 hdf5_file = 'imdb.hdf5'

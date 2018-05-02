@@ -6,7 +6,7 @@ import keras
 from keras.preprocessing import sequence
 from keras.datasets import reuters
 
-import utils
+from examples import utils
 
 
 hdf5_file = 'reuters.hdf5'

@@ -5,7 +5,7 @@ import h5py
 import keras
 from keras.datasets import mnist
 
-import utils
+from examples import utils
 
 
 hdf5_file = 'mnist.hdf5'

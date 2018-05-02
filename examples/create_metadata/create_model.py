@@ -1,6 +1,6 @@
 import time
 
-import utils
+from examples import utils
 import create_architecture
 import create_dataset
 

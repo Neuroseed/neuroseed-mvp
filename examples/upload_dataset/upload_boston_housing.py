@@ -5,7 +5,7 @@ import h5py
 import keras
 from keras.datasets import boston_housing
 
-import utils
+from examples import utils
 
 
 hdf5_file = 'boston_housing.hdf5'

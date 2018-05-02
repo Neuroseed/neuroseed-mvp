@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -7,55 +7,31 @@ def create_architecture():
     architecture = {
         "layers": [
             {
-                "name": "Embedding",
+                "name": "Dense",
                 "config": {
-                    "input_dim": 5000,
-                    "output_dim": 50
+                    "units": 512,
+                   "activation": "relu"
                 }
             },
             {
                 "name": "Dropout",
                 "config": {
-                    "rate": 0.2
+                    "rate": 0.5
                 }
-            },
-            {
-                "name": "Conv1D",
-                "config": {
-                    "filters": 250,
-                    "kernel_size": [3],
-                    "padding": "valid",
-                    "activation": "relu",
-                    "strides": [1]
-                }
-            },
-            {
-                "name": "Flatten"
             },
             {
                 "name": "Dense",
                 "config": {
-                    "units": 250
-                }
+                   "units": 46,
+                   "activation": "softmax"
+                   }
             },
-            {
-               "name": "Dropout",
-               "config": {
-                   "rate": 0.2
-               }
-           },
-           {
-               "name": "Dense",
-               "config": {
-                   "units": 2
-               }
-           }
         ]
     }
 
     data = {
         "is_public": True,
-        "title": "CNN architecture for imdb dataset",
+        "title": "LSTM architecture for imdb dataset",
         "architecture": architecture
     }
 
@@ -95,7 +71,7 @@ def train_cnn_cifar10(model_id):
         "optimizer": {
             "name": "Adam"
         },
-        "loss": "binary_crossentropy"
+        "loss": "categorical_crossentropy"
     }
 
     resp = utils.post(url, json=config)

@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -14,18 +14,37 @@ def create_architecture():
                 }
             },
             {
+                "name": "Dropout",
+                "config": {
+                    "rate": 0.25
+                }
+            },
+            {
+                "name": "Conv1D",
+                "config": {
+                    "filters": 64,
+                    "kernel_size": [5],
+                    "padding": "valid",
+                    "activation": "relu",
+                    "strides": [1]
+                }
+            },
+            {
+                "name": "MaxPooling1D",
+                "config": {
+                   "pool_size": 4
+                }
+            },
+            {
                 "name": "LSTM",
                 "config": {
-                    "units": 128,
-                   "dropout": 0.2,
-                   "recurrent_dropout": 0.2
+                    "units": 70
                 }
             },
             {
                "name": "Dense",
                "config": {
-                   "units": 2,
-                   "activation": "sigmoid"
+                   "units": 2
                }
            }
         ]
@@ -69,7 +88,7 @@ def train_cnn_cifar10(model_id):
     url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=model_id)
 
     config = {
-        "epochs": 1,
+        "epochs": 5,
         "optimizer": {
             "name": "Adam"
         },

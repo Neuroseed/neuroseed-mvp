@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -7,38 +7,33 @@ def create_architecture():
     architecture = {
         "layers": [
             {
-                "name": "Conv2D",
+                "name": "Embedding",
                 "config": {
-                    "filters": 32,
-                    "kernel_size": [3, 3]
+                    "input_dim": 20000,
+                    "output_dim": 128
                 }
             },
             {
-                "name": "MaxPooling2D",
+                "name": "LSTM",
                 "config": {
-                    "pool_size": [2, 2]
+                    "units": 128,
+                   "dropout": 0.2,
+                   "recurrent_dropout": 0.2
                 }
             },
             {
-                "name": "Conv2D",
-                "config": {
-                    "filters": 32,
-                    "kernel_size": [3, 3]
-                }
-            },
-            {"name": "Flatten"},
-            {
-                "name": "Dense",
-                "config": {
-                    "units": 10
-                }
-            }
+               "name": "Dense",
+               "config": {
+                   "units": 2,
+                   "activation": "sigmoid"
+               }
+           }
         ]
     }
 
     data = {
         "is_public": True,
-        "title": "CNN architecture fo cifar10 dataset",
+        "title": "LSTM architecture for imdb dataset",
         "architecture": architecture
     }
 
@@ -56,7 +51,7 @@ def create_model(architecture_id, dataset_id):
 
     model = {
         "is_public": True,
-        "title": "Classification CNN on cifar10",
+        "title": "Classification CNN on imdb",
         "architecture": architecture_id,
         "dataset": dataset_id
     }
@@ -76,9 +71,9 @@ def train_cnn_cifar10(model_id):
     config = {
         "epochs": 1,
         "optimizer": {
-            "name": "SGD"
+            "name": "Adam"
         },
-        "loss": "categorical_crossentropy"
+        "loss": "binary_crossentropy"
     }
 
     resp = utils.post(url, json=config)
