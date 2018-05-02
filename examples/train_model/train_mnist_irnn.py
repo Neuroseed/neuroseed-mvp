@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -7,30 +7,19 @@ def create_architecture():
     architecture = {
         "layers": [
             {
-                "name": "Conv2D",
+                "name": "SimpleRNN",
                 "config": {
-                    "filters": 32,
-                    "kernel_size": [3, 3]
+                    "units": 100,
+                    "kernel_initializer": "RandomNormal",
+                    "recurrent_initializer": "Identity",
+                    "activation": "relu"
                 }
             },
-            {
-                "name": "MaxPooling2D",
-                "config": {
-                    "pool_size": [2, 2]
-                }
-            },
-            {
-                "name": "Conv2D",
-                "config": {
-                    "filters": 32,
-                    "kernel_size": [3, 3]
-                }
-            },
-            {"name": "Flatten"},
             {
                 "name": "Dense",
                 "config": {
-                    "units": 10
+                   "units": 10,
+                   "activation": "softmax"
                 }
             }
         ]
@@ -38,7 +27,7 @@ def create_architecture():
 
     data = {
         "is_public": True,
-        "title": "CNN architecture fo cifar10 dataset",
+        "title": "Irnn on mnist dataset",
         "architecture": architecture
     }
 
@@ -56,7 +45,7 @@ def create_model(architecture_id, dataset_id):
 
     model = {
         "is_public": True,
-        "title": "Classification CNN on cifar10",
+        "title": "Irnn on mnist dataset",
         "architecture": architecture_id,
         "dataset": dataset_id
     }
@@ -70,13 +59,13 @@ def create_model(architecture_id, dataset_id):
     raise RuntimeError('status: {code} data: {text}'.format(code=resp.status_code, text=resp.text))
 
 
-def train_cnn_cifar10(model_id):
+def train_mnist_irnn(model_id):
     url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=model_id)
 
     config = {
         "epochs": 1,
         "optimizer": {
-            "name": "SGD"
+            "name": "RMSprop"
         },
         "loss": "categorical_crossentropy"
     }
@@ -96,4 +85,4 @@ if __name__ == '__main__':
 
     model_id = create_model(architecture_id, dataset_id)
 
-    task_id = train_cnn_cifar10(model_id)
+    task_id = train_mnist_irnn(model_id)

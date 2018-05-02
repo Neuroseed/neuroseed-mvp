@@ -1,21 +1,18 @@
 import os
-import requests
-import jwt
-import utils
+
 import numpy
 import h5py
 import keras
 from keras.preprocessing import sequence
 from keras.datasets import imdb
 
-SECRET_KEY = 'secret'
-payload = {'user_id': 'user-user-user'}
+from examples import utils
 
-TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
 
 hdf5_file = 'imdb.hdf5'
 batch_size = 32
 num_classes = 2
+
 
 def create_dataset_meta():
     url = 'http://localhost:8080/api/v1/dataset'
@@ -27,10 +24,7 @@ def create_dataset_meta():
         "category": "classification"
     }
 
-    headers = {
-        'Authorization': 'Bearer {token}'.format(token=TOKEN)
-    }
-    r = requests.post(url, json=dataset_meta, headers=headers)
+    r = utils.post(url, json=dataset_meta)
     print('Create dataset metadata: ', r.status_code, 'data:', r.text)
 
     if r.status_code == 200:
@@ -60,13 +54,13 @@ def imdb_to_hdf5(file_name):
     y = numpy.concatenate((y_train, y_test), axis=0)
 #    y = sequence.pad_sequences(y, maxlen=400)
 
-
     with h5py.File(file_name, 'w') as f:
         f.create_dataset('x',data=x, compression='gzip')
         f.create_dataset('y',data=y, compression='gzip')
         dictionary = f.create_group('dictionary')
         for key in word_index:
             dictionary[key] = word_index[key]
+
 
 if __name__ == '__main__':
     imdb_to_hdf5(hdf5_file)

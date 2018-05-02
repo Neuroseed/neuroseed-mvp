@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -7,21 +7,41 @@ def create_architecture():
     architecture = {
         "layers": [
             {
-                "name": "SimpleRNN",
+                "name": "Dense",
                 "config": {
-                    "units": 100,
-                    "kernel_initializer": "RandomNormal",
-                    "recurrent_initializer": "Identity",
+                    "units": 512,
                     "activation": "relu"
                 }
             },
             {
-                "name": "Dense",
+                "name": "Dropout",
                 "config": {
+                   "rate": 0.2,
+                }
+            },
+           {
+               "name": "Dense",
+               "config": {
+                   "units": 512,
+                   "activation": "relu"
+                }
+           },
+           {
+               "name": "Dropout",
+               "config": {
+                   "rate": 0.2,
+               }
+           },
+           {
+               "name": "Flatten"
+           },
+           {
+               "name": "Dense",
+               "config": {
                    "units": 10,
                    "activation": "softmax"
-                }
-            }
+               }
+           },
         ]
     }
 
@@ -59,7 +79,7 @@ def create_model(architecture_id, dataset_id):
     raise RuntimeError('status: {code} data: {text}'.format(code=resp.status_code, text=resp.text))
 
 
-def train_mnist_irnn(model_id):
+def train_mnist_mlp(model_id):
     url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=model_id)
 
     config = {
@@ -85,4 +105,4 @@ if __name__ == '__main__':
 
     model_id = create_model(architecture_id, dataset_id)
 
-    task_id = train_mnist_irnn(model_id)
+    task_id = train_mnist_mlp(model_id)

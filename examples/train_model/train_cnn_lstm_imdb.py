@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -7,47 +7,52 @@ def create_architecture():
     architecture = {
         "layers": [
             {
-                "name": "Dense",
+                "name": "Embedding",
                 "config": {
-                    "units": 512,
-                    "activation": "relu"
+                    "input_dim": 20000,
+                    "output_dim": 128
                 }
             },
             {
                 "name": "Dropout",
                 "config": {
-                   "rate": 0.2,
+                    "rate": 0.25
                 }
             },
-           {
-               "name": "Dense",
-               "config": {
-                   "units": 512,
-                   "activation": "relu"
+            {
+                "name": "Conv1D",
+                "config": {
+                    "filters": 64,
+                    "kernel_size": [5],
+                    "padding": "valid",
+                    "activation": "relu",
+                    "strides": [1]
                 }
-           },
-           {
-               "name": "Dropout",
-               "config": {
-                   "rate": 0.2,
-               }
-           },
-           {
-               "name": "Flatten"
-           },
-           {
+            },
+            {
+                "name": "MaxPooling1D",
+                "config": {
+                   "pool_size": 4
+                }
+            },
+            {
+                "name": "LSTM",
+                "config": {
+                    "units": 70
+                }
+            },
+            {
                "name": "Dense",
                "config": {
-                   "units": 10,
-                   "activation": "softmax"
+                   "units": 2
                }
-           },
+           }
         ]
     }
 
     data = {
         "is_public": True,
-        "title": "Irnn on mnist dataset",
+        "title": "LSTM architecture for imdb dataset",
         "architecture": architecture
     }
 
@@ -65,7 +70,7 @@ def create_model(architecture_id, dataset_id):
 
     model = {
         "is_public": True,
-        "title": "Irnn on mnist dataset",
+        "title": "Classification CNN on imdb",
         "architecture": architecture_id,
         "dataset": dataset_id
     }
@@ -79,15 +84,15 @@ def create_model(architecture_id, dataset_id):
     raise RuntimeError('status: {code} data: {text}'.format(code=resp.status_code, text=resp.text))
 
 
-def train_mnist_mlp(model_id):
+def train_cnn_cifar10(model_id):
     url = 'http://localhost:8080/api/v1/model/{id}/train'.format(id=model_id)
 
     config = {
-        "epochs": 1,
+        "epochs": 5,
         "optimizer": {
-            "name": "RMSprop"
+            "name": "Adam"
         },
-        "loss": "categorical_crossentropy"
+        "loss": "binary_crossentropy"
     }
 
     resp = utils.post(url, json=config)
@@ -105,4 +110,4 @@ if __name__ == '__main__':
 
     model_id = create_model(architecture_id, dataset_id)
 
-    task_id = train_mnist_mlp(model_id)
+    task_id = train_cnn_cifar10(model_id)
