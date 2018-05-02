@@ -6,11 +6,21 @@ from mongoengine.queryset.visitor import Q
 
 from .dataset import DATASET_CATEGORIES
 from .mixin import MetadataMixin
+from .errors import ResourcePublishedException
 
 __all__ = [
     'ArchitectureMetadata',
     'get_architecture',
-    'get_architectures'
+    'get_architectures',
+    'delete_architecture'
+]
+
+PENDING = 'PENDING'
+PUBLISHED = 'PUBLISHED'
+
+ARCHITECTURE_STATUS_CODES = [
+    PENDING,
+    PUBLISHED
 ]
 
 
@@ -18,6 +28,7 @@ class ArchitectureMetadata(Document, MetadataMixin):
     id = fields.StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     is_public = fields.BooleanField(default=False)
     owner = fields.StringField(required=True)
+    status = fields.StringField(default=PENDING, choices=ARCHITECTURE_STATUS_CODES, required=True)  # NEW IN V0.5.0
     title = fields.StringField(required=True)
     description = fields.StringField()
     category = fields.StringField(choices=DATASET_CATEGORIES)
@@ -62,6 +73,47 @@ def get_architecture(id, context):
         meta = ArchitectureMetadata.from_id(**kwargs)
 
     return meta
+
+
+def delete_architecture(architecture, context=None):
+    """Delete architecture by id or directly
+    Args:
+        architecture (str or ArchitectureMetadata): architecture to delete
+        context (None or dict): context for delete
+
+    Returns:
+        None
+
+    Raises:
+        TypeError - invalid argument type
+        DoesNotExist - architecture does not exist
+        KeyError - context not contain user_id key
+        ValueError - invalid access rights
+        ResourcePublishedException - can not delete published architecture
+    """
+
+    if not isinstance(architecture, (str, ArchitectureMetadata)):
+        raise TypeError('Type of architecture must be str or ArchitectureMetadata')
+
+    if not isinstance(context, (dict, type(None))):
+        raise TypeError('Type of context must be dict or None')
+
+    if isinstance(architecture, str):
+        if isinstance(context, type(None)):
+            raise ValueError('to access to architecture need user_id')
+
+        user_id = context.get('user_id', None)
+
+        if user_id:
+            query = Q(id=architecture) & Q(owner=user_id)
+            architecture = ArchitectureMetadata.from_id(query)
+        else:
+            raise KeyError('context must contain user_id key')
+
+    if architecture.status == PUBLISHED:
+        raise ResourcePublishedException('can not delete published architecture')
+
+    architecture.delete()
 
 
 def get_architectures(context, filter=None):

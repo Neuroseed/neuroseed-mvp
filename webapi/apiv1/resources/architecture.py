@@ -5,6 +5,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
+import manager
 from ..schema.architecture import ARCHITECTURE_SCHEMA
 
 __all__ = [
@@ -99,3 +100,24 @@ class ArchitectureResource:
             'id': id
         }
 
+    def on_delete(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.delete_architecture(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Architecture {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Architecture not found",
+                description="Architecture metadata does not exist"
+            )
+        except metadata.errors.ResourcePublishedException:
+            raise falcon.HTTPConflict(
+                title='Architecture already published',
+                description='Can not delete architecture. Architecture already published on blockchain'
+            )
+
+        resp.status = falcon.HTTP_200
