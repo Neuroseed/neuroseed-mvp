@@ -26,7 +26,7 @@ class TestDeleteDataset(TestInitAPI):
 
         self.assertEqual(result.status, falcon.HTTP_200)
 
-    def delete_others_dataset(self):
+    def test_delete_others_dataset(self):
         user_id = 'u1'
         other_user_id = 'u2'
         d1 = self.create_dataset_metadata(False, other_user_id)
@@ -38,7 +38,7 @@ class TestDeleteDataset(TestInitAPI):
 
         self.assertEqual(result.status, falcon.HTTP_404)
 
-    def delete_not_exist_dataset(self):
+    def test_delete_not_exist_dataset(self):
         user_id = 'u1'
         dataset_id = 'dataset-id'
         token = self.create_token(user_id)
