@@ -10,8 +10,8 @@ def create_architecture():
                 "name": "SimpleRNN",
                 "config": {
                     "units": 100,
-#                    "kernel_initializer": "RandomNormal",
-#                    "recurrent_initializer": "Identity",
+                    "kernel_initializer": "RandomNormal",
+                    "recurrent_initializer": "Identity",
                     "activation": "relu"
                 }
             },
