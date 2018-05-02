@@ -66,7 +66,7 @@ class SchemaModelResource:
 
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
-        resp.media = model.MODEL_SCHEMA
+        resp.media = model.CREATE_MODEL_SCHEMA
 
 
 class SchemaTaskResource:

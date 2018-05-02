@@ -13,6 +13,7 @@ __all__ = [
     'ModelMetadata',
     'get_model',
     'get_models',
+    'update_model',
     'delete_model'
 ]
 
@@ -132,6 +133,48 @@ def get_model(id, context):
         meta = ModelMetadata.from_id(**kwargs)
 
     return meta
+
+
+def update_model(model, data, context=None):
+    """Delete model by id or directly
+    Args:
+        model (str or ModelMetadata): model to delete
+        data (dict): update fields data
+        context (None or dict): context for delete
+
+    Returns:
+        None
+
+    Raises:
+        TypeError - invalid argument type
+        DoesNotExist - model does not exist
+        KeyError - context not contain user_id key
+        ValueError - invalid access rights
+    """
+
+    if not isinstance(model, (str, ModelMetadata)):
+        raise TypeError('type of model must be str or ModelMetadata')
+
+    if not isinstance(data, dict):
+        raise TypeError('type of data must be dict')
+
+    if not isinstance(context, (dict, type(None))):
+        raise TypeError('type of context must be dict or None')
+
+    if isinstance(model, str):
+        if isinstance(context, type(None)):
+            raise ValueError('to access to model need user_id')
+
+        user_id = context.get('user_id', None)
+
+        if user_id:
+            query = Q(id=model) & Q(base__owner=user_id)
+            model = ModelMetadata.from_id(query)
+        else:
+            raise KeyError('context must contain user_id key')
+
+    with model.save_context():
+        model.from_flatten(data)
 
 
 def delete_model(model, context=None):
