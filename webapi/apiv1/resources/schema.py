@@ -56,7 +56,7 @@ class SchemaArchitectureResource:
 
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
-        resp.media = architecture.ARCHITECTURE_SCHEMA
+        resp.media = architecture.CREATE_ARCHITECTURE_SCHEMA
 
 
 class SchemaModelResource:

@@ -12,6 +12,7 @@ __all__ = [
     'ArchitectureMetadata',
     'get_architecture',
     'get_architectures',
+    'update_architecture',
     'delete_architecture'
 ]
 
@@ -73,6 +74,48 @@ def get_architecture(id, context):
         meta = ArchitectureMetadata.from_id(**kwargs)
 
     return meta
+
+
+def update_architecture(architecture, data, context=None):
+    """Delete architecture by id or directly
+    Args:
+        architecture (str or ArchitectureMetadata): architecture to delete
+        data (dict): update fields data
+        context (None or dict): context for delete
+
+    Returns:
+        None
+
+    Raises:
+        TypeError - invalid argument type
+        DoesNotExist - architecture does not exist
+        KeyError - context not contain user_id key
+        ValueError - invalid access rights
+    """
+
+    if not isinstance(architecture, (str, ArchitectureMetadata)):
+        raise TypeError('type of architecture must be str or ArchitectureMetadata')
+
+    if not isinstance(data, dict):
+        raise TypeError('type of data must be dict')
+
+    if not isinstance(context, (dict, type(None))):
+        raise TypeError('type of context must be dict or None')
+
+    if isinstance(architecture, str):
+        if isinstance(context, type(None)):
+            raise ValueError('to access to architecture need user_id')
+
+        user_id = context.get('user_id', None)
+
+        if user_id:
+            query = Q(id=architecture) & Q(owner=user_id)
+            architecture = ArchitectureMetadata.from_id(query)
+        else:
+            raise KeyError('context must contain user_id key')
+
+    with architecture.save_context():
+        architecture.from_dict(data)
 
 
 def delete_architecture(architecture, context=None):

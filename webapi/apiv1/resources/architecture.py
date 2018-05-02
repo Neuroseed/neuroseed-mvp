@@ -6,7 +6,7 @@ from falcon.media.validators import jsonschema
 
 import metadata
 import manager
-from ..schema.architecture import ARCHITECTURE_SCHEMA
+from ..schema.architecture import ARCHITECTURE_SCHEMA, CREATE_ARCHITECTURE_SCHEMA
 
 __all__ = [
     'ArchitectureResource'
@@ -81,7 +81,7 @@ class ArchitectureResource:
                 description="Architecture metadata does not exist"
             )
 
-    @jsonschema.validate(ARCHITECTURE_SCHEMA)
+    @jsonschema.validate(CREATE_ARCHITECTURE_SCHEMA)
     def create_architecture(self, req, resp):
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
@@ -99,6 +99,24 @@ class ArchitectureResource:
         resp.media = {
             'id': id
         }
+
+    @jsonschema.validate(ARCHITECTURE_SCHEMA)
+    def on_patch(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.update_architecture(id, data=req.media, context=context)
+        except metadata.DoesNotExist:
+            logger.debug('Architecture {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Architecture not found",
+                description="Architecture metadata does not exist"
+            )
+
+        resp.status = falcon.HTTP_204
 
     def on_delete(self, req, resp, id):
         user_id = req.context['user']
