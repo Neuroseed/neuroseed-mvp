@@ -5,6 +5,7 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
+import manager
 from ...schema.model import MODEL_SCHEMA
 
 __all__ = [
@@ -105,3 +106,25 @@ class ModelResource:
         resp.media = {
             'id': model_meta.id
         }
+
+    def on_delete(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.delete_model(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
+        except metadata.errors.ResourcePublishedException:
+            raise falcon.HTTPConflict(
+                title='Model already published',
+                description='Can not delete model. Model already published on blockchain'
+            )
+
+        resp.status = falcon.HTTP_200

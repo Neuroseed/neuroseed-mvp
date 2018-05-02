@@ -7,11 +7,13 @@ from mongoengine.queryset.visitor import Q
 from .dataset import DatasetMetadata
 from .architecture import ArchitectureMetadata
 from .mixin import MetadataMixin
+from .errors import ResourcePublishedException
 
 __all__ = [
     'ModelMetadata',
     'get_model',
-    'get_models'
+    'get_models',
+    'delete_model'
 ]
 
 PENDING = 'PENDING'
@@ -130,6 +132,47 @@ def get_model(id, context):
         meta = ModelMetadata.from_id(**kwargs)
 
     return meta
+
+
+def delete_model(model, context=None):
+    """Delete model by id or directly
+    Args:
+        model (str or ModelMetadata): model to delete
+        context (None or dict): context for delete
+
+    Returns:
+        None
+
+    Raises:
+        TypeError - invalid argument type
+        DoesNotExist - model does not exist
+        KeyError - context not contain user_id key
+        ValueError - invalid access rights
+        ResourcePublishedException - can not delete published model
+    """
+
+    if not isinstance(model, (str, ModelMetadata)):
+        raise TypeError('Type of model must be str or ModelMetadata')
+
+    if not isinstance(context, (dict, type(None))):
+        raise TypeError('Type of context must be dict or None')
+
+    if isinstance(model, str):
+        if isinstance(context, type(None)):
+            raise ValueError('to access to model need user_id')
+
+        user_id = context.get('user_id', None)
+
+        if user_id:
+            query = Q(id=model) & Q(base__owner=user_id)
+            model = ModelMetadata.from_id(query)
+        else:
+            raise KeyError('context must contain user_id key')
+
+    if model.status == PUBLISHED:
+        raise ResourcePublishedException('can not delete published model')
+
+    model.delete()
 
 
 def get_models(context, filter=None):
