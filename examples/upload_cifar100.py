@@ -1,21 +1,17 @@
-import requests
 import os
-import jwt
-import utils
+
 import numpy
 import h5py
 import keras
 from keras.datasets import cifar100
 
+import utils
 
-SECRET_KEY = 'secret'
-payload = {'user_id': 'user-user-user'}
-
-TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256',).decode('utf-8')
 
 hdf5_file = 'cifar100.hdf5'
 batch_size = 32
 num_classes = 100
+
 
 def create_dataset_metadata():
     url = 'http://localhost:8080/api/v1/dataset'
@@ -27,10 +23,7 @@ def create_dataset_metadata():
         "category": "classification"
     }
 
-    headers = {
-        'Authorization': 'Bearer {token}'.format(token=TOKEN)
-    }
-    r = requests.post(url, json=dataset_meta, headers=headers)
+    r = utils.post(url, json=dataset_meta)
     print('Create dataset metadata: ', r.status_code, 'data:', r.text)
     
     if r.status_code == 200:

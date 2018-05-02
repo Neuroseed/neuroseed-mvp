@@ -1,17 +1,12 @@
 import os
-import requests
-import jwt
+
 import numpy
 import h5py
-import utils
 import keras
 from keras.datasets import boston_housing
 
+import utils
 
-SECRET_KEY = 'secret'
-payload = {'user_id': 'user-user-user'}
-
-TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256',).decode('utf-8')
 
 hdf5_file = 'boston_housing.hdf5'
 batch_size = 32
@@ -28,10 +23,7 @@ def create_dataset_metadata():
         "category": "regression"
     }
 
-    headers = {
-        'Authorization': 'Bearer {token}'.format(token=TOKEN)
-    }
-    r = requests.post(url, json=dataset_meta, headers=headers)
+    r = utils.post(url, json=dataset_meta)
     print('Create dataset metadata: ', r.status_code, 'data:', r.text)
 
     if r.status_code == 200:
