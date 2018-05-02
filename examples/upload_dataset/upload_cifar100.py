@@ -1,49 +1,42 @@
-import requests
 import os
-import jwt
-import utils
+
 import numpy
 import h5py
 import keras
-from keras.datasets import mnist
+from keras.datasets import cifar100
+
+from examples import utils
 
 
-SECRET_KEY = 'secret'
-payload = {'user_id': 'user-user-user'}
-
-TOKEN = jwt.encode(payload, SECRET_KEY, algorithm='HS256',).decode('utf-8')
-
-
-hdf5_file = 'mnist.hdf5'
+hdf5_file = 'cifar100.hdf5'
 batch_size = 32
-num_classes = 10
+num_classes = 100
+
 
 def create_dataset_metadata():
     url = 'http://localhost:8080/api/v1/dataset'
-    
+
     dataset_meta = {
         "is_public": True,
-        "title": "mnist",
-        "description": "Dataset of 60,000 28x28 grayscale images of the 10 digits, along with a test set of 10,000 images.",
+        "title": "cifar100",
+        "description": "Dataset of 50,000 32x32 color training images, labeled over 100 categories, and 10,000 test images.",
         "category": "classification"
     }
-    
-    headers = {
-        'Authorization': 'Bearer {token}'.format(token=TOKEN)
-    }
-    r = requests.post(url, json=dataset_meta, headers=headers)
+
+    r = utils.post(url, json=dataset_meta)
     print('Create dataset metadata: ', r.status_code, 'data:', r.text)
     
     if r.status_code == 200:
         return r.json()['id']
-    
+
     raise RuntimeError('Status_code', r.status_code, r.text)
 
-def mnist_to_hdf5(file_name):
+
+def cifar100_to_hdf5(file_name):
     if os.path.exists(file_name):
         return
     
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    (x_train, y_train), (x_test, y_test) = cifar100.load_data()
 
     print('x_train shape:', x_train.shape)
     print(x_train.shape[0], 'train samples')
@@ -65,10 +58,12 @@ def mnist_to_hdf5(file_name):
     numpy.random.shuffle(y)
 
     with h5py.File(file_name, 'w') as f:
-        f.create_dataset('x', data=x, compression='gzip')
-        f.create_dataset('y', data=y, compression='gzip')
+        f.create_dataset('x',data=x, compression='gzip')
+        f.create_dataset('y',data=y, compression='gzip')
+
 
 if __name__ == '__main__':
-    mnist_to_hdf5(hdf5_file)
+    cifar100_to_hdf5(hdf5_file)
     id = create_dataset_metadata()
     utils.upload(id, hdf5_file)
+

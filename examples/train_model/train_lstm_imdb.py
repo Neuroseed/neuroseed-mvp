@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def create_architecture():
@@ -9,45 +9,23 @@ def create_architecture():
             {
                 "name": "Embedding",
                 "config": {
-                    "input_dim": 5000,
-                    "output_dim": 50
+                    "input_dim": 20000,
+                    "output_dim": 128
                 }
             },
             {
-                "name": "Dropout",
+                "name": "LSTM",
                 "config": {
-                    "rate": 0.2
+                    "units": 128,
+                   "dropout": 0.2,
+                   "recurrent_dropout": 0.2
                 }
             },
             {
-                "name": "Conv1D",
-                "config": {
-                    "filters": 250,
-                    "kernel_size": [3],
-                    "padding": "valid",
-                    "activation": "relu",
-                    "strides": [1]
-                }
-            },
-            {
-                "name": "Flatten"
-            },
-            {
-                "name": "Dense",
-                "config": {
-                    "units": 250
-                }
-            },
-            {
-               "name": "Dropout",
-               "config": {
-                   "rate": 0.2
-               }
-           },
-           {
                "name": "Dense",
                "config": {
-                   "units": 2
+                   "units": 2,
+                   "activation": "sigmoid"
                }
            }
         ]
@@ -55,7 +33,7 @@ def create_architecture():
 
     data = {
         "is_public": True,
-        "title": "CNN architecture for imdb dataset",
+        "title": "LSTM architecture for imdb dataset",
         "architecture": architecture
     }
 

@@ -120,20 +120,67 @@ class TestDataset(TestInitAPI):
         self.assertEqual(result.status, falcon.HTTP_200)
         self.assertTrue(not_my_public_dataset.id, result.json['id'])
 
-    def test_create_dataset_auth(self):
+    def test_get_dataset_does_not_exist(self):
+        result = self.simulate_get('/api/v1/dataset/dataset-id')
+        self.assertEqual(result.status, falcon.HTTP_404)
+
+    # TEST CREATE DATASET META:
+
+    def test_create_dataset_no_auth(self):
         user_id = 'user1'
-        ds1 = self.create_dataset_metadata(True, user_id)
+        d1 = self.create_dataset_metadata(True, user_id)
         json = {
             'title': 'title',
             'description': 'description'
         }
-        url = '/api/v1/dataset/{id}'.format(id=ds1.id)
+        url = '/api/v1/dataset'
         result = self.simulate_post(url, json=json)
+
         self.assertEqual(result.status, falcon.HTTP_401)
 
-    def test_get_dataset_does_not_exist(self):
-        result = self.simulate_get('/api/v1/dataset/dataset-id')
-        self.assertEqual(result.status, falcon.HTTP_404)
+    def test_create_dataset_auth_invalid_token(self):
+        user_id = 'user1'
+        d1 = self.create_dataset_metadata(True, user_id)
+        json = {
+            'title': 'title',
+            'description': 'description'
+        }
+        token = 'invalid-token'
+        headers = self.get_auth_headers(token)
+        url = '/api/v1/dataset'
+        result = self.simulate_post(url, json=json, headers=headers)
+
+        self.assertEqual(result.status, falcon.HTTP_401)
+
+    def test_create_dataset_auth(self):
+        user_id = 'user1'
+        d1 = self.create_dataset_metadata(True, user_id)
+        json = {
+            'title': 'title',
+            'description': 'description'
+        }
+        token = self.create_token(user_id)
+        headers = self.get_auth_headers(token)
+        url = '/api/v1/dataset'
+        result = self.simulate_post(url, json=json, headers=headers)
+
+        self.assertEqual(result.status, falcon.HTTP_200)
+
+    def test_create_dataset_invalid_data(self):
+        user_id = 'user1'
+        d1 = self.create_dataset_metadata(True, user_id)
+        json = {
+            'title': 'title',
+            'description-invalid': 'description'
+        }
+        token = self.create_token(user_id)
+        headers = self.get_auth_headers(token)
+        url = '/api/v1/dataset'
+        result = self.simulate_post(url, json=json, headers=headers)
+
+        self.assertEqual(result.status, falcon.HTTP_400)
+
+    # TEST UPLOAD DATASET:
 
     def upload(self, dataset_id, file_io, headers={}):
         form = encoder.MultipartEncoder({
@@ -235,7 +282,7 @@ class TestDataset(TestInitAPI):
         self.assertEqual(resp.status, falcon.HTTP_413)
 
 
-class TestDatasetssFull(TestInitAPI):
+class TestDatasetsFull(TestInitAPI):
     def test_get_empty(self):
         result = self.simulate_get('/api/v1/datasets/full')
 

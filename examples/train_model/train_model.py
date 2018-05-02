@@ -1,4 +1,4 @@
-import utils
+from examples import utils
 
 
 def train_model():
