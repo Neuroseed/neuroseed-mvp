@@ -7,6 +7,7 @@ from . import dataset
 from . import architecture
 from . import model
 from . import task
+from . import errors
 
 from .dataset import *
 from .architecture import *

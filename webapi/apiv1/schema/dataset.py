@@ -47,6 +47,8 @@ DATASET_SCHEMA = {
             "uniqueItems": True
         }
     },
-    "required": ["title"],
     "additionalProperties": False
 }
+
+CREATE_DATASET_SCHEMA = DATASET_SCHEMA.copy()
+CREATE_DATASET_SCHEMA["required"] = ["title"]

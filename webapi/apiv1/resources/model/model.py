@@ -5,7 +5,8 @@ import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
-from ...schema.model import MODEL_SCHEMA
+import manager
+from ...schema.model import MODEL_SCHEMA, CREATE_MODEL_SCHEMA
 
 __all__ = [
     'ModelResource'
@@ -64,7 +65,7 @@ class ModelResource:
             description="Can not update model metadata"
         )
 
-    @jsonschema.validate(MODEL_SCHEMA)
+    @jsonschema.validate(CREATE_MODEL_SCHEMA)
     def create_model_meta(self, req, resp):
         user_id = req.context['user']
         context = {'user_id': user_id}
@@ -105,3 +106,43 @@ class ModelResource:
         resp.media = {
             'id': model_meta.id
         }
+
+    @jsonschema.validate(MODEL_SCHEMA)
+    def on_patch(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.update_model(id, data=req.media, context=context)
+        except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
+
+        resp.status = falcon.HTTP_204
+
+    def on_delete(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.delete_model(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Model {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Model not found",
+                description="Model metadata does not exist"
+            )
+        except metadata.errors.ResourcePublishedException:
+            raise falcon.HTTPConflict(
+                title='Model already published',
+                description='Can not delete model. Model already published on blockchain'
+            )
+
+        resp.status = falcon.HTTP_200

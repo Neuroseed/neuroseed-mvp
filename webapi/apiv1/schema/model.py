@@ -51,6 +51,8 @@ MODEL_SCHEMA = {
             "description": "Dataset ID"
         }
     },
-    "required": ["title", "architecture", "dataset"],
     "additionalProperties": False
 }
+
+CREATE_MODEL_SCHEMA = MODEL_SCHEMA.copy()
+CREATE_MODEL_SCHEMA["required"] = ["title", "architecture", "dataset"]

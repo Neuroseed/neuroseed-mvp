@@ -46,7 +46,7 @@ class SchemaDatasetResource:
 
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
-        resp.media = dataset.DATASET_SCHEMA
+        resp.media = dataset.CREATE_DATASET_SCHEMA
 
 
 class SchemaArchitectureResource:
@@ -56,7 +56,7 @@ class SchemaArchitectureResource:
 
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
-        resp.media = architecture.ARCHITECTURE_SCHEMA
+        resp.media = architecture.CREATE_ARCHITECTURE_SCHEMA
 
 
 class SchemaModelResource:
@@ -66,7 +66,7 @@ class SchemaModelResource:
 
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
-        resp.media = model.MODEL_SCHEMA
+        resp.media = model.CREATE_MODEL_SCHEMA
 
 
 class SchemaTaskResource:

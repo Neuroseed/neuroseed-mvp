@@ -1,15 +1,13 @@
 import logging
-import hashlib
 import uuid
 import cgi
 
-from mongoengine.queryset.visitor import Q
 import falcon
 from falcon.media.validators import jsonschema
 
 import metadata
 import manager
-from ..schema.dataset import DATASET_SCHEMA
+from ..schema.dataset import DATASET_SCHEMA, CREATE_DATASET_SCHEMA
 
 __all__ = [
     'DatasetResource'
@@ -133,7 +131,7 @@ class DatasetResource:
         elif dataset_meta.status == metadata.dataset.RECEIVED:
             self.dataset_already_uploaded(req, resp, id)
 
-    @jsonschema.validate(DATASET_SCHEMA)
+    @jsonschema.validate(CREATE_DATASET_SCHEMA)
     def create_dataset_meta(self, req, resp):
         user_id = req.context['user']
         logger.debug('Authorize user {id}'.format(id=user_id))
@@ -150,3 +148,43 @@ class DatasetResource:
         resp.media = {
             'id': dataset_meta.id
         }
+
+    @jsonschema.validate(DATASET_SCHEMA)
+    def on_patch(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.update_dataset(id, data=req.media, context=context)
+        except metadata.DoesNotExist:
+            logger.debug('Dataset {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Dataset not found",
+                description="Dataset metadata does not exist"
+            )
+
+        resp.status = falcon.HTTP_204
+
+    def on_delete(self, req, resp, id):
+        user_id = req.context['user']
+        logger.debug('Authorize user {id}'.format(id=user_id))
+
+        try:
+            context = {'user_id': user_id}
+            manager.delete_dataset(id, context)
+        except metadata.DoesNotExist:
+            logger.debug('Dataset {id} does not exist'.format(id=id))
+
+            raise falcon.HTTPNotFound(
+                title="Dataset not found",
+                description="Dataset metadata does not exist"
+            )
+        except metadata.errors.ResourcePublishedException:
+            raise falcon.HTTPConflict(
+                title='Dataset already published',
+                description='Can not delete dataset. Dataset already published on blockchain'
+            )
+
+        resp.status = falcon.HTTP_200
