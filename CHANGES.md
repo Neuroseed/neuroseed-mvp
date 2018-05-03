@@ -1,5 +1,23 @@
 # Neuroseed MVP Versions History
 
+## v0.5.0
+
+- Добавлена возможность редактировать метаданные ресурсов
+    - PATCH dataset
+    - PATCH architecture
+    - PATCH model
+- Добавлена возможность удалять метаданные ресурсов
+    - DELETE dataset
+    - DELETE architecture
+    - DELETE model
+- Добавлены автоматические тесты для роутов
+    - PATCH dataset
+    - PATCH architecture
+    - PATCH model
+    - DELETE dataset
+    - DELETE architecture
+    - DELETE model
+
 ## v0.4.1
 
 - В схемы новых слоев добавлены поля title, description, default
@@ -12,32 +30,32 @@
 ## v0.4.0
 
 - Добавлены схемы для новых слоев:
-- Activation
-- Reshape
-- Permute
-- RepeatVector
-- ActivityRegularization
-- Masking
-- Conv1D
-- Cropping1D
-- Cropping2D
-- MaxPooling1D
-- AveragePooling1D
-- SimpleRNN
-- ConvLSTM2D
-- GRU
-- LSTM
-- Embedding
-- BatchNormalization
-- GaussianNoise
-- GaussianDropout
-- TimeDistributed
+    - Activation
+    - Reshape
+    - Permute
+    - RepeatVector
+    - ActivityRegularization
+    - Masking
+    - Conv1D
+    - Cropping1D
+    - Cropping2D
+    - MaxPooling1D
+    - AveragePooling1D
+    - SimpleRNN
+    - ConvLSTM2D
+    - GRU
+    - LSTM
+    - Embedding
+    - BatchNormalization
+    - GaussianNoise
+    - GaussianDropout
+    - TimeDistributed
 - Добавлены примеры создания и обучения нейронных сетей:
-- CNN IMDB
-- LSTM IMDB
-- CNN LSTM IMDB
-- MLP Reuters
-- MLP mnist
+    - CNN IMDB
+    - LSTM IMDB
+    - CNN LSTM IMDB
+    - MLP Reuters
+    - MLP mnist
 - Новые слои доступны опционально
 
 ## v0.3.4
@@ -80,14 +98,14 @@
 ## v0.3.0
 
 - Добавлены роуты возвращающие json-схемы валидации данных
-- /api/v1/schema/dataset
-- /api/v1/schema/architecture
-- /api/v1/schema/model
-- /api/v1/schema/model/train
-- /api/v1/schema/model/test
-- /api/v1/schema/model/predict
-- /api/v1/schema/task
-- /api/v1/schema/layers
+    - /api/v1/schema/dataset
+    - /api/v1/schema/architecture
+    - /api/v1/schema/model
+    - /api/v1/schema/model/train
+    - /api/v1/schema/model/test
+    - /api/v1/schema/model/predict
+    - /api/v1/schema/task
+    - /api/v1/schema/layers
 - Добавлено описание новых роутов во внутреннюю документацию
 
 ## v0.2.3

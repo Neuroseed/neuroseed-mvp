@@ -1,0 +1,3 @@
+
+class ResourcePublishedException(Exception):
+    pass

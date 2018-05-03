@@ -56,6 +56,8 @@ ARCHITECTURE_SCHEMA = {
             "additionalProperties": False
         }
     },
-    "required": ["title", "architecture"],
     "additionalProperties": False
 }
+
+CREATE_ARCHITECTURE_SCHEMA = ARCHITECTURE_SCHEMA.copy()
+CREATE_ARCHITECTURE_SCHEMA["required"] = ["title", "architecture"]
